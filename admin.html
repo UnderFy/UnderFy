@@ -1,1051 +1,352 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UnderFy - ADM</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel ADM • UnderFy</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
-        body {
-            font-family: Arial, sans-serif;
-            background: #121212;
-            color: white;
-            padding: 30px;
-        }
+body{
+    background:#0b0b0b;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+    padding:30px 20px;
+}
 
-        .container {
-            max-width: 1000px;
-            margin: auto;
-        }
+.container{
+    max-width:600px;
+    margin:auto;
+    background:#151515;
+    padding:30px;
+    border-radius:20px;
+    border:1px solid #222;
+}
 
-        h1 {
-            margin-bottom: 10px;
-        }
+h1{
+    font-size:24px;
+    margin-bottom:20px;
+    color:#1ed760;
+}
 
-        .subtitle {
-            color: #aaa;
-            margin-bottom: 30px;
-        }
+h2{
+    font-size:18px;
+    margin:25px 0 15px;
+    border-bottom:1px solid #222;
+    padding-bottom:8px;
+}
 
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-        }
+label{
+    display:block;
+    font-size:14px;
+    color:#bbb;
+    margin-bottom:6px;
+}
 
-        .card {
-            background: #1f1f1f;
-            padding: 25px;
-            border-radius: 15px;
-            transition: 0.2s;
-        }
+input, select{
+    width:100%;
+    padding:12px;
+    margin-bottom:18px;
+    background:#202020;
+    border:1px solid #333;
+    color:#fff;
+    border-radius:9px;
+    outline:none;
+    font:inherit;
+}
 
-        .card:hover {
-            transform: translateY(-3px);
-            background: #292929;
-        }
+input[type="file"] {
+    padding: 9px;
+    cursor: pointer;
+}
 
-        .card h2 {
-            margin-bottom: 10px;
-        }
+input:focus, select:focus{
+    border-color:#1ed760;
+}
 
-        .card p {
-            color: #aaa;
-        }
+.checkbox-group {
+    background: #202020;
+    border: 1px solid #333;
+    border-radius: 9px;
+    padding: 12px;
+    max-height: 150px;
+    overflow-y: auto;
+    margin-bottom: 18px;
+}
 
-        button {
-            margin-top: 20px;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
 
-        .abrir {
-            background: #1db954;
-            color: white;
-        }
+.checkbox-item input {
+    width: auto;
+    margin: 0;
+    cursor: pointer;
+}
 
-        .sair {
-            background: #e53935;
-            color: white;
-        }
+.btn{
+    width:100%;
+    padding:14px;
+    background:#1ed760;
+    color:#000;
+    border:0;
+    border-radius:25px;
+    font-weight:bold;
+    cursor:pointer;
+    font:inherit;
+    transition: .2s;
+}
 
-        .painel {
-            display: none;
-            margin-top: 30px;
-            background: #1f1f1f;
-            padding: 25px;
-            border-radius: 15px;
-        }
+.btn:hover{
+    opacity: .9;
+}
 
-        .painel.ativo {
-            display: block;
-        }
+.back-link{
+    display:inline-block;
+    margin-top:20px;
+    color:#888;
+    text-decoration:none;
+    font-size:14px;
+}
 
-        .painel h2 {
-            margin-bottom: 20px;
-        }
+.back-link:hover{
+    color:#fff;
+}
 
-        input,
-        textarea,
-        select {
-            width: 100%;
-            padding: 13px;
-            margin-top: 8px;
-            margin-bottom: 15px;
-            border: none;
-            border-radius: 8px;
-            background: #303030;
-            color: white;
-            outline: none;
-        }
-
-        textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        label {
-            color: #ccc;
-            font-size: 14px;
-        }
-
-        .salvar {
-            background: #1db954;
-            color: white;
-            width: 100%;
-        }
-
-        .voltar {
-            background: #444;
-            color: white;
-        }
-
-        .mensagem {
-            margin-top: 15px;
-            padding: 12px;
-            border-radius: 8px;
-            display: none;
-        }
-
-        .lista {
-            margin-top: 30px;
-        }
-
-        .item {
-            background: #292929;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-        }
-
-        .item-info {
-            flex: 1;
-        }
-
-        .item-info strong {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .item-info small {
-            color: #aaa;
-        }
-
-        .excluir {
-            background: #e53935;
-            color: white;
-            margin: 0;
-            padding: 8px 12px;
-        }
-
-        .foto-preview {
-            width: 60px;
-            height: 60px;
-            border-radius: 10px;
-            object-fit: cover;
-            background: #111;
-        }
-
-        .topo-painel {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-        }
-
-        @media (max-width: 600px) {
-            body {
-                padding: 15px;
-            }
-
-            .item {
-                align-items: flex-start;
-            }
-        }
-    </style>
+#loadingMsg {
+    display: none;
+    text-align: center;
+    color: #1ed760;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+</style>
 </head>
 
 <body>
 
 <div class="container">
-
-    <h1>🎛️ UnderFy ADM</h1>
-    <p class="subtitle">Painel administrativo</p>
-
-    <!-- MENU PRINCIPAL -->
-
-<div class="card">
-    <h2>🎤 Artistas</h2>
-    <p>Adicionar e gerenciar artistas.</p>
-
-    <a href="upload.html" class="abrir">
-     Gerenciar artistas
-    </a>
+    <a href="index.html" class="back-link">← Voltar para o site</a>
     
-    <div class="card">
-        <h2>🎵 Músicas</h2>
-        <p>Adicionar e gerenciar músicas.</p>
+    <h1>Painel de Cadastro • UnderFy</h1>
 
-        <button class="abrir" onclick="window.location.href='musicas.html'">
-            Gerenciar músicas
-        </button>
+    <!-- FORMULÁRIO DE ARTISTA -->
+    <div id="formArtista">
+        <h2>Cadastrar Novo Artista</h2>
+        <label>Nome do Artista</label>
+        <input type="text" id="nomeArtista" placeholder="Ex: Matuê">
+
+        <label>Foto do Artista (Arquivo)</label>
+        <input type="file" id="fotoArtistaFile" accept="image/*">
+
+        <button class="btn" onclick="cadastrarArtista()">Cadastrar Artista</button>
     </div>
 
+    <!-- FORMULÁRIO DE MÚSICA -->
+    <div id="formMusica" style="margin-top: 40px;">
+        <h2>Cadastrar Nova Guia</h2>
+        <label>Nome da Música</label>
+        <input type="text" id="nomeMusica" placeholder="Ex: Som de Camping #1">
 
-    <div class="card">
-        <h2>📀 Projetos</h2>
-        <p>Gerenciar sessões e projetos.</p>
+        <label>Artistas Participantes (Selecione um ou mais para Feat)</label>
+        <div class="checkbox-group" id="listaArtistasCheckbox">
+            <span style="color:#888;font-size:13px;">Carregando artistas...</span>
+        </div>
 
-        <button class="abrir" onclick="window.location.href='projetos.html'">
-            Gerenciar projetos
-        </button>
+        <label>Capa da Guia (Imagem)</label>
+        <input type="file" id="capaMusicaFile" accept="image/*">
+
+        <label>Arquivo de Áudio (.mp3 / WAV)</label>
+        <input type="file" id="audioMusicaFile" accept="audio/*">
+
+        <div id="loadingMsg">Enviando arquivos e salvando... Aguarde ⏳</div>
+
+        <button class="btn" onclick="cadastrarMusica()">Salvar Guia</button>
     </div>
-
 </div>
 
-    <!-- ARTISTAS -->
-
-    <div id="painelArtistas" class="painel">
-
-        <div class="topo-painel">
-            <h2>🎤 Cadastrar artista</h2>
-        </div>
-
-        <label>Nome do artista</label>
-        <input
-            type="text"
-            id="artistaNome"
-            placeholder="Ex: Novais MC"
-        >
-
-        <label>Descrição</label>
-        <textarea
-            id="artistaDescricao"
-            placeholder="Descrição do artista..."
-        ></textarea>
-
-        <label>URL da foto</label>
-        <input
-            type="text"
-            id="artistaFoto"
-            placeholder="Cole aqui a URL da foto"
-        >
-
-        <button class="salvar" onclick="cadastrarArtista()">
-            💾 Cadastrar artista
-        </button>
-
-        <div id="mensagemArtista" class="mensagem"></div>
-
-        <div class="lista">
-            <h3>Artistas cadastrados</h3>
-            <br>
-            <div id="listaArtistas">
-                Carregando...
-            </div>
-        </div>
-
-        <button class="voltar" onclick="voltarMenu()">
-            ← Voltar
-        </button>
-
-    </div>
-
-
-    <!-- MÚSICAS -->
-
-    <div id="painelMusicas" class="painel">
-
-        <h2>🎵 Cadastrar música</h2>
-
-        <label>Nome da música</label>
-        <input
-            type="text"
-            id="musicaNome"
-            placeholder="Ex: Guia 01"
-        >
-
-        <label>Artista</label>
-        <input
-            type="text"
-            id="musicaArtista"
-            placeholder="Nome do artista"
-        >
-
-        <label>Descrição</label>
-        <textarea
-            id="musicaDescricao"
-            placeholder="Descrição da música..."
-        ></textarea>
-
-        <label>URL da capa</label>
-        <input
-            type="text"
-            id="musicaCapa"
-            placeholder="Cole aqui a URL da capa"
-        >
-
-        <label>URL do áudio</label>
-        <input
-            type="text"
-            id="musicaAudio"
-            placeholder="Cole aqui a URL do arquivo de áudio"
-        >
-
-        <button class="salvar" onclick="cadastrarMusica()">
-            💾 Cadastrar música
-        </button>
-
-        <div id="mensagemMusica" class="mensagem"></div>
-
-        <div class="lista">
-            <h3>Músicas cadastradas</h3>
-            <br>
-            <div id="listaMusicas">
-                Carregando...
-            </div>
-        </div>
-
-        <button class="voltar" onclick="voltarMenu()">
-            ← Voltar
-        </button>
-
-    </div>
-
-
-    <!-- PROJETOS -->
-
-    <div id="painelProjetos" class="painel">
-
-        <h2>📀 Cadastrar projeto</h2>
-
-        <label>Nome do projeto</label>
-        <input
-            type="text"
-            id="projetoNome"
-            placeholder="Ex: UnderFy Session 01"
-        >
-
-        <label>Descrição</label>
-        <textarea
-            id="projetoDescricao"
-            placeholder="Descrição do projeto..."
-        ></textarea>
-
-        <label>URL da capa</label>
-        <input
-            type="text"
-            id="projetoCapa"
-            placeholder="Cole aqui a URL da capa"
-        >
-
-        <button class="salvar" onclick="cadastrarProjeto()">
-            💾 Cadastrar projeto
-        </button>
-
-        <div id="mensagemProjeto" class="mensagem"></div>
-
-        <div class="lista">
-            <h3>Projetos cadastrados</h3>
-            <br>
-            <div id="listaProjetos">
-                Carregando...
-            </div>
-        </div>
-
-        <button class="voltar" onclick="voltarMenu()">
-            ← Voltar
-        </button>
-
-    </div>
-
-
-    <button class="sair" onclick="logout()">
-        Sair do ADM
-    </button>
-
-</div>
-
-
-<!-- SUPABASE -->
-
+<!-- SUPABASE SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-
-alert("JavaScript do ADM carregou!");
-
-const SUPABASE_URL =
-"https://gnibzbnypirjrcaoibkx.supabase.co";
-
-const SUPABASE_KEY =
-"sb_publishable_b9yvSbmWOLVJvq4AB4CLmQ_VRuzpG5T";
+const SUPABASE_URL = "https://gnibzbnypirjrcaoibkx.supabase.co";
+const SUPABASE_KEY = "sb_publishable_b9yvSbmWOLVJvq4AB4CLmQ_VRuzpG5T";
 
 const supabaseClient = supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
 );
 
-
-// ===============================
-// ABRIR PAINEL
-// ===============================
-
-function abrirPainel(tipo) {
-
-    document.getElementById("menu").style.display = "none";
-
-    document.getElementById("painelArtistas")
-        .classList.remove("ativo");
-
-    document.getElementById("painelMusicas")
-        .classList.remove("ativo");
-
-    document.getElementById("painelProjetos")
-        .classList.remove("ativo");
-
-
-    if (tipo === "artistas") {
-
-        document
-            .getElementById("painelArtistas")
-            .classList.add("ativo");
-
-        carregarArtistas();
-
+async function checarAuth() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+        alert("Área restrita! Faça login no site principal primeiro.");
+        window.location.href = "index.html";
     }
-
-
-    if (tipo === "musicas") {
-
-        document
-            .getElementById("painelMusicas")
-            .classList.add("ativo");
-
-        carregarMusicas();
-
-    }
-
-
-    if (tipo === "projetos") {
-
-        document
-            .getElementById("painelProjetos")
-            .classList.add("ativo");
-
-        carregarProjetos();
-
-    }
-
 }
 
+let artistasDisponiveis = [];
 
-// ===============================
-// VOLTAR
-// ===============================
+async function carregarArtistasParaSelecao() {
+    await checarAuth();
+    
+    const { data, error } = await supabaseClient
+        .from('artistas')
+        .select('*')
+        .order('nome', { ascending: true });
 
-function voltarMenu() {
+    if (error) {
+        console.error("Erro ao carregar artistas:", error);
+        return;
+    }
 
-    document.getElementById("menu").style.display = "grid";
+    artistasDisponiveis = data || [];
+    const container = document.getElementById("listaArtistasCheckbox");
+    container.innerHTML = "";
 
-    document.getElementById("painelArtistas")
-        .classList.remove("ativo");
+    if (artistasDisponiveis.length === 0) {
+        container.innerHTML = `<span style="color:#888;font-size:13px;">Nenhum artista cadastrado ainda.</span>`;
+        return;
+    }
 
-    document.getElementById("painelMusicas")
-        .classList.remove("ativo");
-
-    document.getElementById("painelProjetos")
-        .classList.remove("ativo");
-
+    artistasDisponiveis.forEach(artista => {
+        container.innerHTML += `
+            <label class="checkbox-item">
+                <input type="checkbox" name="artistaCheck" value="${artista.id}">
+                ${artista.nome}
+            </label>
+        `;
+    });
 }
 
+document.addEventListener('DOMContentLoaded', carregarArtistasParaSelecao);
 
-// ===============================
-// ARTISTAS
-// ===============================
+// Função de upload direcionada para o bucket correto
+async function fazerUploadArquivo(file, nomeBucket) {
+    if (!file) return '';
+    const nomeUnico = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+    
+    const { data, error } = await supabaseClient.storage
+        .from(nomeBucket)
+        .upload(nomeUnico, file);
 
+    if (error) {
+        throw new Error("Erro no upload para o bucket " + nomeBucket + ": " + error.message);
+    }
+
+    const { data: urlData } = supabaseClient.storage
+        .from(nomeBucket)
+        .getPublicUrl(nomeUnico);
+
+    return urlData.publicUrl;
+}
+
+// Cadastrar Artista
 async function cadastrarArtista() {
-
-    const nome =
-        document.getElementById("artistaNome").value.trim();
-
-    const descricao =
-        document.getElementById("artistaDescricao").value.trim();
-
-    const foto =
-        document.getElementById("artistaFoto").value.trim();
-
+    const nome = document.getElementById("nomeArtista").value.trim();
+    const fotoFile = document.getElementById("fotoArtistaFile").files[0];
 
     if (!nome) {
-
-        mostrarMensagem(
-            "mensagemArtista",
-            "Digite o nome do artista.",
-            false
-        );
-
+        alert("Preencha o nome do artista.");
         return;
     }
 
+    try {
+        let foto_url = '';
+        if (fotoFile) {
+            foto_url = await fazerUploadArquivo(fotoFile, 'fotos-artistas');
+        }
 
-    const { data, error } =
-        await supabaseClient
-            .from("artistas")
-            .insert([
-                {
-                    nome: nome,
-                    descricao: descricao,
-                    foto_url: foto
-                }
-            ])
-            .select();
+        const { error } = await supabaseClient
+            .from('artistas')
+            .insert([{ nome, foto_url }]);
 
+        if (error) throw error;
 
-    if (error) {
-
-        console.error(error);
-
-        mostrarMensagem(
-            "mensagemArtista",
-            "Erro: " + error.message,
-            false
-        );
-
-        return;
+        alert("Artista cadastrado com sucesso!");
+        document.getElementById("nomeArtista").value = "";
+        document.getElementById("fotoArtistaFile").value = "";
+        carregarArtistasParaSelecao();
+    } catch (err) {
+        alert("Erro: " + err.message);
     }
-
-
-    mostrarMensagem(
-        "mensagemArtista",
-        "✅ Artista cadastrado com sucesso!",
-        true
-    );
-
-
-    document.getElementById("artistaNome").value = "";
-    document.getElementById("artistaDescricao").value = "";
-    document.getElementById("artistaFoto").value = "";
-
-
-    carregarArtistas();
-
 }
 
-
-// ===============================
-// CARREGAR ARTISTAS
-// ===============================
-
-async function carregarArtistas() {
-
-    const lista =
-        document.getElementById("listaArtistas");
-
-    lista.innerHTML = "Carregando...";
-
-
-    const { data, error } =
-        await supabaseClient
-            .from("artistas")
-            .select("*")
-            .order("id", { ascending: false });
-
-
-    if (error) {
-
-        lista.innerHTML =
-            "❌ Erro ao carregar artistas: " +
-            error.message;
-
-        return;
-    }
-
-
-    if (!data || data.length === 0) {
-
-        lista.innerHTML =
-            "<p>Nenhum artista cadastrado.</p>";
-
-        return;
-    }
-
-
-    lista.innerHTML = "";
-
-
-    data.forEach(artista => {
-
-        const div =
-            document.createElement("div");
-
-        div.className = "item";
-
-
-        div.innerHTML = `
-
-            ${
-                artista.foto_url
-                ?
-                `<img
-                    src="${artista.foto_url}"
-                    class="foto-preview"
-                >`
-                :
-                ""
-            }
-
-            <div class="item-info">
-
-                <strong>
-                    ${artista.nome || "Sem nome"}
-                </strong>
-
-                <small>
-                    ${artista.descricao || ""}
-                </small>
-
-            </div>
-
-            <button
-                class="excluir"
-                onclick="excluirArtista('${artista.id}')"
-            >
-                Excluir
-            </button>
-
-        `;
-
-
-        lista.appendChild(div);
-
-    });
-
-}
-
-
-// ===============================
-// EXCLUIR ARTISTA
-// ===============================
-
-async function excluirArtista(id) {
-
-    if (!confirm("Excluir este artista?")) {
-        return;
-    }
-
-
-    const { error } =
-        await supabaseClient
-            .from("artistas")
-            .delete()
-            .eq("id", id);
-
-
-    if (error) {
-
-        alert(
-            "Erro ao excluir: " +
-            error.message
-        );
-
-        return;
-    }
-
-
-    carregarArtistas();
-
-}
-
-
-// ===============================
-// MÚSICAS
-// ===============================
-
+// Cadastrar Música com Upload de Arquivo e Feats
 async function cadastrarMusica() {
+    const nome = document.getElementById("nomeMusica").value.trim();
+    const capaFile = document.getElementById("capaMusicaFile").files[0];
+    const audioFile = document.getElementById("audioMusicaFile").files[0];
 
-    const nome =
-        document.getElementById("musicaNome").value.trim();
+    const checkboxesSelecionados = document.querySelectorAll('input[name="artistaCheck"]:checked');
+    const artistasIds = Array.from(checkboxesSelecionados).map(cb => cb.value);
 
-    const artista =
-        document.getElementById("musicaArtista").value.trim();
-
-    const descricao =
-        document.getElementById("musicaDescricao").value.trim();
-
-    const capa =
-        document.getElementById("musicaCapa").value.trim();
-
-    const audio =
-        document.getElementById("musicaAudio").value.trim();
-
-
-    if (!nome) {
-
-        mostrarMensagem(
-            "mensagemMusica",
-            "Digite o nome da música.",
-            false
-        );
-
+    if (!nome || artistasIds.length === 0) {
+        alert("Preencha o nome da música e selecione pelo menos um artista.");
         return;
     }
 
+    const loadingMsg = document.getElementById("loadingMsg");
+    loadingMsg.style.display = "block";
 
-    const { error } =
-        await supabaseClient
-            .from("musicas")
-            .insert([
-                {
-                    nome: nome,
-                    artista: artista,
-                    descricao: descricao,
-                    capa_url: capa,
-                    audio_url: audio
-                }
-            ]);
+    try {
+        let capa_url = '';
+        let audio_url = '';
 
+        if (capaFile) {
+            capa_url = await fazerUploadArquivo(capaFile, 'capas-musicas');
+        }
+        if (audioFile) {
+            audio_url = await fazerUploadArquivo(audioFile, 'audios');
+        }
 
-    if (error) {
+        // 1. Insere a música
+        const { data: musicaData, error: musicaError } = await supabaseClient
+            .from('musicas')
+            .insert([{ nome, capa_url, audio_url, plays: 0 }])
+            .select()
+            .single();
 
-        console.error(error);
+        if (musicaError) throw musicaError;
 
-        mostrarMensagem(
-            "mensagemMusica",
-            "Erro: " + error.message,
-            false
-        );
+        const musicaId = musicaData.id;
 
-        return;
+        // 2. Insere as relações na tabela de feats (`musica_artistas`)
+        const relacoesParaInserir = artistasIds.map(artistaId => ({
+            musica_id: musicaId,
+            artista_id: artistaId
+        }));
+
+        const { error: relError } = await supabaseClient
+            .from('musica_artistas')
+            .insert(relacoesParaInserir);
+
+        if (relError) throw relError;
+
+        alert("Guia cadastrada com sucesso!");
+        
+        document.getElementById("nomeMusica").value = "";
+        document.getElementById("capaMusicaFile").value = "";
+        document.getElementById("audioMusicaFile").value = "";
+        checkboxesSelecionados.forEach(cb => cb.checked = false);
+
+    } catch (err) {
+        alert("Erro ao cadastrar guia: " + err.message);
+    } finally {
+        loadingMsg.style.display = "none";
     }
-
-
-    mostrarMensagem(
-        "mensagemMusica",
-        "✅ Música cadastrada!",
-        true
-    );
-
-
-    document.getElementById("musicaNome").value = "";
-    document.getElementById("musicaArtista").value = "";
-    document.getElementById("musicaDescricao").value = "";
-    document.getElementById("musicaCapa").value = "";
-    document.getElementById("musicaAudio").value = "";
-
-
-    carregarMusicas();
-
 }
+</script>
 
-
-// ===============================
-// CARREGAR MÚSICAS
-// ===============================
-
-async function carregarMusicas() {
-
-    const lista =
-        document.getElementById("listaMusicas");
-
-    lista.innerHTML = "Carregando...";
-
-
-    const { data, error } =
-        await supabaseClient
-            .from("musicas")
-            .select("*")
-            .order("id", { ascending: false });
-
-
-    if (error) {
-
-        lista.innerHTML =
-            "❌ Erro: " +
-            error.message;
-
-        return;
-    }
-
-
-    if (!data || data.length === 0) {
-
-        lista.innerHTML =
-            "<p>Nenhuma música cadastrada.</p>";
-
-        return;
-    }
-
-
-    lista.innerHTML = "";
-
-
-    data.forEach(musica => {
-
-        const div =
-            document.createElement("div");
-
-        div.className = "item";
-
-
-        div.innerHTML = `
-
-            <div class="item-info">
-
-                <strong>
-                    ${musica.nome || "Sem nome"}
-                </strong>
-
-                <small>
-                    ${musica.artista || ""}
-                </small>
-
-            </div>
-
-            <button
-                class="excluir"
-                onclick="excluirMusica('${musica.id}')"
-            >
-                Excluir
-            </button>
-
-        `;
-
-
-        lista.appendChild(div);
-
-    });
-
-}
-
-
-// ===============================
-// EXCLUIR MÚSICA
-// ===============================
-
-async function excluirMusica(id) {
-
-    if (!confirm("Excluir esta música?")) {
-        return;
-    }
-
-
-    const { error } =
-        await supabaseClient
-            .from("musicas")
-            .delete()
-            .eq("id", id);
-
-
-    if (error) {
-
-        alert(
-            "Erro ao excluir: " +
-            error.message
-        );
-
-        return;
-    }
-
-
-    carregarMusicas();
-
-}
-
-
-// ===============================
-// PROJETOS
-// ===============================
-
-async function cadastrarProjeto() {
-
-    const nome =
-        document.getElementById("projetoNome").value.trim();
-
-    const descricao =
-        document.getElementById("projetoDescricao").value.trim();
-
-    const capa =
-        document.getElementById("projetoCapa").value.trim();
-
-
-    if (!nome) {
-
-        mostrarMensagem(
-            "mensagemProjeto",
-            "Digite o nome do projeto.",
-            false
-        );
-
-        return;
-    }
-
-
-    const { error } =
-        await supabaseClient
-            .from("projetos")
-            .insert([
-                {
-                    nome: nome,
-                    descricao: descricao,
-                    capa_url: capa
-                }
-            ]);
-
-
-    if (error) {
-
-        console.error(error);
-
-        mostrarMensagem(
-            "mensagemProjeto",
-            "Erro: " + error.message,
-            false
-        );
-
-        return;
-    }
-
-
-    mostrarMensagem(
-        "mensagemProjeto",
-        "✅ Projeto cadastrado!",
-        true
-    );
-
-
-    document.getElementById("projetoNome").value = "";
-    document.getElementById("projetoDescricao").value = "";
-    document.getElementById("projetoCapa").value = "";
-
-
-    carregarProjetos();
-
-}
-
-
-// ===============================
-// CARREGAR PROJETOS
-// ===============================
-
-async function carregarProjetos() {
-
-    const lista =
-        document.getElementById("listaProjetos");
-
-    lista.innerHTML = "Carregando...";
-
-
-    const { data, error } =
-        await supabaseClient
-            .from("projetos")
-            .select("*")
-            .order("id", { ascending: false });
-
-
-    if (error) {
-
-        lista.innerHTML =
-            "❌ Erro: " +
-            error.message;
-
-        return;
-    }
-
-
-    if (!data || data.length === 0) {
-
-        lista.innerHTML =
-            "<p>Nenhum projeto cadastrado.</p>";
-
-        return;
-    }
-
-
-    lista.innerHTML = "";
-
-
-    data.forEach(projeto => {
-
-        const div =
-            document.createElement("div");
-
-        div.className = "item";
-
-
-        div.innerHTML = `
-
-            <div class="item-info">
-
-                <strong>
-                    ${projeto.nome || "Sem nome"}
-                </strong>
-
-                <small>
-                    ${projeto.descricao || ""}
-                </small>
-
-            </div>
-
-            <button
-                class="excluir"
-                onclick="excluirProjeto('${projeto.id}')"
-            >
-                Excluir
-            </button>
-
-        `;
-
-
-        lista.appendChild(div);
-
-    });
-
-}
-
-
-// ===============================
-// EXCLUIR PROJETO
-// ===============================
-
-async function excluirProjeto(id) {
-
-    if (!confirm("Excluir este projeto?")) {
-        return;
-    }
-
-
-    const { error } =
-        await supabaseClient
+</body>
+</html>
