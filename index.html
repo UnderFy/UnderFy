@@ -126,11 +126,37 @@ main{
     border-radius:15px;
     transition:.2s;
     cursor:pointer;
+    position: relative;
 }
 
 .card:hover{
     background:#202020;
     transform:translateY(-3px);
+}
+
+/* BOTÃO DE EXCLUIR DO ADM */
+.btn-excluir {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(220, 38, 38, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: 0.2s;
+}
+
+.btn-excluir:hover {
+    background: rgb(220, 38, 38);
+    transform: scale(1.1);
 }
 
 .cover{
@@ -474,9 +500,17 @@ const supabaseClient = supabase.createClient(
 ===================================== */
 let musicas = [];
 let artistasCache = [];
+let usuarioLogado = false;
+
+async function verificarSessaoAdmin() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    usuarioLogado = !!session;
+}
 
 async function carregarDadosDoSupabase() {
     try {
+        await verificarSessaoAdmin();
+
         // 1. Busca todos os artistas primeiro de forma isolada
         const { data: dadosArtistas, error: erroArtistas } = await supabaseClient
             .from('artistas')
@@ -533,8 +567,14 @@ function renderizarMusicas(lista = musicas) {
     }
 
     lista.forEach(musica => {
+        // Se o usuário estiver logado como ADM, cria o botão de excluir no card
+        const botaoExcluirHtml = usuarioLogado 
+            ? `<button class="btn-excluir" onclick="excluirMusica('${musica.id}', event)" title="Excluir guia">✕</button>` 
+            : '';
+
         container.innerHTML += `
         <div class="card">
+            ${botaoExcluirHtml}
             <img class="cover" src="${musica.capa}" onerror="this.src='https://via.placeholder.com/500'">
             <h3>${musica.nome}</h3>
             <p>${musica.artista}</p>
@@ -544,6 +584,37 @@ function renderizarMusicas(lista = musicas) {
         </div>
         `;
     });
+}
+
+
+/* =====================================
+   EXCLUIR MÚSICA
+===================================== */
+async function excluirMusica(id, event) {
+    event.stopPropagation(); // Evita disparar cliques do card
+
+    if (!confirm("Tem certeza que deseja excluir esta guia do banco de dados?")) {
+        return;
+    }
+
+    try {
+        const { error } = await supabaseClient
+            .from('musicas')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        // Atualiza a lista local removendo a música excluída e re-renderiza
+        musicas = musicas.filter(m => m.id != id);
+        renderizarMusicas(musicas);
+        renderizarArtistasNaTela();
+
+        alert("Guia excluída com sucesso!");
+    } catch (err) {
+        console.error("Erro ao excluir:", err.message);
+        alert("Erro ao excluir a música. Verifique suas permissões no Supabase.");
+    }
 }
 
 
