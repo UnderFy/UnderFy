@@ -194,6 +194,13 @@ main{
     text-overflow:ellipsis;
 }
 
+.card-plays {
+    color: #1ed760;
+    font-size: 12px;
+    margin-top: 4px;
+    font-weight: bold;
+}
+
 .play{
     margin-top:12px;
     width:100%;
@@ -481,7 +488,7 @@ input:focus{
 <h2>🔐 Área administrativa</h2>
 
 <p style="color:#999;margin-bottom:15px;">
-    Entre para gerenciar o Underfy.
+    Entre para gerenciar o UnderFy.
 </p>
 
 <input type="email" id="emailADM" placeholder="E-mail">
@@ -552,7 +559,8 @@ async function carregarDadosDoSupabase() {
                 nome: m.nome,
                 artista: artistaObj ? artistaObj.nome : 'Desconhecido',
                 capa: m.capa_url || 'https://via.placeholder.com/500',
-                audio: m.audio_url || ''
+                audio: m.audio_url || '',
+                plays: m.plays || 0
             };
         });
 
@@ -594,6 +602,7 @@ function renderizarMusicas(lista = musicas) {
             <img class="cover" src="${musica.capa}" onerror="this.src='https://via.placeholder.com/500'">
             <h3>${musica.nome}</h3>
             <p>${musica.artista}</p>
+            <div class="card-plays">▶ ${musica.plays} reproduç${musica.plays === 1 ? 'ão' : 'ões'}</div>
             <button class="play" onclick="tocarMusica('${musica.id}')">
                 ▶ Ouvir guia
             </button>
@@ -661,9 +670,9 @@ function renderizarArtistasNaTela() {
 
 
 /* =====================================
-   PLAYER
+   PLAYER E CONTADOR DE PLAYS
 ===================================== */
-function tocarMusica(id) {
+async function tocarMusica(id) {
     const musica = musicas.find(m => m.id == id);
     if (!musica) return;
 
@@ -681,6 +690,20 @@ function tocarMusica(id) {
 
     audio.src = musica.audio;
     audio.play();
+
+    // Incrementa o play localmente e atualiza na tela de imediato
+    musica.plays += 1;
+    renderizarMusicas(musicas);
+
+    // Salva o incremento no banco de dados do Supabase em segundo plano
+    try {
+        await supabaseClient
+            .from('musicas')
+            .update({ plays: musica.plays })
+            .eq('id', id);
+    } catch (err) {
+        console.error("Erro ao atualizar plays:", err.message);
+    }
 }
 
 
