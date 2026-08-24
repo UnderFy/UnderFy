@@ -91,6 +91,30 @@
             opacity: .9;
         }
 
+        .btn-secundario {
+            background: #292929;
+            color: white;
+            margin-top: 10px;
+        }
+
+        .btn-acao {
+            width: auto;
+            padding: 8px 14px;
+            margin-top: 0;
+            font-size: 14px;
+            border-radius: 8px;
+        }
+
+        .btn-editar {
+            background: #292929;
+            color: white;
+        }
+
+        .btn-excluir {
+            background: #421818;
+            color: #ff7070;
+        }
+
         .mensagem {
             margin-top: 15px;
             padding: 12px;
@@ -121,6 +145,52 @@
             background: #292929;
             color: white;
         }
+
+        /* Lista de Artistas ADM */
+        .artista-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #202020;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            gap: 12px;
+        }
+
+        .artista-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow: hidden;
+        }
+
+        .artista-info img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #333;
+        }
+
+        .artista-detalhes h4 {
+            font-size: 15px;
+            color: #fff;
+        }
+
+        .artista-detalhes p {
+            font-size: 12px;
+            color: #aaa;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 220px;
+        }
+
+        .artista-acoes {
+            display: flex;
+            gap: 6px;
+        }
     </style>
 </head>
 
@@ -134,7 +204,10 @@
     <!-- ARTISTA -->
     <div class="card">
 
-        <h2>👤 Adicionar artista</h2>
+        <h2 id="tituloCardArtista">👤 Adicionar artista</h2>
+
+        <!-- Input escondido para controlar ID na edição -->
+        <input type="hidden" id="artistaIdEdicao" value="">
 
         <label>Nome do artista</label>
         <input
@@ -143,6 +216,13 @@
             placeholder="Ex: Novais MC"
         >
 
+        <label>Biografia</label>
+        <textarea
+            id="bioArtista"
+            rows="3"
+            placeholder="Biografia do artista..."
+        ></textarea>
+
         <label>Foto do artista</label>
         <input
             type="file"
@@ -150,16 +230,28 @@
             accept="image/*"
         >
 
-        <button onclick="cadastrarArtista()">
+        <button id="btnCadastrarArtista" onclick="salvarArtista()">
             Cadastrar artista
+        </button>
+
+        <button id="btnCancelarEdicao" class="btn-secundario" style="display: none;" onclick="limparFormularioArtista()">
+            Cancelar edição
         </button>
 
         <div id="mensagemArtista" class="mensagem"></div>
 
         <div id="progressoArtista" class="progresso">
-            Enviando foto...
+            Salvando artista...
         </div>
 
+    </div>
+
+    <!-- LISTA DE ARTISTAS CADASTRADOS -->
+    <div class="card">
+        <h2>📋 Artistas cadastrados</h2>
+        <div id="listaArtistasGerenciar">
+            <p style="color: #777; font-size: 14px;">Carregando artistas...</p>
+        </div>
     </div>
 
 
@@ -228,9 +320,7 @@
    ===================================================== */
 
 const SUPABASE_URL = "https://gnibzbnypirjrcaoibkx.supabase.co";
-
 const SUPABASE_KEY = "sb_publishable_b9yvSbmWOLVJvq4AB4CLmQ_VRuzpG5T";
-
 
 const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
@@ -243,17 +333,13 @@ const supabaseClient = window.supabase.createClient(
    ===================================================== */
 
 async function verificarLogin() {
-
     const {
         data: { session }
     } = await supabaseClient.auth.getSession();
 
     if (!session) {
-
         alert("Você precisa estar logado como ADM.");
-
         window.location.href = "index.html";
-
         return false;
     }
 
@@ -262,11 +348,10 @@ async function verificarLogin() {
 
 
 /* =====================================================
-   CARREGAR ARTISTAS
+   CARREGAR ARTISTAS (SELECT E LISTA ADM)
    ===================================================== */
 
 async function carregarArtistas() {
-
     const {
         data,
         error
@@ -276,27 +361,52 @@ async function carregarArtistas() {
         .order("nome");
 
     if (error) {
-
         console.log(error);
-
         return;
     }
 
+    // 1. Atualizar o <select> do card de músicas
     const select = document.getElementById("artistaMusica");
+    select.innerHTML = '<option value="">Selecione um artista</option>';
 
-    select.innerHTML =
-        '<option value="">Selecione um artista</option>';
+    // 2. Atualizar a listagem de gerenciamento de artistas
+    const listaDiv = document.getElementById("listaArtistasGerenciar");
+    
+    if (!data || data.length === 0) {
+        listaDiv.innerHTML = '<p style="color: #777; font-size: 14px;">Nenhum artista cadastrado.</p>';
+        return;
+    }
+
+    listaDiv.innerHTML = "";
 
     data.forEach(artista => {
-
+        // Preencher select
         const option = document.createElement("option");
-
         option.value = artista.id;
-
         option.textContent = artista.nome;
-
         select.appendChild(option);
 
+        // Preencher lista de gerenciamento
+        const item = document.createElement("div");
+        item.className = "artista-item";
+        
+        const fotoSrc = artista.foto_url || "https://via.placeholder.com/45";
+        const bioTexto = artista.bio || "Sem biografia.";
+
+        item.innerHTML = `
+            <div class="artista-info">
+                <img src="${fotoSrc}" alt="${artista.nome}">
+                <div class="artista-detalhes">
+                    <h4>${artista.nome}</h4>
+                    <p>${bioTexto}</p>
+                </div>
+            </div>
+            <div class="artista-acoes">
+                <button class="btn-acao btn-editar" onclick="prepararEdicaoArtista('${artista.id}', '${encodeURIComponent(artista.nome)}', '${encodeURIComponent(artista.bio || '')}', '${artista.foto_url || ''}')">✏️</button>
+                <button class="btn-acao btn-excluir" onclick="excluirArtista('${artista.id}')">🗑️</button>
+            </div>
+        `;
+        listaDiv.appendChild(item);
     });
 }
 
@@ -306,10 +416,7 @@ async function carregarArtistas() {
    ===================================================== */
 
 function gerarNomeArquivo(arquivo) {
-
-    const extensao =
-        arquivo.name.split(".").pop();
-
+    const extensao = arquivo.name.split(".").pop();
     return Date.now() + "-" +
         Math.random().toString(36).substring(2) +
         "." + extensao;
@@ -317,365 +424,223 @@ function gerarNomeArquivo(arquivo) {
 
 
 /* =====================================================
-   UPLOAD FOTO DO ARTISTA
+   CADASTRAR OU EDITAR ARTISTA
    ===================================================== */
 
-async function cadastrarArtista() {
+async function salvarArtista() {
+    const idEdicao = document.getElementById("artistaIdEdicao").value;
+    const nome = document.getElementById("nomeArtista").value.trim();
+    const bio = document.getElementById("bioArtista").value.trim();
+    const arquivo = document.getElementById("fotoArtista").files[0];
 
-    const nome =
-        document.getElementById("nomeArtista").value.trim();
-
-    const arquivo =
-        document.getElementById("fotoArtista").files[0];
-
-    const mensagem =
-        document.getElementById("mensagemArtista");
-
-    const progresso =
-        document.getElementById("progressoArtista");
-
+    const mensagem = document.getElementById("mensagemArtista");
+    const progresso = document.getElementById("progressoArtista");
 
     mensagem.className = "mensagem";
-
     mensagem.textContent = "";
 
-
     if (!nome) {
-
-        mostrarErro(
-            mensagem,
-            "Digite o nome do artista."
-        );
-
+        mostrarErro(mensagem, "Digite o nome do artista.");
         return;
     }
-
-
-    if (!arquivo) {
-
-        mostrarErro(
-            mensagem,
-            "Escolha uma foto."
-        );
-
-        return;
-    }
-
 
     try {
-
         progresso.style.display = "block";
+        let fotoURL = document.getElementById("artistaIdEdicao").dataset.fotoAtual || "";
 
+        // Se uma nova foto foi enviada, faz o upload
+        if (arquivo) {
+            const nomeArquivo = gerarNomeArquivo(arquivo);
+            const caminho = "artistas/" + nomeArquivo;
 
-        /* UPLOAD */
+            const { error: uploadError } = await supabaseClient
+                .storage
+                .from("fotos-artistas")
+                .upload(caminho, arquivo);
 
-        const nomeArquivo =
-            gerarNomeArquivo(arquivo);
+            if (uploadError) throw uploadError;
 
+            const { data: urlData } = supabaseClient
+                .storage
+                .from("fotos-artistas")
+                .getPublicUrl(caminho);
 
-        const caminho =
-            "artistas/" + nomeArquivo;
+            fotoURL = urlData.publicUrl;
+        }
 
+        if (idEdicao) {
+            // ATUALIZAR ARTISTA EXISTENTE
+            const { error: bancoError } = await supabaseClient
+                .from("artistas")
+                .update({
+                    nome: nome,
+                    bio: bio,
+                    foto_url: fotoURL
+                })
+                .eq("id", idEdicao);
 
-        const {
-            error: uploadError
-        } = await supabaseClient
-            .storage
-            .from("fotos-artistas")
-            .upload(
-                caminho,
-                arquivo
-            );
+            if (bancoError) throw bancoError;
 
+            mostrarSucesso(mensagem, "✅ Artista atualizado com sucesso!");
+        } else {
+            // CADASTRAR NOVO ARTISTA
+            if (!arquivo) {
+                mostrarErro(mensagem, "Escolha uma foto para o novo artista.");
+                progresso.style.display = "none";
+                return;
+            }
 
-        if (uploadError)
-            throw uploadError;
+            const { error: bancoError } = await supabaseClient
+                .from("artistas")
+                .insert({
+                    nome: nome,
+                    bio: bio,
+                    foto_url: fotoURL
+                });
 
+            if (bancoError) throw bancoError;
 
-        /* PEGAR URL */
+            mostrarSucesso(mensagem, "✅ Artista cadastrado com sucesso!");
+        }
 
-        const {
-            data: urlData
-        } = supabaseClient
-            .storage
-            .from("fotos-artistas")
-            .getPublicUrl(caminho);
-
-
-        const fotoURL =
-            urlData.publicUrl;
-
-
-        /* SALVAR NO BANCO */
-
-        const {
-            error: bancoError
-        } = await supabaseClient
-            .from("artistas")
-            .insert({
-
-                nome: nome,
-
-                foto_url: fotoURL
-
-            });
-
-
-        if (bancoError)
-            throw bancoError;
-
-
-        mostrarSucesso(
-            mensagem,
-            "✅ Artista cadastrado com sucesso!"
-        );
-
-
-        document.getElementById("nomeArtista").value = "";
-
-        document.getElementById("fotoArtista").value = "";
-
-
+        limparFormularioArtista();
         carregarArtistas();
 
-
     } catch (erro) {
-
         console.error(erro);
-
-        mostrarErro(
-            mensagem,
-            "Erro: " + erro.message
-        );
-
+        mostrarErro(mensagem, "Erro: " + erro.message);
     } finally {
-
         progresso.style.display = "none";
-
     }
 }
 
 
 /* =====================================================
-   CADASTRAR MÚSICA
+   PREPARAR EDIÇÃO DE ARTISTA
+   ===================================================== */
+
+function prepararEdicaoArtista(id, nomeEncoded, bioEncoded, fotoUrl) {
+    const nome = decodeURIComponent(nomeEncoded);
+    const bio = decodeURIComponent(bioEncoded);
+
+    document.getElementById("artistaIdEdicao").value = id;
+    document.getElementById("artistaIdEdicao").dataset.fotoAtual = fotoUrl;
+    document.getElementById("nomeArtista").value = nome;
+    document.getElementById("bioArtista").value = bio === "null" ? "" : bio;
+
+    document.getElementById("tituloCardArtista").textContent = "✏️ Editar artista";
+    document.getElementById("btnCadastrarArtista").textContent = "Salvar alterações";
+    document.getElementById("btnCancelarEdicao").style.display = "block";
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+
+/* =====================================================
+   LIMPAR FORMULÁRIO DE ARTISTA
+   ===================================================== */
+
+function limparFormularioArtista() {
+    document.getElementById("artistaIdEdicao").value = "";
+    document.getElementById("artistaIdEdicao").dataset.fotoAtual = "";
+    document.getElementById("nomeArtista").value = "";
+    document.getElementById("bioArtista").value = "";
+    document.getElementById("fotoArtista").value = "";
+
+    document.getElementById("tituloCardArtista").textContent = "👤 Adicionar artista";
+    document.getElementById("btnCadastrarArtista").textContent = "Cadastrar artista";
+    document.getElementById("btnCancelarEdicao").style.display = "none";
+}
+
+
+/* =====================================================
+   EXCLUIR ARTISTA
+   ===================================================== */
+
+async function excluirArtista(id) {
+    if (!confirm("Tem certeza que deseja excluir este artista?")) return;
+
+    const { error } = await supabaseClient
+        .from("artistas")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+        alert("Erro ao excluir: " + error.message);
+        return;
+    }
+
+    carregarArtistas();
+}
+
+
+/* =====================================================
+   CADASTRAR MÚSICA (Mantido do seu original)
    ===================================================== */
 
 async function cadastrarMusica() {
+    const nome = document.getElementById("nomeMusica").value.trim();
+    const artista = document.getElementById("artistaMusica").value;
+    const capa = document.getElementById("capaMusica").files[0];
+    const audio = document.getElementById("audioMusica").files[0];
+    const descricao = document.getElementById("descricaoMusica").value.trim();
 
-    const nome =
-        document.getElementById("nomeMusica").value.trim();
-
-    const artista =
-        document.getElementById("artistaMusica").value;
-
-    const capa =
-        document.getElementById("capaMusica").files[0];
-
-    const audio =
-        document.getElementById("audioMusica").files[0];
-
-    const descricao =
-        document.getElementById("descricaoMusica").value.trim();
-
-
-    const mensagem =
-        document.getElementById("mensagemMusica");
-
-    const progresso =
-        document.getElementById("progressoMusica");
-
+    const mensagem = document.getElementById("mensagemMusica");
+    const progresso = document.getElementById("progressoMusica");
 
     mensagem.className = "mensagem";
-
     mensagem.textContent = "";
 
-
-    if (!nome) {
-
-        mostrarErro(
-            mensagem,
-            "Digite o nome da música."
-        );
-
-        return;
-    }
-
-
-    if (!artista) {
-
-        mostrarErro(
-            mensagem,
-            "Selecione um artista."
-        );
-
-        return;
-    }
-
-
-    if (!capa) {
-
-        mostrarErro(
-            mensagem,
-            "Escolha a capa da música."
-        );
-
-        return;
-    }
-
-
-    if (!audio) {
-
-        mostrarErro(
-            mensagem,
-            "Escolha o arquivo de áudio."
-        );
-
-        return;
-    }
-
+    if (!nome) { mostrarErro(mensagem, "Digite o nome da música."); return; }
+    if (!artista) { mostrarErro(mensagem, "Selecione um artista."); return; }
+    if (!capa) { mostrarErro(mensagem, "Escolha a capa da música."); return; }
+    if (!audio) { mostrarErro(mensagem, "Escolha o arquivo de áudio."); return; }
 
     try {
-
         progresso.style.display = "block";
 
+        // UPLOAD DA CAPA
+        const nomeCapa = gerarNomeArquivo(capa);
+        const caminhoCapa = "capas/" + nomeCapa;
+        const { error: erroCapa } = await supabaseClient.storage.from("capas-musicas").upload(caminhoCapa, capa);
+        if (erroCapa) throw erroCapa;
 
-        /* =========================
-           UPLOAD DA CAPA
-           ========================= */
+        const { data: capaURLData } = supabaseClient.storage.from("capas-musicas").getPublicUrl(caminhoCapa);
+        const capaURL = capaURLData.publicUrl;
 
-        const nomeCapa =
-            gerarNomeArquivo(capa);
+        // UPLOAD DO ÁUDIO
+        const nomeAudio = gerarNomeArquivo(audio);
+        const caminhoAudio = "musicas/" + nomeAudio;
+        const { error: erroAudio } = await supabaseClient.storage.from("audios").upload(caminhoAudio, audio);
+        if (erroAudio) throw erroAudio;
 
-        const caminhoCapa =
-            "capas/" + nomeCapa;
+        const { data: audioURLData } = supabaseClient.storage.from("audios").getPublicUrl(caminhoAudio);
+        const audioURL = audioURLData.publicUrl;
 
+        // SALVAR MÚSICA
+        const { error: bancoError } = await supabaseClient.from("musicas").insert({
+            nome: nome,
+            artista_id: artista,
+            capa_url: capaURL,
+            audio_url: audioURL,
+            descricao: descricao
+        });
 
-        const {
-            error: erroCapa
-        } = await supabaseClient
-            .storage
-            .from("capas-musicas")
-            .upload(
-                caminhoCapa,
-                capa
-            );
+        if (bancoError) throw bancoError;
 
-
-        if (erroCapa)
-            throw erroCapa;
-
-
-        const {
-            data: capaURLData
-        } = supabaseClient
-            .storage
-            .from("capas-musicas")
-            .getPublicUrl(caminhoCapa);
-
-
-        const capaURL =
-            capaURLData.publicUrl;
-
-
-        /* =========================
-           UPLOAD DO ÁUDIO
-           ========================= */
-
-        const nomeAudio =
-            gerarNomeArquivo(audio);
-
-        const caminhoAudio =
-            "musicas/" + nomeAudio;
-
-
-        const {
-            error: erroAudio
-        } = await supabaseClient
-            .storage
-            .from("audios")
-            .upload(
-                caminhoAudio,
-                audio
-            );
-
-
-        if (erroAudio)
-            throw erroAudio;
-
-
-        /* =========================
-           URL DO ÁUDIO
-           ========================= */
-
-        const {
-            data: audioURLData
-        } = supabaseClient
-            .storage
-            .from("audios")
-            .getPublicUrl(caminhoAudio);
-
-
-        const audioURL =
-            audioURLData.publicUrl;
-
-
-        /* =========================
-           SALVAR MÚSICA
-           ========================= */
-
-        const {
-            error: bancoError
-        } = await supabaseClient
-            .from("musicas")
-            .insert({
-
-                nome: nome,
-
-                artista_id: artista,
-
-                capa_url: capaURL,
-
-                audio_url: audioURL,
-
-                descricao: descricao
-
-            });
-
-
-        if (bancoError)
-            throw bancoError;
-
-
-        mostrarSucesso(
-            mensagem,
-            "🎵 Música publicada com sucesso!"
-        );
-
+        mostrarSucesso(mensagem, "🎵 Música publicada com sucesso!");
 
         document.getElementById("nomeMusica").value = "";
-
         document.getElementById("artistaMusica").value = "";
-
         document.getElementById("capaMusica").value = "";
-
         document.getElementById("audioMusica").value = "";
-
         document.getElementById("descricaoMusica").value = "";
 
-
     } catch (erro) {
-
         console.error(erro);
-
-        mostrarErro(
-            mensagem,
-            "Erro: " + erro.message
-        );
-
+        mostrarErro(mensagem, "Erro: " + erro.message);
     } finally {
-
         progresso.style.display = "none";
-
     }
 }
 
@@ -685,20 +650,13 @@ async function cadastrarMusica() {
    ===================================================== */
 
 function mostrarSucesso(elemento, texto) {
-
     elemento.textContent = texto;
-
-    elemento.className =
-        "mensagem sucesso";
+    elemento.className = "mensagem sucesso";
 }
 
-
 function mostrarErro(elemento, texto) {
-
     elemento.textContent = texto;
-
-    elemento.className =
-        "mensagem erro";
+    elemento.className = "mensagem erro";
 }
 
 
@@ -707,15 +665,10 @@ function mostrarErro(elemento, texto) {
    ===================================================== */
 
 (async function() {
-
-    const logado =
-        await verificarLogin();
-
-    if (!logado)
-        return;
+    const logado = await verificarLogin();
+    if (!logado) return;
 
     await carregarArtistas();
-
 })();
 
 </script>
