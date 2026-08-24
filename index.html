@@ -477,34 +477,7 @@ let artistasCache = [];
 
 async function carregarDadosDoSupabase() {
     try {
-        // 1. Busca as músicas com o relacionamento do artista
-        const { data: dadosMusicas, error: erroMusicas } = await supabaseClient
-            .from('musicas')
-            .select(`
-                id,
-                nome,
-                capa_url,
-                audio_url,
-                descricao,
-                artistas (
-                    id,
-                    nome,
-                    foto_url
-                )
-            `)
-            .order('created_at', { ascending: false });
-
-        if (erroMusicas) throw erroMusicas;
-
-        musicas = (dadosMusicas || []).map(m => ({
-            id: m.id,
-            nome: m.nome,
-            artista: m.artistas ? m.artistas.nome : 'Desconhecido',
-            capa: m.capa_url || 'https://via.placeholder.com/500',
-            audio: m.audio_url || ''
-        }));
-
-        // 2. Busca todos os artistas cadastrados
+        // 1. Busca todos os artistas primeiro de forma isolada
         const { data: dadosArtistas, error: erroArtistas } = await supabaseClient
             .from('artistas')
             .select('*')
@@ -512,6 +485,26 @@ async function carregarDadosDoSupabase() {
 
         if (erroArtistas) throw erroArtistas;
         artistasCache = dadosArtistas || [];
+
+        // 2. Busca todas as músicas de forma isolada
+        const { data: dadosMusicas, error: erroMusicas } = await supabaseClient
+            .from('musicas')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (erroMusicas) throw erroMusicas;
+
+        // Mapeia e cruza os dados com segurança pelo ID do artista
+        musicas = (dadosMusicas || []).map(m => {
+            const artistaObj = artistasCache.find(a => a.id === m.artista_id);
+            return {
+                id: m.id,
+                nome: m.nome,
+                artista: artistaObj ? artistaObj.nome : 'Desconhecido',
+                capa: m.capa_url || 'https://via.placeholder.com/500',
+                audio: m.audio_url || ''
+            };
+        });
 
         renderizarMusicas(musicas);
         renderizarArtistasNaTela();
