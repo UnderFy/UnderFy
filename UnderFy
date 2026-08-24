@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UnderFy</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#0b0b0b;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+button,input{
+    font:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+.app{
+    min-height:100vh;
+    padding-bottom:110px;
+}
+
+/* HEADER */
+header{
+    position:sticky;
+    top:0;
+    z-index:20;
+    background:rgba(11,11,11,.95);
+    backdrop-filter:blur(15px);
+    padding:18px 5%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom:1px solid #202020;
+}
+
+.logo{
+    font-size:27px;
+    font-weight:900;
+    letter-spacing:-1px;
+}
+
+.logo span{
+    color:#1ed760;
+}
+
+.header-btn{
+    border:0;
+    background:#1ed760;
+    color:#000;
+    font-weight:bold;
+    padding:10px 16px;
+    border-radius:25px;
+}
+
+/* CONTEÚDO */
+main{
+    width:90%;
+    max-width:1200px;
+    margin:auto;
+}
+
+.hero{
+    margin-top:25px;
+    min-height:260px;
+    border-radius:25px;
+    padding:35px;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    background:linear-gradient(135deg,#171717,#063d20);
+    overflow:hidden;
+}
+
+.hero small{
+    color:#1ed760;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.hero h1{
+    font-size:42px;
+    margin-bottom:10px;
+}
+
+.hero p{
+    color:#bbb;
+    max-width:600px;
+}
+
+.section{
+    margin-top:35px;
+}
+
+.section-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
+}
+
+.section-title h2{
+    font-size:22px;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+    gap:18px;
+}
+
+.card{
+    background:#151515;
+    padding:14px;
+    border-radius:15px;
+    transition:.2s;
+    cursor:pointer;
+}
+
+.card:hover{
+    background:#202020;
+    transform:translateY(-3px);
+}
+
+.cover{
+    width:100%;
+    aspect-ratio:1;
+    object-fit:cover;
+    border-radius:10px;
+    background:#252525;
+}
+
+.card h3{
+    margin-top:12px;
+    font-size:16px;
+}
+
+.card p{
+    color:#999;
+    margin-top:5px;
+    font-size:14px;
+}
+
+.play{
+    margin-top:12px;
+    width:100%;
+    border:0;
+    background:#1ed760;
+    color:#000;
+    padding:10px;
+    border-radius:20px;
+    font-weight:bold;
+}
+
+/* PLAYER */
+.player{
+    position:fixed;
+    bottom:65px;
+    left:0;
+    right:0;
+    z-index:30;
+    background:#171717;
+    border-top:1px solid #292929;
+    padding:12px 5%;
+    display:none;
+    align-items:center;
+    gap:15px;
+}
+
+.player img{
+    width:50px;
+    height:50px;
+    object-fit:cover;
+    border-radius:7px;
+}
+
+.player-info{
+    flex:1;
+    min-width:0;
+}
+
+.player-info strong,
+.player-info span{
+    display:block;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
+
+.player-info span{
+    color:#999;
+    font-size:13px;
+    margin-top:3px;
+}
+
+audio{
+    max-width:300px;
+}
+
+/* NAV */
+nav{
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    height:65px;
+    background:#101010;
+    border-top:1px solid #252525;
+    z-index:40;
+    display:flex;
+    justify-content:center;
+    gap:40px;
+}
+
+nav button{
+    border:0;
+    background:none;
+    color:#aaa;
+    font-size:12px;
+}
+
+nav button:hover{
+    color:#1ed760;
+}
+
+/* MODAIS */
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:100;
+    background:rgba(0,0,0,.75);
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+
+.modal-content{
+    background:#181818;
+    width:100%;
+    max-width:550px;
+    max-height:90vh;
+    overflow:auto;
+    border-radius:20px;
+    padding:25px;
+}
+
+.modal-content h2{
+    margin-bottom:20px;
+}
+
+.close{
+    float:right;
+    border:0;
+    background:#292929;
+    color:#fff;
+    width:35px;
+    height:35px;
+    border-radius:50%;
+}
+
+input{
+    width:100%;
+    padding:13px;
+    margin:7px 0 13px;
+    background:#252525;
+    border:1px solid #333;
+    color:#fff;
+    border-radius:9px;
+    outline:none;
+}
+
+input:focus{
+    border-color:#1ed760;
+}
+
+.form-btn{
+    width:100%;
+    padding:13px;
+    background:#1ed760;
+    color:#000;
+    border:0;
+    border-radius:25px;
+    font-weight:bold;
+    margin-top:5px;
+}
+
+.secondary{
+    background:#292929;
+    color:#fff;
+}
+
+/* ADM */
+.admin-item{
+    background:#242424;
+    padding:12px;
+    border-radius:12px;
+    margin-top:10px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.admin-item img{
+    width:45px;
+    height:45px;
+    border-radius:6px;
+    object-fit:cover;
+}
+
+.admin-item-info{
+    flex:1;
+}
+
+.admin-item-info strong{
+    display:block;
+}
+
+.admin-item-info span{
+    color:#999;
+    font-size:12px;
+}
+
+.delete{
+    background:#e53935;
+    color:#fff;
+    border:0;
+    padding:8px 10px;
+    border-radius:8px;
+}
+
+.empty{
+    color:#888;
+    text-align:center;
+    padding:30px 10px;
+}
+
+.search{
+    margin-top:25px;
+}
+
+/* RESPONSIVO */
+@media(max-width:700px){
+
+    header{
+        padding:15px 5%;
+    }
+
+    .logo{
+        font-size:23px;
+    }
+
+    .hero{
+        min-height:230px;
+        padding:25px;
+    }
+
+    .hero h1{
+        font-size:30px;
+    }
+
+    .grid{
+        grid-template-columns:repeat(2,1fr);
+        gap:12px;
+    }
+
+    .card{
+        padding:10px;
+    }
+
+    audio{
+        width:130px;
+    }
+
+    nav{
+        gap:20px;
+    }
+
+    .player{
+        padding:10px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+    <div class="logo">Under<span>Fy</span></div>
+
+    <button class="header-btn" onclick="abrirADM()">
+        ADM
+    </button>
+</header>
+
+<main>
+
+<section class="hero">
+    <small>UNDERFY • STUDIO CAMP</small>
+    <h1>As guias da sessão.</h1>
+    <p>
+        Um espaço para ouvir, descobrir e organizar
+        as músicas criadas durante as sessões.
+    </p>
+</section>
+
+<input
+    class="search"
+    id="pesquisa"
+    placeholder="🔎 Pesquisar música ou artista..."
+    oninput="pesquisar()"
+>
+
+<section class="section">
+    <div class="section-title">
+        <h2>🎧 Guias recentes</h2>
+    </div>
+
+    <div class="grid" id="listaMusicas"></div>
+</section>
+
+<section class="section">
+    <div class="section-title">
+        <h2>🎤 Artistas</h2>
+    </div>
+
+    <div class="grid" id="listaArtistas"></div>
+</section>
+
+</main>
+</div>
+
+
+<!-- PLAYER -->
+
+<div class="player" id="player">
+
+    <img id="playerCapa" src="">
+
+    <div class="player-info">
+        <strong id="playerMusica">Música</strong>
+        <span id="playerArtista">Artista</span>
+    </div>
+
+    <audio id="audio" controls></audio>
+
+</div>
+
+
+<!-- MENU -->
+
+<nav>
+    <button onclick="irInicio()">🏠<br>Início</button>
+    <button onclick="mostrarMusicas()">🎵<br>Guias</button>
+    <button onclick="mostrarArtistas()">🎤<br>Artistas</button>
+    <button onclick="abrirADM()">⚙️<br>ADM</button>
+</nav>
+
+
+<!-- LOGIN ADM -->
+
+<div class="modal" id="modalLogin">
+
+<div class="modal-content">
+
+<button class="close" onclick="fecharModal('modalLogin')">×</button>
+
+<h2>🔐 Área administrativa</h2>
+
+<p style="color:#999;margin-bottom:15px;">
+    Entre para gerenciar o UnderFy.
+</p>
+
+<input
+    id="loginUsuario"
+    placeholder="Usuário"
+>
+
+<input
+    id="loginSenha"
+    type="password"
+    placeholder="Senha"
+>
+
+<button class="form-btn" onclick="loginADM()">
+    Entrar
+</button>
+
+</div>
+</div>
+
+
+<!-- PAINEL ADM -->
+
+<div class="modal" id="modalADM">
+
+<div class="modal-content">
+
+<button class="close" onclick="fecharModal('modalADM')">×</button>
+
+<h2>⚙️ Painel ADM</h2>
+
+<button
+    class="form-btn"
+    onclick="abrirAdicionar()">
+    ➕ Adicionar música
+</button>
+
+<button
+    class="form-btn secondary"
+    onclick="logoutADM()">
+    Sair do ADM
+</button>
+
+<h3 style="margin-top:25px;">
+    Músicas cadastradas
+</h3>
+
+<div id="listaADM"></div>
+
+</div>
+</div>
+
+
+<!-- ADICIONAR MÚSICA -->
+
+<div class="modal" id="modalAdicionar">
+
+<div class="modal-content">
+
+<button class="close" onclick="fecharModal('modalAdicionar')">×</button>
+
+<h2>🎵 Nova guia</h2>
+
+<input
+    id="nomeMusica"
+    placeholder="Nome da música"
+>
+
+<input
+    id="nomeArtista"
+    placeholder="Nome do artista"
+>
+
+<input
+    id="capaMusica"
+    placeholder="URL da capa da música"
+>
+
+<input
+    id="audioMusica"
+    placeholder="URL do arquivo de áudio"
+>
+
+<button
+    class="form-btn"
+    onclick="adicionarMusica()">
+    Salvar música
+</button>
+
+</div>
+</div>
+
+
+<script>
+
+/* =====================================
+   DADOS
+===================================== */
+
+let musicas = JSON.parse(
+    localStorage.getItem("underfy_musicas")
+) || [
+
+    {
+        id:1,
+        nome:"Guia #01",
+        artista:"Novais MC",
+        capa:"https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600",
+        audio:""
+    },
+
+    {
+        id:2,
+        nome:"Sessão #02",
+        artista:"MC Convidado",
+        capa:"https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=600",
+        audio:""
+    }
+
+];
+
+
+/* =====================================
+   RENDERIZAR MÚSICAS
+===================================== */
+
+function renderizarMusicas(lista=musicas){
+
+    const container =
+        document.getElementById("listaMusicas");
+
+    container.innerHTML="";
+
+    if(lista.length===0){
+
+        container.innerHTML =
+        `<div class="empty">
+            Nenhuma música encontrada.
+        </div>`;
+
+        return;
+    }
+
+    lista.forEach(musica=>{
+
+        container.innerHTML += `
+
+        <div class="card">
+
+            <img
+                class="cover"
+                src="${musica.capa || 'https://via.placeholder.com/500'}"
+                onerror="this.src='https://via.placeholder.com/500'"
+            >
+
+            <h3>${musica.nome}</h3>
+
+            <p>${musica.artista}</p>
+
+            <button
+                class="play"
+                onclick="tocarMusica(${musica.id})">
+
+                ▶ Ouvir guia
+
+            </button>
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+
+/* =====================================
+   ARTISTAS
+===================================== */
+
+function renderizarArtistas(){
+
+    const container =
+        document.getElementById("listaArtistas");
+
+    container.innerHTML="";
+
+    const artistas = [
+        ...new Set(
+            musicas.map(m=>m.artista)
+        )
+    ];
+
+    if(artistas.length===0){
+
+        container.innerHTML =
+        `<div class="empty">
+            Nenhum artista cadastrado.
+        </div>`;
+
+        return;
+    }
+
+    artistas.forEach(artista=>{
+
+        const musica =
+            musicas.find(m=>m.artista===artista);
+
+        container.innerHTML += `
+
+        <div class="card"
+             onclick="filtrarArtista('${artista}')">
+
+            <img
+                class="cover"
+                src="${musica.capa || 'https://via.placeholder.com/500'}"
+                onerror="this.src='https://via.placeholder.com/500'"
+            >
+
+            <h3>${artista}</h3>
+
+            <p>
+                ${musicas.filter(m=>m.artista===artista).length}
+                guia(s)
+            </p>
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+
+/* =====================================
+   PLAYER
+===================================== */
+
+function tocarMusica(id){
+
+    const musica =
+        musicas.find(m=>m.id===id);
+
+    if(!musica) return;
+
+    document.getElementById("player").style.display="flex";
+
+    document.getElementById("playerMusica")
+        .textContent=musica.nome;
+
+    document.getElementById("playerArtista")
+        .textContent=musica.artista;
+
+    document.getElementById("playerCapa")
+        .src=musica.capa;
+
+    const audio =
+        document.getElementById("audio");
+
+    if(!musica.audio){
+
+        alert("Essa guia ainda não possui um arquivo de áudio.");
+
+        return;
+    }
+
+    audio.src=musica.audio;
+
+    audio.play();
+
+}
+
+
+/* =====================================
+   PESQUISA
+===================================== */
+
+function pesquisar(){
+
+    const termo =
+        document.getElementById("pesquisa")
+        .value
+        .toLowerCase();
+
+    const resultado =
+        musicas.filter(m=>
+            m.nome.toLowerCase().includes(termo) ||
+            m.artista.toLowerCase().includes(termo)
+        );
+
+    renderizarMusicas(resultado);
+}
+
+
+/* =====================================
+   ARTISTA
+===================================== */
+
+function filtrarArtista(artista){
+
+    const resultado =
+        musicas.filter(m=>m.artista===artista);
+
+    renderizarMusicas(resultado);
+
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+
+}
+
+
+/* =====================================
+   NAVEGAÇÃO
+===================================== */
+
+function irInicio(){
+
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+
+    renderizarMusicas();
+}
+
+
+function mostrarMusicas(){
+
+    document
+        .getElementById("listaMusicas")
+        .scrollIntoView({
+            behavior:"smooth"
+        });
+
+}
+
+
+function mostrarArtistas(){
+
+    document
+        .getElementById("listaArtistas")
+        .scrollIntoView({
+            behavior:"smooth"
+        });
+
+}
+
+
+/* =====================================
+   ADM
+===================================== */
+
+function abrirADM(){
+
+    if(localStorage.getItem("underfy_admin")==="true"){
+
+        atualizarADM();
+
+        document
+            .getElementById("modalADM")
+            .style.display="flex";
+
+    }else{
+
+        document
+            .getElementById("modalLogin")
+            .style.display="flex";
+
+    }
+
+}
+
+
+function loginADM(){
+
+    const usuario =
+        document.getElementById("loginUsuario").value;
+
+    const senha =
+        document.getElementById("loginSenha").value;
+
+    if(usuario==="admin" && senha==="1234"){
+
+        localStorage.setItem(
+            "underfy_admin",
+            "true"
+        );
+
+        fecharModal("modalLogin");
+
+        atualizarADM();
+
+        document
+            .getElementById("modalADM")
+            .style.display="flex";
+
+    }else{
+
+        alert("Usuário ou senha incorretos.");
+
+    }
+
+}
+
+
+function logoutADM(){
+
+    localStorage.removeItem(
+        "underfy_admin"
+    );
+
+    fecharModal("modalADM");
+
+}
+
+
+/* =====================================
+   ADICIONAR
+===================================== */
+
+function abrirAdicionar(){
+
+    fecharModal("modalADM");
+
+    document
+        .getElementById("modalAdicionar")
+        .style.display="flex";
+
+}
+
+
+function adicionarMusica(){
+
+    const nome =
+        document.getElementById("nomeMusica").value.trim();
+
+    const artista =
+        document.getElementById("nomeArtista").value.trim();
+
+    const capa =
+        document.getElementById("capaMusica").value.trim();
+
+    const audio =
+        document.getElementById("audioMusica").value.trim();
+
+
+    if(!nome || !artista){
+
+        alert("Preencha o nome da música e o artista.");
+
+        return;
+    }
+
+
+    const novaMusica={
+
+        id:Date.now(),
+
+        nome:nome,
+
+        artista:artista,
+
+        capa:capa ||
+        "https://via.placeholder.com/500",
+
+        audio:audio
+
+    };
+
+
+    musicas.push(novaMusica);
+
+
+    localStorage.setItem(
+        "underfy_musicas",
+        JSON.stringify(musicas)
+    );
+
+
+    document.getElementById("nomeMusica").value="";
+    document.getElementById("nomeArtista").value="";
+    document.getElementById("capaMusica").value="";
+    document.getElementById("audioMusica").value="";
+
+
+    fecharModal("modalAdicionar");
+
+    renderizarMusicas();
+
+    renderizarArtistas();
+
+    atualizarADM();
+
+
+    alert("Música adicionada com sucesso!");
+
+}
+
+
+/* =====================================
+   PAINEL
+===================================== */
+
+function atualizarADM(){
+
+    const container =
+        document.getElementById("listaADM");
+
+    container.innerHTML="";
+
+    if(musicas.length===0){
+
+        container.innerHTML =
+        `<div class="empty">
+            Nenhuma música cadastrada.
+        </div>`;
+
+        return;
+    }
+
+
+    musicas.forEach(musica=>{
+
+        container.innerHTML += `
+
+        <div class="admin-item">
+
+            <img
+                src="${musica.capa}"
+                onerror="this.src='https://via.placeholder.com/100'"
+            >
+
+            <div class="admin-item-info">
+
+                <strong>${musica.nome}</strong>
+
+                <span>${musica.artista}</span>
+
+            </div>
+
+            <button
+                class="delete"
+                onclick="excluirMusica(${musica.id})">
+
+                🗑️
+
+            </button>
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+
+/* =====================================
+   EXCLUIR
+===================================== */
+
+function excluirMusica(id){
+
+    if(!confirm("Excluir esta música?")) return;
+
+
+    musicas =
+        musicas.filter(m=>m.id!==id);
+
+
+    localStorage.setItem(
+        "underfy_musicas",
+        JSON.stringify(musicas)
+    );
+
+
+    renderizarMusicas();
+
+    renderizarArtistas();
+
+    atualizarADM();
+
+}
+
+
+/* =====================================
+   MODAIS
+===================================== */
+
+function fecharModal(id){
+
+    document
+        .getElementById(id)
+        .style.display="none";
+
+}
+
+
+window.onclick=function(event){
+
+    if(event.target.classList.contains("modal")){
+
+        event.target.style.display="none";
+
+    }
+
+};
+
+
+/* =====================================
+   INICIALIZAÇÃO
+===================================== */
+
+renderizarMusicas();
+
+renderizarArtistas();
+
+</script>
+
+</body>
+</html>
