@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UnderFy — Upload ADM</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #121212;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: auto;
+        }
+
+        h1 {
+            margin-bottom: 8px;
+        }
+
+        .subtitulo {
+            color: #aaa;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: #181818;
+            padding: 22px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 7px;
+            color: #ddd;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: #242424;
+            color: white;
+            outline: none;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #1ed760;
+        }
+
+        input[type="file"] {
+            padding: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 25px;
+            background: #1ed760;
+            color: #000;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: .9;
+        }
+
+        .mensagem {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .sucesso {
+            display: block;
+            background: #123d24;
+            color: #5cff91;
+        }
+
+        .erro {
+            display: block;
+            background: #421818;
+            color: #ff7070;
+        }
+
+        .progresso {
+            display: none;
+            margin-top: 15px;
+            color: #aaa;
+            text-align: center;
+        }
+
+        .voltar {
+            background: #292929;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>UnderFy ADM</h1>
+    <p class="subtitulo">Gerenciamento de artistas e músicas</p>
+
+    <!-- ARTISTA -->
+    <div class="card">
+
+        <h2>👤 Adicionar artista</h2>
+
+        <label>Nome do artista</label>
+        <input
+            type="text"
+            id="nomeArtista"
+            placeholder="Ex: Novais MC"
+        >
+
+        <label>Foto do artista</label>
+        <input
+            type="file"
+            id="fotoArtista"
+            accept="image/*"
+        >
+
+        <button onclick="cadastrarArtista()">
+            Cadastrar artista
+        </button>
+
+        <div id="mensagemArtista" class="mensagem"></div>
+
+        <div id="progressoArtista" class="progresso">
+            Enviando foto...
+        </div>
+
+    </div>
+
+
+    <!-- MÚSICA -->
+    <div class="card">
+
+        <h2>🎵 Adicionar música</h2>
+
+        <label>Nome da música</label>
+        <input
+            type="text"
+            id="nomeMusica"
+            placeholder="Ex: Sessão 01"
+        >
+
+        <label>Artista</label>
+        <select id="artistaMusica">
+            <option value="">Selecione um artista</option>
+        </select>
+
+        <label>Capa da música</label>
+        <input
+            type="file"
+            id="capaMusica"
+            accept="image/*"
+        >
+
+        <label>Arquivo de áudio</label>
+        <input
+            type="file"
+            id="audioMusica"
+            accept="audio/*"
+        >
+
+        <label>Descrição</label>
+        <textarea
+            id="descricaoMusica"
+            rows="4"
+            placeholder="Descrição da guia musical..."
+        ></textarea>
+
+        <button onclick="cadastrarMusica()">
+            Publicar música
+        </button>
+
+        <div id="mensagemMusica" class="mensagem"></div>
+
+        <div id="progressoMusica" class="progresso">
+            Enviando arquivos...
+        </div>
+
+    </div>
+
+
+    <button class="voltar" onclick="history.back()">
+        ← Voltar
+    </button>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   CONFIGURAÇÃO DO SUPABASE
+   ===================================================== */
+
+const SUPABASE_URL = "COLE_SEU_PROJECT_URL_AQUI";
+
+const SUPABASE_KEY = "COLE_SUA_CHAVE_PUBLICA_AQUI";
+
+
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+
+/* =====================================================
+   VERIFICAR LOGIN
+   ===================================================== */
+
+async function verificarLogin() {
+
+    const {
+        data: { session }
+    } = await supabaseClient.auth.getSession();
+
+    if (!session) {
+
+        alert("Você precisa estar logado como ADM.");
+
+        window.location.href = "index.html";
+
+        return false;
+    }
+
+    return true;
+}
+
+
+/* =====================================================
+   CARREGAR ARTISTAS
+   ===================================================== */
+
+async function carregarArtistas() {
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from("artistas")
+        .select("*")
+        .order("nome");
+
+    if (error) {
+
+        console.log(error);
+
+        return;
+    }
+
+    const select = document.getElementById("artistaMusica");
+
+    select.innerHTML =
+        '<option value="">Selecione um artista</option>';
+
+    data.forEach(artista => {
+
+        const option = document.createElement("option");
+
+        option.value = artista.id;
+
+        option.textContent = artista.nome;
+
+        select.appendChild(option);
+
+    });
+}
+
+
+/* =====================================================
+   GERAR NOME ÚNICO
+   ===================================================== */
+
+function gerarNomeArquivo(arquivo) {
+
+    const extensao =
+        arquivo.name.split(".").pop();
+
+    return Date.now() + "-" +
+        Math.random().toString(36).substring(2) +
+        "." + extensao;
+}
+
+
+/* =====================================================
+   UPLOAD FOTO DO ARTISTA
+   ===================================================== */
+
+async function cadastrarArtista() {
+
+    const nome =
+        document.getElementById("nomeArtista").value.trim();
+
+    const arquivo =
+        document.getElementById("fotoArtista").files[0];
+
+    const mensagem =
+        document.getElementById("mensagemArtista");
+
+    const progresso =
+        document.getElementById("progressoArtista");
+
+
+    mensagem.className = "mensagem";
+
+    mensagem.textContent = "";
+
+
+    if (!nome) {
+
+        mostrarErro(
+            mensagem,
+            "Digite o nome do artista."
+        );
+
+        return;
+    }
+
+
+    if (!arquivo) {
+
+        mostrarErro(
+            mensagem,
+            "Escolha uma foto."
+        );
+
+        return;
+    }
+
+
+    try {
+
+        progresso.style.display = "block";
+
+
+        /* UPLOAD */
+
+        const nomeArquivo =
+            gerarNomeArquivo(arquivo);
+
+
+        const caminho =
+            "artistas/" + nomeArquivo;
+
+
+        const {
+            error: uploadError
+        } = await supabaseClient
+            .storage
+            .from("fotos-artistas")
+            .upload(
+                caminho,
+                arquivo
+            );
+
+
+        if (uploadError)
+            throw uploadError;
+
+
+        /* PEGAR URL */
+
+        const {
+            data: urlData
+        } = supabaseClient
+            .storage
+            .from("fotos-artistas")
+            .getPublicUrl(caminho);
+
+
+        const fotoURL =
+            urlData.publicUrl;
+
+
+        /* SALVAR NO BANCO */
+
+        const {
+            error: bancoError
+        } = await supabaseClient
+            .from("artistas")
+            .insert({
+
+                nome: nome,
+
+                foto_url: fotoURL
+
+            });
+
+
+        if (bancoError)
+            throw bancoError;
+
+
+        mostrarSucesso(
+            mensagem,
+            "✅ Artista cadastrado com sucesso!"
+        );
+
+
+        document.getElementById("nomeArtista").value = "";
+
+        document.getElementById("fotoArtista").value = "";
+
+
+        carregarArtistas();
+
+
+    } catch (erro) {
+
+        console.error(erro);
+
+        mostrarErro(
+            mensagem,
+            "Erro: " + erro.message
+        );
+
+    } finally {
+
+        progresso.style.display = "none";
+
+    }
+}
+
+
+/* =====================================================
+   CADASTRAR MÚSICA
+   ===================================================== */
+
+async function cadastrarMusica() {
+
+    const nome =
+        document.getElementById("nomeMusica").value.trim();
+
+    const artista =
+        document.getElementById("artistaMusica").value;
+
+    const capa =
+        document.getElementById("capaMusica").files[0];
+
+    const audio =
+        document.getElementById("audioMusica").files[0];
+
+    const descricao =
+        document.getElementById("descricaoMusica").value.trim();
+
+
+    const mensagem =
+        document.getElementById("mensagemMusica");
+
+    const progresso =
+        document.getElementById("progressoMusica");
+
+
+    mensagem.className = "mensagem";
+
+    mensagem.textContent = "";
+
+
+    if (!nome) {
+
+        mostrarErro(
+            mensagem,
+            "Digite o nome da música."
+        );
+
+        return;
+    }
+
+
+    if (!artista) {
+
+        mostrarErro(
+            mensagem,
+            "Selecione um artista."
+        );
+
+        return;
+    }
+
+
+    if (!capa) {
+
+        mostrarErro(
+            mensagem,
+            "Escolha a capa da música."
+        );
+
+        return;
+    }
+
+
+    if (!audio) {
+
+        mostrarErro(
+            mensagem,
+            "Escolha o arquivo de áudio."
+        );
+
+        return;
+    }
+
+
+    try {
+
+        progresso.style.display = "block";
+
+
+        /* =========================
+           UPLOAD DA CAPA
+           ========================= */
+
+        const nomeCapa =
+            gerarNomeArquivo(capa);
+
+        const caminhoCapa =
+            "capas/" + nomeCapa;
+
+
+        const {
+            error: erroCapa
+        } = await supabaseClient
+            .storage
+            .from("capas-musicas")
+            .upload(
+                caminhoCapa,
+                capa
+            );
+
+
+        if (erroCapa)
+            throw erroCapa;
+
+
+        const {
+            data: capaURLData
+        } = supabaseClient
+            .storage
+            .from("capas-musicas")
+            .getPublicUrl(caminhoCapa);
+
+
+        const capaURL =
+            capaURLData.publicUrl;
+
+
+        /* =========================
+           UPLOAD DO ÁUDIO
+           ========================= */
+
+        const nomeAudio =
+            gerarNomeArquivo(audio);
+
+        const caminhoAudio =
+            "musicas/" + nomeAudio;
+
+
+        const {
+            error: erroAudio
+        } = await supabaseClient
+            .storage
+            .from("audios")
+            .upload(
+                caminhoAudio,
+                audio
+            );
+
+
+        if (erroAudio)
+            throw erroAudio;
+
+
+        /* =========================
+           URL DO ÁUDIO
+           ========================= */
+
+        const {
+            data: audioURLData
+        } = supabaseClient
+            .storage
+            .from("audios")
+            .getPublicUrl(caminhoAudio);
+
+
+        const audioURL =
+            audioURLData.publicUrl;
+
+
+        /* =========================
+           SALVAR MÚSICA
+           ========================= */
+
+        const {
+            error: bancoError
+        } = await supabaseClient
+            .from("musicas")
+            .insert({
+
+                nome: nome,
+
+                artista_id: artista,
+
+                capa_url: capaURL,
+
+                audio_url: audioURL,
+
+                descricao: descricao
+
+            });
+
+
+        if (bancoError)
+            throw bancoError;
+
+
+        mostrarSucesso(
+            mensagem,
+            "🎵 Música publicada com sucesso!"
+        );
+
+
+        document.getElementById("nomeMusica").value = "";
+
+        document.getElementById("artistaMusica").value = "";
+
+        document.getElementById("capaMusica").value = "";
+
+        document.getElementById("audioMusica").value = "";
+
+        document.getElementById("descricaoMusica").value = "";
+
+
+    } catch (erro) {
+
+        console.error(erro);
+
+        mostrarErro(
+            mensagem,
+            "Erro: " + erro.message
+        );
+
+    } finally {
+
+        progresso.style.display = "none";
+
+    }
+}
+
+
+/* =====================================================
+   MENSAGENS
+   ===================================================== */
+
+function mostrarSucesso(elemento, texto) {
+
+    elemento.textContent = texto;
+
+    elemento.className =
+        "mensagem sucesso";
+}
+
+
+function mostrarErro(elemento, texto) {
+
+    elemento.textContent = texto;
+
+    elemento.className =
+        "mensagem erro";
+}
+
+
+/* =====================================================
+   INICIALIZAÇÃO
+   ===================================================== */
+
+(async function() {
+
+    const logado =
+        await verificarLogin();
+
+    if (!logado)
+        return;
+
+    await carregarArtistas();
+
+})();
+
+</script>
+
+</body>
+</html>
