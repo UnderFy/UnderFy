@@ -534,7 +534,7 @@ async function carregarDadosDoSupabase() {
     try {
         await verificarSessaoAdmin();
 
-        // 1. Busca todos os artistas primeiro de forma isolada
+        // 1. Busca todos os artistas
         const { data: dadosArtistas, error: erroArtistas } = await supabaseClient
             .from('artistas')
             .select('*')
@@ -543,7 +543,7 @@ async function carregarDadosDoSupabase() {
         if (erroArtistas) throw erroArtistas;
         artistasCache = dadosArtistas || [];
 
-        // 2. Busca todas as músicas de forma isolada
+        // 2. Busca todas as músicas
         const { data: dadosMusicas, error: erroMusicas } = await supabaseClient
             .from('musicas')
             .select('*')
@@ -551,13 +551,41 @@ async function carregarDadosDoSupabase() {
 
         if (erroMusicas) throw erroMusicas;
 
-        // Mapeia e cruza os dados com segurança pelo ID do artista
+        // 3. Busca a tabela de relações (quem participa de qual música)
+        const { data: dadosRelacao, error: erroRelacao } = await supabaseClient
+            .from('musica_artistas')
+            .select('*');
+
+        if (erroRelacao) throw erroRelacao;
+
+        // Mapeia cruzando as informações de múltiplos artistas por música
         musicas = (dadosMusicas || []).map(m => {
-            const artistaObj = artistasCache.find(a => a.id === m.artista_id);
+            // Filtra os IDs de artistas vinculados a esta música na tabela de ligação
+            const relsDaMusica = (dadosRelacao || []).filter(r => r.musica_id === m.id);
+            const objsArtistas = relsDaMusica.map(r => artistasCache.find(a => a.id === r.artista_id)).filter(Boolean);
+
+            let artistasNomes = [];
+            if (objsArtistas.length > 0) {
+                artistasNomes = objsArtistas.map(a => a.nome);
+            } else if (m.artista_id) {
+                // Compatibilidade com o formato antigo caso ainda exista
+                const antigo = artistasCache.find(a => a.id === m.artista_id);
+                if (antigo) artistasNomes = [antigo.nome];
+            }
+
+            if (artistasNomes.length === 0) artistasNomes = ['Desconhecido'];
+
+            // Formata o texto do artista (Ex: "Artista 1 feat. Artista 2, Artista 3")
+            let textoArtistaFormatado = artistasNomes[0];
+            if (artistasNomes.length > 1) {
+                textoArtistaFormatado += ` feat. ${artistasNomes.slice(1).join(', ')}`;
+            }
+
             return {
                 id: m.id,
                 nome: m.nome,
-                artista: artistaObj ? artistaObj.nome : 'Desconhecido',
+                artistas: artistasNomes, // Lista completa para facilitar os filtros por perfil
+                artistaFormatado: textoArtistaFormatado,
                 capa: m.capa_url || 'https://via.placeholder.com/500',
                 audio: m.audio_url || '',
                 plays: m.plays || 0
@@ -591,7 +619,6 @@ function renderizarMusicas(lista = musicas) {
     }
 
     lista.forEach(musica => {
-        // Se o usuário estiver logado como ADM, cria o botão de excluir no card
         const botaoExcluirHtml = usuarioLogado 
             ? `<button class="btn-excluir" onclick="excluirMusica('${musica.id}', event)" title="Excluir guia">✕</button>` 
             : '';
@@ -601,7 +628,7 @@ function renderizarMusicas(lista = musicas) {
             ${botaoExcluirHtml}
             <img class="cover" src="${musica.capa}" onerror="this.src='https://via.placeholder.com/500'">
             <h3>${musica.nome}</h3>
-            <p>${musica.artista}</p>
+            <p>${musica.artistaFormatado}</p>
             <div class="card-plays">▶ ${musica.plays} reproduç${musica.plays === 1 ? 'ão' : 'ões'}</div>
             <button class="play" onclick="tocarMusica('${musica.id}')">
                 ▶ Ouvir guia
@@ -616,7 +643,7 @@ function renderizarMusicas(lista = musicas) {
    EXCLUIR MÚSICA
 ===================================== */
 async function excluirMusica(id, event) {
-    event.stopPropagation(); // Evita disparar cliques do card
+    event.stopPropagation();
 
     if (!confirm("Tem certeza que deseja excluir esta guia do banco de dados?")) {
         return;
@@ -630,7 +657,6 @@ async function excluirMusica(id, event) {
 
         if (error) throw error;
 
-        // Atualiza a lista local removendo a música excluída e re-renderiza
         musicas = musicas.filter(m => m.id != id);
         renderizarMusicas(musicas);
         renderizarArtistasNaTela();
@@ -644,7 +670,7 @@ async function excluirMusica(id, event) {
 
 
 /* =====================================
-   ARTISTAS
+   ARTISTAS (CONTAGEM DE MÚSICAS POR PERFIL)
 ===================================== */
 function renderizarArtistasNaTela() {
     const container = document.getElementById("listaArtistas");
@@ -656,7 +682,8 @@ function renderizarArtistasNaTela() {
     }
 
     artistasCache.forEach(artista => {
-        const qtdMusicas = musicas.filter(m => m.artista === artista.nome).length;
+        // Conta a música se o artista estiver na lista de colaboradores da faixa
+        const qtdMusicas = musicas.filter(m => m.artistas.includes(artista.nome)).length;
 
         container.innerHTML += `
         <div class="card" onclick="filtrarArtista('${artista.nome}')">
@@ -678,7 +705,7 @@ async function tocarMusica(id) {
 
     document.getElementById("player").style.display = "flex";
     document.getElementById("playerMusica").textContent = musica.nome;
-    document.getElementById("playerArtista").textContent = musica.artista;
+    document.getElementById("playerArtista").textContent = musica.artistaFormatado;
     document.getElementById("playerCapa").src = musica.capa;
 
     const audio = document.getElementById("audio");
@@ -691,11 +718,9 @@ async function tocarMusica(id) {
     audio.src = musica.audio;
     audio.play();
 
-    // Incrementa o play localmente e atualiza na tela de imediato
     musica.plays += 1;
     renderizarMusicas(musicas);
 
-    // Salva o incremento no banco de dados do Supabase em segundo plano
     try {
         await supabaseClient
             .from('musicas')
@@ -714,17 +739,17 @@ function pesquisar() {
     const termo = document.getElementById("pesquisa").value.toLowerCase();
     const resultado = musicas.filter(m =>
         m.nome.toLowerCase().includes(termo) ||
-        m.artista.toLowerCase().includes(termo)
+        m.artistaFormatado.toLowerCase().includes(termo)
     );
     renderizarMusicas(resultado);
 }
 
 
 /* =====================================
-   FILTRAR POR ARTISTA
+   FILTRAR POR ARTISTA (INCLUI FEATS)
 ===================================== */
-function filtrarArtista(artista) {
-    const resultado = musicas.filter(m => m.artista === artista);
+function filtrarArtista(nomeArtista) {
+    const resultado = musicas.filter(m => m.artistas.includes(nomeArtista));
     renderizarMusicas(resultado);
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -773,7 +798,6 @@ async function loginADM() {
         return;
     }
 
-    // Redireciona para o painel de upload/admin autenticado
     window.location.href = "upload.html";
 }
 
