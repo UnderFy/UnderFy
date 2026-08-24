@@ -173,6 +173,22 @@ input:focus, select:focus{
 
         <button class="btn" onclick="cadastrarMusica()">Salvar Guia</button>
     </div>
+
+    <!-- FORMULÁRIO DE PROJETO -->
+    <div id="formProjeto" style="margin-top: 40px; border-top: 1px solid #222; padding-top: 25px;">
+        <h2>Cadastrar Novo Projeto / Sessão</h2>
+        
+        <label>Nome do Projeto</label>
+        <input type="text" id="nomeProjeto" placeholder="Ex: UnderFy Session Vol. 1">
+
+        <label>Descrição</label>
+        <input type="text" id="descProjeto" placeholder="Ex: Sessão ao vivo gravada em estúdio">
+
+        <label>Capa do Projeto (Imagem)</label>
+        <input type="file" id="capaProjetoFile" accept="image/*">
+
+        <button class="btn" onclick="cadastrarProjeto()">Salvar Projeto</button>
+    </div>
 </div>
 
 <!-- SUPABASE SDK -->
@@ -264,7 +280,6 @@ async function cadastrarArtista() {
     try {
         let foto_url = '';
         if (fotoFile) {
-            // Envia para o bucket 'fotos-artistas'
             foto_url = await fazerUploadArquivo(fotoFile, 'fotos-artistas');
         }
 
@@ -305,11 +320,9 @@ async function cadastrarMusica() {
         let audio_url = '';
 
         if (capaFile) {
-            // Envia para o bucket 'capas-musicas'
             capa_url = await fazerUploadArquivo(capaFile, 'capas-musicas');
         }
         if (audioFile) {
-            // Envia para o bucket 'audios'
             audio_url = await fazerUploadArquivo(audioFile, 'audios');
         }
 
@@ -347,6 +360,40 @@ async function cadastrarMusica() {
         alert("Erro ao cadastrar guia: " + err.message);
     } finally {
         loadingMsg.style.display = "none";
+    }
+}
+
+// Cadastrar Projeto
+async function cadastrarProjeto() {
+    const nome = document.getElementById("nomeProjeto").value.trim();
+    const descricao = document.getElementById("descProjeto").value.trim();
+    const capaFile = document.getElementById("capaProjetoFile").files[0];
+
+    if (!nome) {
+        alert("Preencha o nome do projeto.");
+        return;
+    }
+
+    try {
+        let capa_url = '';
+        if (capaFile) {
+            capa_url = await fazerUploadArquivo(capaFile, 'capas-musicas');
+        }
+
+        const { error } = await supabaseClient
+            .from('projetos')
+            .insert([{ nome, descricao, capa_url }]);
+
+        if (error) throw error;
+
+        alert("Projeto cadastrado com sucesso!");
+        
+        document.getElementById("nomeProjeto").value = "";
+        document.getElementById("descProjeto").value = "";
+        document.getElementById("capaProjetoFile").value = "";
+
+    } catch (err) {
+        alert("Erro ao cadastrar projeto: " + err.message);
     }
 }
 </script>
