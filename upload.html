@@ -60,11 +60,15 @@ input, select{
     font:inherit;
 }
 
+input[type="file"] {
+    padding: 9px;
+    cursor: pointer;
+}
+
 input:focus, select:focus{
     border-color:#1ed760;
 }
 
-/* LISTA DE CHECKBOXES PARA OS FEATS */
 .checkbox-group {
     background: #202020;
     border: 1px solid #333;
@@ -118,6 +122,14 @@ input:focus, select:focus{
 .back-link:hover{
     color:#fff;
 }
+
+#loadingMsg {
+    display: none;
+    text-align: center;
+    color: #1ed760;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
 </style>
 </head>
 
@@ -134,8 +146,8 @@ input:focus, select:focus{
         <label>Nome do Artista</label>
         <input type="text" id="nomeArtista" placeholder="Ex: Matuê">
 
-        <label>Link da Foto (URL)</label>
-        <input type="text" id="fotoArtista" placeholder="https://exemplo.com/foto.jpg">
+        <label>Foto do Artista (Arquivo)</label>
+        <input type="file" id="fotoArtistaFile" accept="image/*">
 
         <button class="btn" onclick="cadastrarArtista()">Cadastrar Artista</button>
     </div>
@@ -148,15 +160,16 @@ input:focus, select:focus{
 
         <label>Artistas Participantes (Selecione um ou mais para Feat)</label>
         <div class="checkbox-group" id="listaArtistasCheckbox">
-            <!-- Os artistas serão injetados aqui via JS -->
             <span style="color:#888;font-size:13px;">Carregando artistas...</span>
         </div>
 
-        <label>Link da Capa (URL)</label>
-        <input type="text" id="capaMusica" placeholder="https://exemplo.com/capa.jpg">
+        <label>Capa da Guia (Imagem)</label>
+        <input type="file" id="capaMusicaFile" accept="image/*">
 
-        <label>Link do Áudio (.mp3 / URL Direta)</label>
-        <input type="text" id="audioMusica" placeholder="https://exemplo.com/audio.mp3">
+        <label>Arquivo de Áudio (.mp3 / WAV)</label>
+        <input type="file" id="audioMusicaFile" accept="audio/*">
+
+        <div id="loadingMsg">Enviando arquivos e salvando... Aguarde ⏳</div>
 
         <button class="btn" onclick="cadastrarMusica()">Salvar Guia</button>
     </div>
@@ -174,7 +187,6 @@ const supabaseClient = supabase.createClient(
     SUPABASE_KEY
 );
 
-// Verifica se o admin está logado ao abrir a página
 async function checarAuth() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) {
@@ -203,7 +215,7 @@ async function carregarArtistasParaSelecao() {
     container.innerHTML = "";
 
     if (artistasDisponiveis.length === 0) {
-        container.innerHTML = `<span style="color:#888;font-size:13px;">Nenhum artista cadastrado ainda. Cadastre um acima primeiro.</span>`;
+        container.innerHTML = `<span style="color:#888;font-size:13px;">Nenhum artista cadastrado ainda.</span>`;
         return;
     }
 
@@ -219,38 +231,64 @@ async function carregarArtistasParaSelecao() {
 
 document.addEventListener('DOMContentLoaded', carregarArtistasParaSelecao);
 
+// Função de upload direcionada para o bucket correto
+async function fazerUploadArquivo(file, nomeBucket) {
+    if (!file) return '';
+    const nomeUnico = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+    
+    const { data, error } = await supabaseClient.storage
+        .from(nomeBucket)
+        .upload(nomeUnico, file);
+
+    if (error) {
+        throw new Error("Erro no upload para o bucket " + nomeBucket + ": " + error.message);
+    }
+
+    const { data: urlData } = supabaseClient.storage
+        .from(nomeBucket)
+        .getPublicUrl(nomeUnico);
+
+    return urlData.publicUrl;
+}
+
 // Cadastrar Artista
 async function cadastrarArtista() {
     const nome = document.getElementById("nomeArtista").value.trim();
-    const foto_url = document.getElementById("fotoArtista").value.trim();
+    const fotoFile = document.getElementById("fotoArtistaFile").files[0];
 
     if (!nome) {
         alert("Preencha o nome do artista.");
         return;
     }
 
-    const { error } = await supabaseClient
-        .from('artistas')
-        .insert([{ nome, foto_url }]);
+    try {
+        let foto_url = '';
+        if (fotoFile) {
+            // Envia para o bucket 'fotos-artistas'
+            foto_url = await fazerUploadArquivo(fotoFile, 'fotos-artistas');
+        }
 
-    if (error) {
-        alert("Erro ao cadastrar artista: " + error.message);
-        return;
+        const { error } = await supabaseClient
+            .from('artistas')
+            .insert([{ nome, foto_url }]);
+
+        if (error) throw error;
+
+        alert("Artista cadastrado com sucesso!");
+        document.getElementById("nomeArtista").value = "";
+        document.getElementById("fotoArtistaFile").value = "";
+        carregarArtistasParaSelecao();
+    } catch (err) {
+        alert("Erro: " + err.message);
     }
-
-    alert("Artista cadastrado com sucesso!");
-    document.getElementById("nomeArtista").value = "";
-    document.getElementById("fotoArtista").value = "";
-    carregarArtistasParaSelecao(); // Atualiza a lista de checkboxes
 }
 
-// Cadastrar Música com Feat (Múltiplos Artistas)
+// Cadastrar Música com Upload de Arquivo e Feats
 async function cadastrarMusica() {
     const nome = document.getElementById("nomeMusica").value.trim();
-    const capa_url = document.getElementById("capaMusica").value.trim();
-    const audio_url = document.getElementById("audioMusica").value.trim();
+    const capaFile = document.getElementById("capaMusicaFile").files[0];
+    const audioFile = document.getElementById("audioMusicaFile").files[0];
 
-    // Pega todos os checkboxes marcados
     const checkboxesSelecionados = document.querySelectorAll('input[name="artistaCheck"]:checked');
     const artistasIds = Array.from(checkboxesSelecionados).map(cb => cb.value);
 
@@ -259,42 +297,57 @@ async function cadastrarMusica() {
         return;
     }
 
-    // 1. Insere a música na tabela principal
-    const { data: musicaData, error: musicaError } = await supabaseClient
-        .from('musicas')
-        .insert([{ nome, capa_url, audio_url, plays: 0 }])
-        .select()
-        .single();
+    const loadingMsg = document.getElementById("loadingMsg");
+    loadingMsg.style.display = "block";
 
-    if (musicaError) {
-        alert("Erro ao salvar música: " + musicaError.message);
-        return;
+    try {
+        let capa_url = '';
+        let audio_url = '';
+
+        if (capaFile) {
+            // Envia para o bucket 'capas-musicas'
+            capa_url = await fazerUploadArquivo(capaFile, 'capas-musicas');
+        }
+        if (audioFile) {
+            // Envia para o bucket 'audios'
+            audio_url = await fazerUploadArquivo(audioFile, 'audios');
+        }
+
+        // 1. Insere a música
+        const { data: musicaData, error: musicaError } = await supabaseClient
+            .from('musicas')
+            .insert([{ nome, capa_url, audio_url, plays: 0 }])
+            .select()
+            .single();
+
+        if (musicaError) throw musicaError;
+
+        const musicaId = musicaData.id;
+
+        // 2. Insere as relações na tabela de feats (`musica_artistas`)
+        const relacoesParaInserir = artistasIds.map(artistaId => ({
+            musica_id: musicaId,
+            artista_id: artistaId
+        }));
+
+        const { error: relError } = await supabaseClient
+            .from('musica_artistas')
+            .insert(relacoesParaInserir);
+
+        if (relError) throw relError;
+
+        alert("Guia cadastrada com sucesso!");
+        
+        document.getElementById("nomeMusica").value = "";
+        document.getElementById("capaMusicaFile").value = "";
+        document.getElementById("audioMusicaFile").value = "";
+        checkboxesSelecionados.forEach(cb => cb.checked = false);
+
+    } catch (err) {
+        alert("Erro ao cadastrar guia: " + err.message);
+    } finally {
+        loadingMsg.style.display = "none";
     }
-
-    const musicaId = musicaData.id;
-
-    // 2. Insere as relações na tabela `musica_artistas` para cada artista selecionado
-    const relacoesParaInserir = artistasIds.map(artistaId => ({
-        musica_id: musicaId,
-        artista_id: artistaId
-    }));
-
-    const { error: relError } = await supabaseClient
-        .from('musica_artistas')
-        .insert(relacoesParaInserir);
-
-    if (relError) {
-        alert("Erro ao associar os artistas à música: " + relError.message);
-        return;
-    }
-
-    alert("Guia cadastrada com sucesso com todos os feats!");
-    
-    // Limpa o formulário
-    document.getElementById("nomeMusica").value = "";
-    document.getElementById("capaMusica").value = "";
-    document.getElementById("audioMusica").value = "";
-    checkboxesSelecionados.forEach(cb => cb.checked = false);
 }
 </script>
 
