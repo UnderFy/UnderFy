@@ -1104,5 +1104,35 @@ renderizarArtistas();
 
 </script>
 
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const SUPABASE_URL = "https://gnibzbnypirjrcaoibkx.supabase.co/rest/v1/";
+const SUPABASE_KEY = "sb_publishable_b9yvSbmWOLVJvq4AB4CLmQ_VRuzpG5T";
+
+const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+async function loginADM() {
+    const email = document.getElementById("emailADM").value;
+    const senha = document.getElementById("senhaADM").value;
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: senha
+    });
+
+    if (error) {
+        alert("E-mail ou senha incorretos.");
+        return;
+    }
+
+    window.location.href = "admin.html";
+}
+</script>
+    
 </body>
 </html>
