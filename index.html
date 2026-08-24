@@ -144,12 +144,18 @@ main{
 .card h3{
     margin-top:12px;
     font-size:16px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
 .card p{
     color:#999;
     margin-top:5px;
     font-size:14px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
 .play{
@@ -296,54 +302,11 @@ input:focus{
     margin-top:5px;
 }
 
-.secondary{
-    background:#292929;
-    color:#fff;
-}
-
-/* ADM */
-.admin-item{
-    background:#242424;
-    padding:12px;
-    border-radius:12px;
-    margin-top:10px;
-    display:flex;
-    align-items:center;
-    gap:10px;
-}
-
-.admin-item img{
-    width:45px;
-    height:45px;
-    border-radius:6px;
-    object-fit:cover;
-}
-
-.admin-item-info{
-    flex:1;
-}
-
-.admin-item-info strong{
-    display:block;
-}
-
-.admin-item-info span{
-    color:#999;
-    font-size:12px;
-}
-
-.delete{
-    background:#e53935;
-    color:#fff;
-    border:0;
-    padding:8px 10px;
-    border-radius:8px;
-}
-
 .empty{
     color:#888;
     text-align:center;
     padding:30px 10px;
+    grid-column: 1 / -1;
 }
 
 .search{
@@ -352,41 +315,32 @@ input:focus{
 
 /* RESPONSIVO */
 @media(max-width:700px){
-
     header{
         padding:15px 5%;
     }
-
     .logo{
         font-size:23px;
     }
-
     .hero{
         min-height:230px;
         padding:25px;
     }
-
     .hero h1{
         font-size:30px;
     }
-
     .grid{
         grid-template-columns:repeat(2,1fr);
         gap:12px;
     }
-
     .card{
         padding:10px;
     }
-
     audio{
         width:130px;
     }
-
     nav{
         gap:20px;
     }
-
     .player{
         padding:10px;
     }
@@ -429,7 +383,9 @@ input:focus{
         <h2>🎧 Guias recentes</h2>
     </div>
 
-    <div class="grid" id="listaMusicas"></div>
+    <div class="grid" id="listaMusicas">
+        <div class="empty">Carregando músicas...</div>
+    </div>
 </section>
 
 <section class="section">
@@ -437,7 +393,9 @@ input:focus{
         <h2>🎤 Artistas</h2>
     </div>
 
-    <div class="grid" id="listaArtistas"></div>
+    <div class="grid" id="listaArtistas">
+        <div class="empty">Carregando artistas...</div>
+    </div>
 </section>
 
 </main>
@@ -460,7 +418,7 @@ input:focus{
 </div>
 
 
-<!-- MENU -->
+<!-- NAV -->
 
 <nav>
     <button onclick="irInicio()">🏠<br>Início</button>
@@ -496,611 +454,13 @@ input:focus{
 </div>
 
 
-<!-- PAINEL ADM -->
-
-<div class="modal" id="modalADM">
-
-<div class="modal-content">
-
-<button class="close" onclick="fecharModal('modalADM')">×</button>
-
-<h2>⚙️ Painel ADM</h2>
-
-<button
-    class="form-btn"
-    onclick="abrirAdicionar()">
-    ➕ Adicionar música
-</button>
-
-<button
-    class="form-btn secondary"
-    onclick="logoutADM()">
-    Sair do ADM
-</button>
-
-<h3 style="margin-top:25px;">
-    Músicas cadastradas
-</h3>
-
-<div id="listaADM"></div>
-
-</div>
-</div>
-
-
-<!-- ADICIONAR MÚSICA -->
-
-<div class="modal" id="modalAdicionar">
-
-<div class="modal-content">
-
-<button class="close" onclick="fecharModal('modalAdicionar')">×</button>
-
-<h2>🎵 Nova guia</h2>
-
-<input
-    id="nomeMusica"
-    placeholder="Nome da música"
->
-
-<input
-    id="nomeArtista"
-    placeholder="Nome do artista"
->
-
-<input
-    id="capaMusica"
-    placeholder="URL da capa da música"
->
-
-<input
-    id="audioMusica"
-    placeholder="URL do arquivo de áudio"
->
-
-<button
-    class="form-btn"
-    onclick="adicionarMusica()">
-    Salvar música
-</button>
-
-</div>
-</div>
-
-
-<script>
-
-/* =====================================
-   DADOS
-===================================== */
-
-let musicas = JSON.parse(
-    localStorage.getItem("underfy_musicas")
-) || [
-
-    {
-        id:1,
-        nome:"Guia #01",
-        artista:"Novais MC",
-        capa:"https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600",
-        audio:""
-    },
-
-    {
-        id:2,
-        nome:"Sessão #02",
-        artista:"MC Convidado",
-        capa:"https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=600",
-        audio:""
-    }
-
-];
-
-
-/* =====================================
-   RENDERIZAR MÚSICAS
-===================================== */
-
-function renderizarMusicas(lista=musicas){
-
-    const container =
-        document.getElementById("listaMusicas");
-
-    container.innerHTML="";
-
-    if(lista.length===0){
-
-        container.innerHTML =
-        `<div class="empty">
-            Nenhuma música encontrada.
-        </div>`;
-
-        return;
-    }
-
-    lista.forEach(musica=>{
-
-        container.innerHTML += `
-
-        <div class="card">
-
-            <img
-                class="cover"
-                src="${musica.capa || 'https://via.placeholder.com/500'}"
-                onerror="this.src='https://via.placeholder.com/500'"
-            >
-
-            <h3>${musica.nome}</h3>
-
-            <p>${musica.artista}</p>
-
-            <button
-                class="play"
-                onclick="tocarMusica(${musica.id})">
-
-                ▶ Ouvir guia
-
-            </button>
-
-        </div>
-
-        `;
-
-    });
-
-}
-
-
-/* =====================================
-   ARTISTAS
-===================================== */
-
-function renderizarArtistas(){
-
-    const container =
-        document.getElementById("listaArtistas");
-
-    container.innerHTML="";
-
-    const artistas = [
-        ...new Set(
-            musicas.map(m=>m.artista)
-        )
-    ];
-
-    if(artistas.length===0){
-
-        container.innerHTML =
-        `<div class="empty">
-            Nenhum artista cadastrado.
-        </div>`;
-
-        return;
-    }
-
-    artistas.forEach(artista=>{
-
-        const musica =
-            musicas.find(m=>m.artista===artista);
-
-        container.innerHTML += `
-
-        <div class="card"
-             onclick="filtrarArtista('${artista}')">
-
-            <img
-                class="cover"
-                src="${musica.capa || 'https://via.placeholder.com/500'}"
-                onerror="this.src='https://via.placeholder.com/500'"
-            >
-
-            <h3>${artista}</h3>
-
-            <p>
-                ${musicas.filter(m=>m.artista===artista).length}
-                guia(s)
-            </p>
-
-        </div>
-
-        `;
-
-    });
-
-}
-
-
-/* =====================================
-   PLAYER
-===================================== */
-
-function tocarMusica(id){
-
-    const musica =
-        musicas.find(m=>m.id===id);
-
-    if(!musica) return;
-
-    document.getElementById("player").style.display="flex";
-
-    document.getElementById("playerMusica")
-        .textContent=musica.nome;
-
-    document.getElementById("playerArtista")
-        .textContent=musica.artista;
-
-    document.getElementById("playerCapa")
-        .src=musica.capa;
-
-    const audio =
-        document.getElementById("audio");
-
-    if(!musica.audio){
-
-        alert("Essa guia ainda não possui um arquivo de áudio.");
-
-        return;
-    }
-
-    audio.src=musica.audio;
-
-    audio.play();
-
-}
-
-
-/* =====================================
-   PESQUISA
-===================================== */
-
-function pesquisar(){
-
-    const termo =
-        document.getElementById("pesquisa")
-        .value
-        .toLowerCase();
-
-    const resultado =
-        musicas.filter(m=>
-            m.nome.toLowerCase().includes(termo) ||
-            m.artista.toLowerCase().includes(termo)
-        );
-
-    renderizarMusicas(resultado);
-}
-
-
-/* =====================================
-   ARTISTA
-===================================== */
-
-function filtrarArtista(artista){
-
-    const resultado =
-        musicas.filter(m=>m.artista===artista);
-
-    renderizarMusicas(resultado);
-
-    window.scrollTo({
-        top:0,
-        behavior:"smooth"
-    });
-
-}
-
-
-/* =====================================
-   NAVEGAÇÃO
-===================================== */
-
-function irInicio(){
-
-    window.scrollTo({
-        top:0,
-        behavior:"smooth"
-    });
-
-    renderizarMusicas();
-}
-
-
-function mostrarMusicas(){
-
-    document
-        .getElementById("listaMusicas")
-        .scrollIntoView({
-            behavior:"smooth"
-        });
-
-}
-
-
-function mostrarArtistas(){
-
-    document
-        .getElementById("listaArtistas")
-        .scrollIntoView({
-            behavior:"smooth"
-        });
-
-}
-
-
-/* =====================================
-   ADM
-===================================== */
-
-function abrirADM(){
-
-    if(localStorage.getItem("underfy_admin")==="true"){
-
-        atualizarADM();
-
-        document
-            .getElementById("modalADM")
-            .style.display="flex";
-
-    }else{
-
-        document
-            .getElementById("modalLogin")
-            .style.display="flex";
-
-    }
-
-}
-
-
-function loginADM(){
-
-    const usuario =
-        document.getElementById("loginUsuario").value;
-
-    const senha =
-        document.getElementById("loginSenha").value;
-
-    if(usuario==="admin" && senha==="1234"){
-
-        localStorage.setItem(
-            "underfy_admin",
-            "true"
-        );
-
-        fecharModal("modalLogin");
-
-        atualizarADM();
-
-        document
-            .getElementById("modalADM")
-            .style.display="flex";
-
-    }else{
-
-        alert("Usuário ou senha incorretos.");
-
-    }
-
-}
-
-
-function logoutADM(){
-
-    localStorage.removeItem(
-        "underfy_admin"
-    );
-
-    fecharModal("modalADM");
-
-}
-
-
-/* =====================================
-   ADICIONAR
-===================================== */
-
-function abrirAdicionar(){
-
-    fecharModal("modalADM");
-
-    document
-        .getElementById("modalAdicionar")
-        .style.display="flex";
-
-}
-
-
-function adicionarMusica(){
-
-    const nome =
-        document.getElementById("nomeMusica").value.trim();
-
-    const artista =
-        document.getElementById("nomeArtista").value.trim();
-
-    const capa =
-        document.getElementById("capaMusica").value.trim();
-
-    const audio =
-        document.getElementById("audioMusica").value.trim();
-
-
-    if(!nome || !artista){
-
-        alert("Preencha o nome da música e o artista.");
-
-        return;
-    }
-
-
-    const novaMusica={
-
-        id:Date.now(),
-
-        nome:nome,
-
-        artista:artista,
-
-        capa:capa ||
-        "https://via.placeholder.com/500",
-
-        audio:audio
-
-    };
-
-
-    musicas.push(novaMusica);
-
-
-    localStorage.setItem(
-        "underfy_musicas",
-        JSON.stringify(musicas)
-    );
-
-
-    document.getElementById("nomeMusica").value="";
-    document.getElementById("nomeArtista").value="";
-    document.getElementById("capaMusica").value="";
-    document.getElementById("audioMusica").value="";
-
-
-    fecharModal("modalAdicionar");
-
-    renderizarMusicas();
-
-    renderizarArtistas();
-
-    atualizarADM();
-
-
-    alert("Música adicionada com sucesso!");
-
-}
-
-
-/* =====================================
-   PAINEL
-===================================== */
-
-function atualizarADM(){
-
-    const container =
-        document.getElementById("listaADM");
-
-    container.innerHTML="";
-
-    if(musicas.length===0){
-
-        container.innerHTML =
-        `<div class="empty">
-            Nenhuma música cadastrada.
-        </div>`;
-
-        return;
-    }
-
-
-    musicas.forEach(musica=>{
-
-        container.innerHTML += `
-
-        <div class="admin-item">
-
-            <img
-                src="${musica.capa}"
-                onerror="this.src='https://via.placeholder.com/100'"
-            >
-
-            <div class="admin-item-info">
-
-                <strong>${musica.nome}</strong>
-
-                <span>${musica.artista}</span>
-
-            </div>
-
-            <button
-                class="delete"
-                onclick="excluirMusica(${musica.id})">
-
-                🗑️
-
-            </button>
-
-        </div>
-
-        `;
-
-    });
-
-}
-
-
-/* =====================================
-   EXCLUIR
-===================================== */
-
-function excluirMusica(id){
-
-    if(!confirm("Excluir esta música?")) return;
-
-
-    musicas =
-        musicas.filter(m=>m.id!==id);
-
-
-    localStorage.setItem(
-        "underfy_musicas",
-        JSON.stringify(musicas)
-    );
-
-
-    renderizarMusicas();
-
-    renderizarArtistas();
-
-    atualizarADM();
-
-}
-
-
-/* =====================================
-   MODAIS
-===================================== */
-
-function fecharModal(id){
-
-    document
-        .getElementById(id)
-        .style.display="none";
-
-}
-
-
-window.onclick=function(event){
-
-    if(event.target.classList.contains("modal")){
-
-        event.target.style.display="none";
-
-    }
-
-};
-
-
-/* =====================================
-   INICIALIZAÇÃO
-===================================== */
-
-renderizarMusicas();
-
-renderizarArtistas();
-
-</script>
-
-<!-- SUPABASE -->
+<!-- SUPABASE SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+/* =====================================
+   CONFIGURAÇÃO DO SUPABASE
+===================================== */
 const SUPABASE_URL = "https://gnibzbnypirjrcaoibkx.supabase.co";
 const SUPABASE_KEY = "sb_publishable_b9yvSbmWOLVJvq4AB4CLmQ_VRuzpG5T";
 
@@ -1109,9 +469,196 @@ const supabaseClient = supabase.createClient(
     SUPABASE_KEY
 );
 
+/* =====================================
+   ESTADO GLOBAL DOS DADOS
+===================================== */
+let musicas = [];
+let artistasCache = [];
+
+async function carregarDadosDoSupabase() {
+    try {
+        // 1. Busca as músicas com o relacionamento do artista
+        const { data: dadosMusicas, error: erroMusicas } = await supabaseClient
+            .from('musicas')
+            .select(`
+                id,
+                nome,
+                capa_url,
+                audio_url,
+                descricao,
+                artistas (
+                    id,
+                    nome,
+                    foto_url
+                )
+            `)
+            .order('created_at', { ascending: false });
+
+        if (erroMusicas) throw erroMusicas;
+
+        musicas = (dadosMusicas || []).map(m => ({
+            id: m.id,
+            nome: m.nome,
+            artista: m.artistas ? m.artistas.nome : 'Desconhecido',
+            capa: m.capa_url || 'https://via.placeholder.com/500',
+            audio: m.audio_url || ''
+        }));
+
+        // 2. Busca todos os artistas cadastrados
+        const { data: dadosArtistas, error: erroArtistas } = await supabaseClient
+            .from('artistas')
+            .select('*')
+            .order('nome', { ascending: true });
+
+        if (erroArtistas) throw erroArtistas;
+        artistasCache = dadosArtistas || [];
+
+        renderizarMusicas(musicas);
+        renderizarArtistasNaTela();
+
+    } catch (error) {
+        console.error('Erro ao carregar dados:', error.message);
+        document.getElementById("listaMusicas").innerHTML = `<div class="empty">Erro ao carregar músicas do banco.</div>`;
+        document.getElementById("listaArtistas").innerHTML = `<div class="empty">Erro ao carregar artistas do banco.</div>`;
+    }
+}
+
+// Inicializa o carregamento ao abrir a página
+document.addEventListener('DOMContentLoaded', carregarDadosDoSupabase);
+
+
+/* =====================================
+   RENDERIZAR MÚSICAS
+===================================== */
+function renderizarMusicas(lista = musicas) {
+    const container = document.getElementById("listaMusicas");
+    container.innerHTML = "";
+
+    if (lista.length === 0) {
+        container.innerHTML = `<div class="empty">Nenhuma música encontrada.</div>`;
+        return;
+    }
+
+    lista.forEach(musica => {
+        container.innerHTML += `
+        <div class="card">
+            <img class="cover" src="${musica.capa}" onerror="this.src='https://via.placeholder.com/500'">
+            <h3>${musica.nome}</h3>
+            <p>${musica.artista}</p>
+            <button class="play" onclick="tocarMusica('${musica.id}')">
+                ▶ Ouvir guia
+            </button>
+        </div>
+        `;
+    });
+}
+
+
+/* =====================================
+   ARTISTAS
+===================================== */
+function renderizarArtistasNaTela() {
+    const container = document.getElementById("listaArtistas");
+    container.innerHTML = "";
+
+    if (artistasCache.length === 0) {
+        container.innerHTML = `<div class="empty">Nenhum artista cadastrado.</div>`;
+        return;
+    }
+
+    artistasCache.forEach(artista => {
+        const qtdMusicas = musicas.filter(m => m.artista === artista.nome).length;
+
+        container.innerHTML += `
+        <div class="card" onclick="filtrarArtista('${artista.nome}')">
+            <img class="cover" src="${artista.foto_url || 'https://via.placeholder.com/500'}" onerror="this.src='https://via.placeholder.com/500'">
+            <h3>${artista.nome}</h3>
+            <p>${qtdMusicas} guia(s)</p>
+        </div>
+        `;
+    });
+}
+
+
+/* =====================================
+   PLAYER
+===================================== */
+function tocarMusica(id) {
+    const musica = musicas.find(m => m.id == id);
+    if (!musica) return;
+
+    document.getElementById("player").style.display = "flex";
+    document.getElementById("playerMusica").textContent = musica.nome;
+    document.getElementById("playerArtista").textContent = musica.artista;
+    document.getElementById("playerCapa").src = musica.capa;
+
+    const audio = document.getElementById("audio");
+
+    if (!musica.audio) {
+        alert("Essa guia ainda não possui um arquivo de áudio.");
+        return;
+    }
+
+    audio.src = musica.audio;
+    audio.play();
+}
+
+
+/* =====================================
+   PESQUISA
+===================================== */
+function pesquisar() {
+    const termo = document.getElementById("pesquisa").value.toLowerCase();
+    const resultado = musicas.filter(m =>
+        m.nome.toLowerCase().includes(termo) ||
+        m.artista.toLowerCase().includes(termo)
+    );
+    renderizarMusicas(resultado);
+}
+
+
+/* =====================================
+   FILTRAR POR ARTISTA
+===================================== */
+function filtrarArtista(artista) {
+    const resultado = musicas.filter(m => m.artista === artista);
+    renderizarMusicas(resultado);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+
+/* =====================================
+   NAVEGAÇÃO
+===================================== */
+function irInicio() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    renderizarMusicas();
+}
+
+function mostrarMusicas() {
+    document.getElementById("listaMusicas").scrollIntoView({ behavior: "smooth" });
+}
+
+function mostrarArtistas() {
+    document.getElementById("listaArtistas").scrollIntoView({ behavior: "smooth" });
+}
+
+
+/* =====================================
+   ADM (LOGIN E REDIRECIONAMENTO)
+===================================== */
+function abrirADM() {
+    document.getElementById("modalLogin").style.display = "flex";
+}
+
 async function loginADM() {
-    const email = document.getElementById("emailADM").value;
-    const senha = document.getElementById("senhaADM").value;
+    const email = document.getElementById("emailADM").value.trim();
+    const senha = document.getElementById("senhaADM").value.trim();
+
+    if (!email || !senha) {
+        alert("Preencha e-mail e senha.");
+        return;
+    }
 
     const { data, error } = await supabaseClient.auth.signInWithPassword({
         email: email,
@@ -1123,8 +670,23 @@ async function loginADM() {
         return;
     }
 
-    window.location.href = "admin.html";
+    // Redireciona para o painel de upload/admin autenticado
+    window.location.href = "upload.html";
 }
+
+
+/* =====================================
+   MODAIS GERAIS
+===================================== */
+function fecharModal(id) {
+    document.getElementById(id).style.display = "none";
+}
+
+window.onclick = function(event) {
+    if (event.target.classList.contains("modal")) {
+        event.target.style.display = "none";
+    }
+};
 </script>
     
 </body>
