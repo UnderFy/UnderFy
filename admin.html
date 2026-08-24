@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UnderFy - ADM</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #121212;
+            color: white;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #aaa;
+            margin-bottom: 30px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: #1f1f1f;
+            padding: 25px;
+            border-radius: 15px;
+        }
+
+        .card h2 {
+            margin-bottom: 10px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .sair {
+            background: #e53935;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🎛️ UnderFy ADM</h1>
+    <p class="subtitle">Painel administrativo</p>
+
+    <div class="cards">
+
+        <div class="card">
+            <h2>🎤 Artistas</h2>
+            <p>Adicionar e gerenciar artistas.</p>
+        </div>
+
+        <div class="card">
+            <h2>🎵 Músicas</h2>
+            <p>Adicionar e gerenciar músicas.</p>
+        </div>
+
+        <div class="card">
+            <h2>📀 Projetos</h2>
+            <p>Gerenciar sessões e projetos.</p>
+        </div>
+
+    </div>
+
+    <button class="sair" onclick="logout()">Sair do ADM</button>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const SUPABASE_URL = "https://gnibzbnypirjrcaoibkx.supabase.co";
+const SUPABASE_KEY = "sb_publishable_b9yvSbmWOLVJvq4AB4CLmQ_VRuzpG5T";
+
+const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+async function logout() {
+    await supabaseClient.auth.signOut();
+    window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>
