@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UnderFy</title>
 
-<!-- Importando a fonte Horizon para o estilo do [by UTA] -->
+<!-- Importando a fonte Horizon -->
 <link href="https://fonts.cdnfonts.com/css/horizon" rel="stylesheet">
 
 <style>
@@ -49,25 +49,22 @@ header{
 }
 
 .logo{
-    font-size:27px;
-    font-weight:900;
-    letter-spacing:-1px;
+    font-family: 'Horizon', sans-serif;
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: -1px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
-.logo span{
-    color:#1ed760;
+.logo .fy{
+    color: #1ed760;
 }
 
-/* Estilo para o [by UTA] com a fonte Horizon */
-.logo-sub {
-    font-family: 'Horizon', sans-serif;
-    font-size: 14px;
+.logo .by-uta {
     color: #ffffff;
-    font-weight: normal;
-    letter-spacing: 1px;
+    font-size: 24px; /* Mesmo tamanho do UnderFy */
 }
 
 .header-btn{
@@ -360,7 +357,10 @@ input:focus{
         padding:15px 5%;
     }
     .logo{
-        font-size:23px;
+        font-size:20px;
+    }
+    .logo .by-uta {
+        font-size: 20px;
     }
     .hero{
         min-height:230px;
@@ -395,8 +395,8 @@ input:focus{
 
 <header>
     <div class="logo">
-        Under<span>Fy</span>
-        <span class="logo-sub">[by UTA]</span>
+        Under<span class="fy">Fy</span>
+        <span class="by-uta">by UTA</span>
     </div>
 
     <button class="header-btn" onclick="abrirADM()">
