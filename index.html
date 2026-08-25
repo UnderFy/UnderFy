@@ -211,7 +211,7 @@ main{
     font-weight:bold;
 }
 
-/* MINI BARRA DE PLAYER FIXO (caso queira minimizar) */
+/* MINI PLAYER FIXO (Rodapé) */
 .mini-player{
     position:fixed;
     bottom:65px;
@@ -395,7 +395,7 @@ main{
     margin-top:8px;
 }
 
-/* FOOTER ICONS DO CARD (Inspirado na referência) */
+/* FOOTER ICONS DO CARD */
 .player-card-footer{
     display:flex;
     justify-content:space-around;
@@ -661,11 +661,25 @@ async function carregarDadosDoSupabase() {
     try {
         await verificarSessaoAdmin();
 
-        const { data: dadosArtistas } = await supabaseClient.from('artistas').select('*').order('nome', { ascending: true });
-        artistasCache = dadosArtistas || [];
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Tempo limite esgotado ao conectar com o Supabase.')), 10000)
+        );
 
-        const { data: dadosMusicas } = await supabaseClient.from('musicas').select('*').order('created_at', { ascending: false });
-        const { data: dadosRelacao } = await supabaseClient.from('musica_artistas').select('*');
+        const fetchPromise = (async () => {
+            const { data: dadosArtistas, error: errArt } = await supabaseClient.from('artistas').select('*').order('nome', { ascending: true });
+            if (errArt) throw errArt;
+            artistasCache = dadosArtistas || [];
+
+            const { data: dadosMusicas, error: errMus } = await supabaseClient.from('musicas').select('*').order('created_at', { ascending: false });
+            if (errMus) throw errMus;
+
+            const { data: dadosRelacao, error: errRel } = await supabaseClient.from('musica_artistas').select('*');
+            if (errRel) throw errRel;
+
+            return { dadosMusicas, dadosRelacao };
+        })();
+
+        const { dadosMusicas, dadosRelacao } = await Promise.race([fetchPromise, timeoutPromise]);
 
         musicas = (dadosMusicas || []).map(m => {
             const relsDaMusica = (dadosRelacao || []).filter(r => r.musica_id === m.id);
@@ -691,13 +705,14 @@ async function carregarDadosDoSupabase() {
         renderizarMusicas(musicas);
         renderizarArtistasNaTela();
 
-        // Eventos do Audio
         const audio = document.getElementById("audio");
         audio.addEventListener('ended', lidarFimDaMusica);
         audio.addEventListener('timeupdate', atualizarBarraProgresso);
 
     } catch (error) {
         console.error('Erro ao carregar dados:', error.message);
+        document.getElementById("listaMusicas").innerHTML = `<div class="empty" style="color: #ff5555;">Erro ao carregar guias: ${error.message}</div>`;
+        document.getElementById("listaArtistas").innerHTML = `<div class="empty" style="color: #ff5555;">Falha ao carregar artistas.</div>`;
     }
 }
 
@@ -771,13 +786,11 @@ async function tocarMusicaPorIndex(index) {
     musicaAtualIndex = index;
     const musica = musicas[musicaAtualIndex];
 
-    // Atualiza mini player
     document.getElementById("miniPlayer").style.display = "flex";
     document.getElementById("miniMusica").textContent = musica.nome;
     document.getElementById("miniArtista").textContent = musica.artistaFormatado;
     document.getElementById("miniCapa").src = musica.capa;
 
-    // Atualiza card modal (Inspiração)
     document.getElementById("modalMusica").textContent = musica.nome;
     document.getElementById("modalArtista").textContent = musica.artistaFormatado;
     document.getElementById("modalCapa").src = musica.capa;
@@ -792,7 +805,6 @@ async function tocarMusicaPorIndex(index) {
     audio.play();
     document.getElementById("btnPlayPauseModal").textContent = "⏸";
 
-    // Abre a interface bonita automaticamente ao dar play
     abrirInterfacePlayer();
 
     musica.plays += 1;
@@ -805,29 +817,4 @@ async function tocarMusicaPorIndex(index) {
 
 function abrirInterfacePlayer() {
     if (musicaAtualIndex === -1) return;
-    document.getElementById("playerModal").style.display = "flex";
-}
-
-function fecharInterfacePlayer() {
-    document.getElementById("playerModal").style.display = "none";
-}
-
-function pausarRetomar() {
-    const audio = document.getElementById("audio");
-    const btn = document.getElementById("btnPlayPauseModal");
-    if (audio.paused) {
-        audio.play();
-        btn.textContent = "⏸";
-    } else {
-        audio.pause();
-        btn.textContent = "▶";
-    }
-}
-
-// Barra de Progresso
-function atualizarBarraProgresso() {
-    const audio = document.getElementById("audio");
-    if (isNaN(audio.duration)) return;
-    
-    const progressoPercent = (audio.currentTime / audio.duration) * 100;
-    document.
+    document.getElementById("playerModal").style.display
