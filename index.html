@@ -28,7 +28,7 @@ button{
 
 .app{
     min-height:100vh;
-    padding-bottom:130px;
+    padding-bottom:110px;
 }
 
 /* HEADER */
@@ -211,8 +211,8 @@ main{
     font-weight:bold;
 }
 
-/* PLAYER AVANÇADO */
-.player{
+/* MINI BARRA DE PLAYER FIXO (caso queira minimizar) */
+.mini-player{
     position:fixed;
     bottom:65px;
     left:0;
@@ -220,91 +220,202 @@ main{
     z-index:30;
     background:#171717;
     border-top:1px solid #292929;
-    padding:14px 5%;
+    padding:12px 5%;
     display:none;
-    flex-direction:column;
-    gap:10px;
-}
-
-.player-top{
-    display:flex;
     align-items:center;
     gap:15px;
+    cursor: pointer;
+}
+.mini-player img{width:50px;height:50px;object-fit:cover;border-radius:7px;}
+.mini-player-info{flex:1;min-width:0;}
+.mini-player-info strong, .mini-player-info span{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.mini-player-info span{color:#999;font-size:13px;margin-top:3px;}
+
+
+/* ==========================================================
+   INTERFACE DE REPRODUÇÃO (ESTILO DA INSPIRAÇÃO)
+========================================================== */
+.player-modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:150;
+    background:rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(20px);
+    align-items:center;
+    justify-content:center;
+    padding:20px;
 }
 
-.player-top img{
-    width:50px;
-    height:50px;
-    object-fit:cover;
-    border-radius:7px;
+.player-card{
+    background:#141414;
+    border: 1px solid #262626;
+    width:100%;
+    max-width:420px;
+    border-radius:35px;
+    padding:30px 25px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.8);
+    position:relative;
 }
 
-.player-info{
-    flex:1;
-    min-width:0;
+.player-header{
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
 }
 
-.player-info strong,
-.player-info span{
-    display:block;
+.player-header button{
+    background:none;
+    border:0;
+    color:#fff;
+    font-size:22px;
+    cursor:pointer;
+}
+
+.player-header span{
+    font-size:15px;
+    font-weight:bold;
+    letter-spacing:1px;
+    color:#ccc;
+}
+
+.player-cover-container{
+    width:100%;
+    aspect-ratio:1;
+    border-radius:25px;
     overflow:hidden;
+    margin-bottom:25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.player-cover-container img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.player-song-info{
+    text-align:center;
+    margin-bottom:30px;
+    width: 100%;
+}
+
+.player-song-info h2{
+    font-size:26px;
+    font-weight:bold;
+    margin-bottom:8px;
     white-space:nowrap;
+    overflow:hidden;
     text-overflow:ellipsis;
 }
 
-.player-info span{
-    color:#999;
-    font-size:13px;
-    margin-top:3px;
+.player-song-info p{
+    color:#888;
+    font-size:15px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
-/* CONTROLES DO PLAYER */
-.player-controls{
+/* CONTROLES CENTRAIS ESTILO APP */
+.player-actions{
     display:flex;
     align-items:center;
-    justify-content:space-between;
-    gap:15px;
+    justify-content:center;
+    gap:25px;
+    margin-bottom:30px;
+    width: 100%;
 }
 
-.player-buttons{
-    display:flex;
-    align-items:center;
-    gap:15px;
-}
-
-.ctrl-btn{
+.action-btn{
     background:none;
     border:0;
     color:#aaa;
-    font-size:18px;
+    font-size:20px;
     cursor:pointer;
     transition:.2s;
 }
 
-.ctrl-btn:hover, .ctrl-btn.active{
+.action-btn.active{
     color:#1ed760;
 }
 
-.play-pause-btn{
+.main-play-btn{
     background:#1ed760;
     color:#000;
     border:0;
-    width:36px;
-    height:36px;
+    width:65px;
+    height:65px;
     border-radius:50%;
-    font-size:15px;
+    font-size:24px;
     font-weight:bold;
     display:flex;
     align-items:center;
     justify-content:center;
+    box-shadow: 0 0 20px rgba(30,215,96,0.4);
+    transition: transform 0.1s;
+}
+.main-play-btn:active{
+    transform: scale(0.95);
 }
 
-audio{
+/* PROGRESS BAR */
+.progress-container{
     width:100%;
-    height:35px;
+    margin-bottom:15px;
 }
 
-/* NAV */
+.progress-bar-bg{
+    width:100%;
+    height:6px;
+    background:#252525;
+    border-radius:3px;
+    cursor:pointer;
+    position:relative;
+    overflow:hidden;
+}
+
+.progress-bar-fill{
+    height:100%;
+    background:#1ed760;
+    width:0%;
+    border-radius:3px;
+}
+
+.time-stamps{
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    color:#777;
+    margin-top:8px;
+}
+
+/* FOOTER ICONS DO CARD (Inspirado na referência) */
+.player-card-footer{
+    display:flex;
+    justify-content:space-around;
+    width:100%;
+    border-top:1px solid #202020;
+    padding-top:20px;
+    margin-top:10px;
+}
+
+.footer-icon-btn{
+    background:none;
+    border:0;
+    color:#aaa;
+    font-size:20px;
+    cursor:pointer;
+}
+.footer-icon-btn:hover{color:#1ed760;}
+
+
+/* NAV INFERIOR */
 nav{
     position:fixed;
     bottom:0;
@@ -335,7 +446,7 @@ nav button:hover{
     display:none;
     position:fixed;
     inset:0;
-    z-index:100;
+    z-index:200;
     background:rgba(0,0,0,.75);
     align-items:center;
     justify-content:center;
@@ -352,19 +463,8 @@ nav button:hover{
     padding:25px;
 }
 
-.modal-content h2{
-    margin-bottom:20px;
-}
-
-.close{
-    float:right;
-    border:0;
-    background:#292929;
-    color:#fff;
-    width:35px;
-    height:35px;
-    border-radius:50%;
-}
+.modal-content h2{margin-bottom:20px;}
+.close{float:right;border:0;background:#292929;color:#fff;width:35px;height:35px;border-radius:50%;}
 
 input{
     width:100%;
@@ -376,10 +476,7 @@ input{
     border-radius:9px;
     outline:none;
 }
-
-input:focus{
-    border-color:#1ed760;
-}
+input:focus{border-color:#1ed760;}
 
 .form-btn{
     width:100%;
@@ -399,14 +496,11 @@ input:focus{
     grid-column: 1 / -1;
 }
 
-.search{
-    margin-top:25px;
-}
+.search{margin-top:25px;}
 
 @media(max-width:700px){
     header{padding:15px 5%;}
     .logo{font-size:23px;}
-    .logo .by-uta{font-size:23px;}
     .hero{min-height:230px;padding:25px;}
     .hero h1{font-size:30px;}
     .grid{grid-template-columns:repeat(2,1fr);gap:12px;}
@@ -457,27 +551,73 @@ input:focus{
 </main>
 </div>
 
-<!-- PLAYER COMPLETO COM CONTROLES -->
-<div class="player" id="player">
-    <div class="player-top">
-        <img id="playerCapa" src="">
-        <div class="player-info">
-            <strong id="playerMusica">Música</strong>
-            <span id="playerArtista">Artista</span>
-        </div>
+<!-- MINI PLAYER FIXO (Rodapé) -->
+<div class="mini-player" id="miniPlayer" onclick="abrirInterfacePlayer()">
+    <img id="miniCapa" src="">
+    <div class="mini-player-info">
+        <strong id="miniMusica">Música</strong>
+        <span id="miniArtista">Artista</span>
     </div>
+    <button style="background:none;border:0;color:#1ed760;font-size:22px;margin-right:10px;" onclick="event.stopPropagation(); pausarRetomar();">⏸</button>
+</div>
 
-    <div class="player-controls">
-        <div class="player-buttons">
-            <button class="ctrl-btn" id="btnShuffle" onclick="toggleShuffle()" title="Modo Aleatório">🔀</button>
-            <button class="ctrl-btn" onclick="tocarAnterior()" title="Anterior">⏮</button>
-            <button class="play-pause-btn" id="btnPlayPause" onclick="pausarRetomar()">⏸</button>
-            <button class="ctrl-btn" onclick="tocarProxima()" title="Próxima">⏭</button>
-            <button class="ctrl-btn" id="btnRepeat" onclick="toggleRepeat()" title="Repetir">🔁</button>
+
+<!-- ==========================================================
+   TELA / MODAL DO PLAYER (ESTILO INSPIRAÇÃO)
+========================================================== -->
+<div class="player-modal" id="playerModal">
+    <div class="player-card">
+        
+        <div class="player-header">
+            <button onclick="fecharInterfacePlayer()">⌄</button>
+            <span>UnderFy Session</span>
+            <button onclick="toggleMenuOpcoes()">≡</button>
         </div>
-        <audio id="audio" controls></audio>
+
+        <div class="player-cover-container">
+            <img id="modalCapa" src="" alt="Capa da Guia">
+        </div>
+
+        <div class="player-song-info">
+            <h2 id="modalMusica">Nome da Música</h2>
+            <p id="modalArtista">Artista</p>
+        </div>
+
+        <!-- BARRA DE PROGRESSO INTERATIVA -->
+        <div class="progress-container">
+            <div class="progress-bar-bg" id="progressBarBg" onclick="mudarProgresso(event)">
+                <div class="progress-bar-fill" id="progressBarFill"></div>
+            </div>
+            <div class="time-stamps">
+                <span id="currentTime">0:00</span>
+                <span id="durationTime">0:00</span>
+            </div>
+        </div>
+
+        <!-- CONTROLES -->
+        <div class="player-actions">
+            <button class="action-btn" id="btnShuffle" onclick="toggleShuffle()" title="Aleatório">🔀</button>
+            <button class="action-btn" onclick="tocarAnterior()" title="Anterior">⏮</button>
+            
+            <button class="main-play-btn" id="btnPlayPauseModal" onclick="pausarRetomar()">⏸</button>
+            
+            <button class="action-btn" onclick="tocarProxima()" title="Próxima">⏭</button>
+            <button class="action-btn" id="btnRepeat" onclick="toggleRepeat()" title="Repetir">🔁</button>
+        </div>
+
+        <!-- FOOTER ICONS DO CARD -->
+        <div class="player-card-footer">
+            <button class="footer-icon-btn" title="Lista de Guias">🎵</button>
+            <button class="footer-icon-btn" onclick="favoritarMusica()" title="Curtir">❤️</button>
+            <button class="footer-icon-btn" onclick="compartilharMusica()" title="Compartilhar">🔗</button>
+        </div>
+
     </div>
 </div>
+
+<!-- ELEMENTO AUDIO OCULTO -->
+<audio id="audio" style="display:none;"></audio>
+
 
 <!-- NAV -->
 <nav>
@@ -508,10 +648,9 @@ let musicas = [];
 let artistasCache = [];
 let usuarioLogado = false;
 
-// Estados do Player
 let musicaAtualIndex = -1;
 let modoShuffle = false;
-let modoRepeat = false; // false = Sequencial normal, true = Repetir música atual
+let modoRepeat = false;
 
 async function verificarSessaoAdmin() {
     const { data: { session } } = await supabaseClient.auth.getSession();
@@ -552,9 +691,10 @@ async function carregarDadosDoSupabase() {
         renderizarMusicas(musicas);
         renderizarArtistasNaTela();
 
-        // Configura o evento para quando a música terminar de tocar
+        // Eventos do Audio
         const audio = document.getElementById("audio");
         audio.addEventListener('ended', lidarFimDaMusica);
+        audio.addEventListener('timeupdate', atualizarBarraProgresso);
 
     } catch (error) {
         console.error('Erro ao carregar dados:', error.message);
@@ -573,7 +713,6 @@ function renderizarMusicas(lista = musicas) {
     }
 
     lista.forEach((musica) => {
-        // Encontra o índice real na lista global para manter o player correto
         const indexReal = musicas.findIndex(m => m.id === musica.id);
         const botaoExcluirHtml = usuarioLogado 
             ? `<button class="btn-excluir" onclick="excluirMusica('${musica.id}', event)">✕</button>` 
@@ -626,16 +765,22 @@ function renderizarArtistasNaTela() {
     });
 }
 
-// Lógica de Reprodução
+// Lógica de Tocar Música e Abrir Interface
 async function tocarMusicaPorIndex(index) {
     if (index < 0 || index >= musicas.length) return;
     musicaAtualIndex = index;
     const musica = musicas[musicaAtualIndex];
 
-    document.getElementById("player").style.display = "flex";
-    document.getElementById("playerMusica").textContent = musica.nome;
-    document.getElementById("playerArtista").textContent = musica.artistaFormatado;
-    document.getElementById("playerCapa").src = musica.capa;
+    // Atualiza mini player
+    document.getElementById("miniPlayer").style.display = "flex";
+    document.getElementById("miniMusica").textContent = musica.nome;
+    document.getElementById("miniArtista").textContent = musica.artistaFormatado;
+    document.getElementById("miniCapa").src = musica.capa;
+
+    // Atualiza card modal (Inspiração)
+    document.getElementById("modalMusica").textContent = musica.nome;
+    document.getElementById("modalArtista").textContent = musica.artistaFormatado;
+    document.getElementById("modalCapa").src = musica.capa;
 
     const audio = document.getElementById("audio");
     if (!musica.audio) {
@@ -645,7 +790,10 @@ async function tocarMusicaPorIndex(index) {
 
     audio.src = musica.audio;
     audio.play();
-    document.getElementById("btnPlayPause").textContent = "⏸";
+    document.getElementById("btnPlayPauseModal").textContent = "⏸";
+
+    // Abre a interface bonita automaticamente ao dar play
+    abrirInterfacePlayer();
 
     musica.plays += 1;
     renderizarMusicas(musicas);
@@ -655,9 +803,18 @@ async function tocarMusicaPorIndex(index) {
     } catch (err) {}
 }
 
+function abrirInterfacePlayer() {
+    if (musicaAtualIndex === -1) return;
+    document.getElementById("playerModal").style.display = "flex";
+}
+
+function fecharInterfacePlayer() {
+    document.getElementById("playerModal").style.display = "none";
+}
+
 function pausarRetomar() {
     const audio = document.getElementById("audio");
-    const btn = document.getElementById("btnPlayPause");
+    const btn = document.getElementById("btnPlayPauseModal");
     if (audio.paused) {
         audio.play();
         btn.textContent = "⏸";
@@ -667,74 +824,10 @@ function pausarRetomar() {
     }
 }
 
-function tocarProxima() {
-    if (musicas.length === 0) return;
-    let proximoIndex;
-    if (modoShuffle) {
-        proximoIndex = Math.floor(Math.random() * musicas.length);
-    } else {
-        proximoIndex = (musicaAtualIndex + 1) % musicas.length;
-    }
-    tocarMusicaPorIndex(proximoIndex);
-}
-
-function tocarAnterior() {
-    if (musicas.length === 0) return;
-    let anteriorIndex = (musicaAtualIndex - 1 + musicas.length) % musicas.length;
-    tocarMusicaPorIndex(anteriorIndex);
-}
-
-function lidarFimDaMusica() {
-    if (modoRepeat) {
-        const audio = document.getElementById("audio");
-        audio.currentTime = 0;
-        audio.play();
-    } else {
-        tocarProxima();
-    }
-}
-
-function toggleShuffle() {
-    modoShuffle = !modoShuffle;
-    const btn = document.getElementById("btnShuffle");
-    if (modoShuffle) {
-        btn.classList.add("active");
-    } else {
-        btn.classList.remove("active");
-    }
-}
-
-function toggleRepeat() {
-    modoRepeat = !modoRepeat;
-    const btn = document.getElementById("btnRepeat");
-    if (modoRepeat) {
-        btn.classList.add("active");
-        btn.style.color = "#1ed760";
-    } else {
-        btn.classList.remove("active");
-        btn.style.color = "#aaa";
-    }
-}
-
-function pesquisar() {
-    const termo = document.getElementById("pesquisa").value.toLowerCase();
-    const resultado = musicas.filter(m => m.nome.toLowerCase().includes(termo) || m.artistaFormatado.toLowerCase().includes(termo));
-    renderizarMusicas(resultado);
-}
-
-function irInicio() { window.scrollTo({ top: 0, behavior: "smooth" }); renderizarMusicas(); }
-function mostrarMusicas() { document.getElementById("listaMusicas").scrollIntoView({ behavior: "smooth" }); }
-function mostrarArtistas() { document.getElementById("listaArtistas").scrollIntoView({ behavior: "smooth" }); }
-
-function abrirADM() { document.getElementById("modalLogin").style.display = "flex"; }
-async function loginADM() {
-    const email = document.getElementById("emailADM").value.trim();
-    const senha = document.getElementById("senhaADM").value.trim();
-    const { error } = await supabaseClient.auth.signInWithPassword({ email, password: senha });
-    if (error) { alert("Dados incorretos."); return; }
-    window.location.href = "upload.html";
-}
-function fecharModal(id) { document.getElementById(id).style.display = "none"; }
-</script>
-</body>
-</html>
+// Barra de Progresso
+function atualizarBarraProgresso() {
+    const audio = document.getElementById("audio");
+    if (isNaN(audio.duration)) return;
+    
+    const progressoPercent = (audio.currentTime / audio.duration) * 100;
+    document.
