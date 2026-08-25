@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UnderFy</title>
-<!-- Importando ícones profissionais em vetor (Lucide Icons) -->
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -266,13 +265,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function iniciarApp() {
     try {
-        const resArtistas = await supabaseClient.from('artistas').select('*').order('nome', { ascending: true });
+        // Timeout de segurança de 6 segundos para evitar travamento infinito de rede
+        const fetchComTimeout = (promise) => {
+            return Promise.race([
+                promise,
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 6000))
+            ]);
+        };
+
+        const resArtistas = await fetchComTimeout(supabaseClient.from('artistas').select('*').order('nome', { ascending: true }));
         artistasCache = resArtistas.data || [];
 
-        const resMusicas = await supabaseClient.from('musicas').select('*').order('created_at', { ascending: false });
+        const resMusicas = await fetchComTimeout(supabaseClient.from('musicas').select('*').order('created_at', { ascending: false }));
         const dadosMusicas = resMusicas.data || [];
 
-        const resRel = await supabaseClient.from('musica_artistas').select('*');
+        const resRel = await fetchComTimeout(supabaseClient.from('musica_artistas').select('*'));
         const dadosRelacao = resRel.data || [];
 
         musicas = dadosMusicas.map(m => {
@@ -299,9 +306,9 @@ async function iniciarApp() {
         audio.addEventListener('timeupdate', atualizarBarraProgresso);
 
     } catch (err) {
-        console.error("Erro:", err);
-        document.getElementById("listaMusicas").innerHTML = `<div class="empty" style="color:#ff5555;">Erro ao carregar dados.</div>`;
-        document.getElementById("listaArtistas").innerHTML = `<div class="empty" style="color:#ff5555;">Erro ao carregar dados.</div>`;
+        console.error("Erro ao carregar:", err);
+        document.getElementById("listaMusicas").innerHTML = `<div class="empty" style="color:#ff5555;">Erro ao conectar com o banco de dados.</div>`;
+        document.getElementById("listaArtistas").innerHTML = `<div class="empty" style="color:#ff5555;">Erro ao conectar com o banco de dados.</div>`;
     }
 }
 
@@ -452,9 +459,4 @@ function pesquisar() {
     } else {
         container.innerHTML = filtrado.map(m => `
             <div class="card">
-                <img class="cover" src="${m.capa}">
-                <h3>${m.nome}</h3>
-                <p>${m.artistaFormatado}</p>
-                <div class="card-plays">${m.plays} reproduções</div>
-                <button class="play" onclick="tocarMusicaPorIndex(${musicas.findIndex(x => x.id === m.id)})">
-                    <i data-lucide="p
+   
