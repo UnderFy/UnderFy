@@ -560,7 +560,6 @@ async function carregarDadosDoSupabase() {
 
         // Mapeia cruzando as informações de múltiplos artistas por música
         musicas = (dadosMusicas || []).map(m => {
-            // Filtra os IDs de artistas vinculados a esta música na tabela de ligação
             const relsDaMusica = (dadosRelacao || []).filter(r => r.musica_id === m.id);
             const objsArtistas = relsDaMusica.map(r => artistasCache.find(a => a.id === r.artista_id)).filter(Boolean);
 
@@ -568,14 +567,12 @@ async function carregarDadosDoSupabase() {
             if (objsArtistas.length > 0) {
                 artistasNomes = objsArtistas.map(a => a.nome);
             } else if (m.artista_id) {
-                // Compatibilidade com o formato antigo caso ainda exista
                 const antigo = artistasCache.find(a => a.id === m.artista_id);
                 if (antigo) artistasNomes = [antigo.nome];
             }
 
             if (artistasNomes.length === 0) artistasNomes = ['Desconhecido'];
 
-            // Formata o texto do artista (Ex: "Artista 1 feat. Artista 2, Artista 3")
             let textoArtistaFormatado = artistasNomes[0];
             if (artistasNomes.length > 1) {
                 textoArtistaFormatado += ` feat. ${artistasNomes.slice(1).join(', ')}`;
@@ -584,7 +581,7 @@ async function carregarDadosDoSupabase() {
             return {
                 id: m.id,
                 nome: m.nome,
-                artistas: artistasNomes, // Lista completa para facilitar os filtros por perfil
+                artistas: artistasNomes,
                 artistaFormatado: textoArtistaFormatado,
                 capa: m.capa_url || 'https://via.placeholder.com/500',
                 audio: m.audio_url || '',
@@ -602,7 +599,6 @@ async function carregarDadosDoSupabase() {
     }
 }
 
-// Inicializa o carregamento ao abrir a página
 document.addEventListener('DOMContentLoaded', carregarDadosDoSupabase);
 
 
@@ -670,7 +666,7 @@ async function excluirMusica(id, event) {
 
 
 /* =====================================
-   ARTISTAS (CONTAGEM DE MÚSICAS POR PERFIL)
+   ARTISTAS (ABRE A PÁGINA DO ARTISTA)
 ===================================== */
 function renderizarArtistasNaTela() {
     const container = document.getElementById("listaArtistas");
@@ -682,11 +678,10 @@ function renderizarArtistasNaTela() {
     }
 
     artistasCache.forEach(artista => {
-        // Conta a música se o artista estiver na lista de colaboradores da faixa
         const qtdMusicas = musicas.filter(m => m.artistas.includes(artista.nome)).length;
 
         container.innerHTML += `
-        <div class="card" onclick="filtrarArtista('${artista.nome}')">
+        <div class="card" onclick="window.location.href='artista.html?nome=${encodeURIComponent(artista.nome)}'">
             <img class="cover" src="${artista.foto_url || 'https://via.placeholder.com/500'}" onerror="this.src='https://via.placeholder.com/500'">
             <h3>${artista.nome}</h3>
             <p>${qtdMusicas} guia(s)</p>
@@ -746,21 +741,14 @@ function pesquisar() {
 
 
 /* =====================================
-   FILTRAR POR ARTISTA (INCLUI FEATS)
-===================================== */
-function filtrarArtista(nomeArtista) {
-    const resultado = musicas.filter(m => m.artistas.includes(nomeArtista));
-    renderizarMusicas(resultado);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-
-/* =====================================
    NAVEGAÇÃO
 ===================================== */
 function irInicio() {
     window.scrollTo({ top: 0, behavior: "smooth" });
     renderizarMusicas();
+    // Restaura o título padrão se tiver alterado
+    const tituloSecao = document.querySelector(".section-title h2");
+    if (tituloSecao) tituloSecao.textContent = "🎧 Guias recentes";
 }
 
 function mostrarMusicas() {
