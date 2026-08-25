@@ -1,11 +1,18 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
 <title>Painel ADM • UnderFy</title>
 
 <style>
+
 *{
     margin:0;
     padding:0;
@@ -20,7 +27,7 @@ body{
 }
 
 .container{
-    max-width:600px;
+    max-width:650px;
     margin:auto;
     background:#151515;
     padding:30px;
@@ -48,355 +55,1793 @@ label{
     margin-bottom:6px;
 }
 
-input, select{
+input,
+select{
+
     width:100%;
+
     padding:12px;
+
     margin-bottom:18px;
+
     background:#202020;
+
     border:1px solid #333;
+
     color:#fff;
+
     border-radius:9px;
+
     outline:none;
+
     font:inherit;
+
 }
 
-input[type="file"] {
-    padding: 9px;
-    cursor: pointer;
+input[type="file"]{
+
+    padding:9px;
+
+    cursor:pointer;
+
 }
 
-input:focus, select:focus{
+input:focus,
+select:focus{
+
     border-color:#1ed760;
+
 }
 
-.checkbox-group {
-    background: #202020;
-    border: 1px solid #333;
-    border-radius: 9px;
-    padding: 12px;
-    max-height: 150px;
-    overflow-y: auto;
-    margin-bottom: 18px;
+.checkbox-group{
+
+    background:#202020;
+
+    border:1px solid #333;
+
+    border-radius:9px;
+
+    padding:12px;
+
+    max-height:150px;
+
+    overflow-y:auto;
+
+    margin-bottom:18px;
+
 }
 
-.checkbox-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-    font-size: 14px;
-    cursor: pointer;
+.checkbox-item{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    margin-bottom:8px;
+
+    font-size:14px;
+
+    cursor:pointer;
+
 }
 
-.checkbox-item input {
-    width: auto;
-    margin: 0;
-    cursor: pointer;
+.checkbox-item input{
+
+    width:auto;
+
+    margin:0;
+
+    cursor:pointer;
+
 }
 
 .btn{
+
     width:100%;
+
     padding:14px;
+
     background:#1ed760;
+
     color:#000;
+
     border:0;
+
     border-radius:25px;
+
     font-weight:bold;
+
     cursor:pointer;
+
     font:inherit;
-    transition: .2s;
+
+    transition:.2s;
+
 }
 
 .btn:hover{
-    opacity: .9;
+
+    opacity:.9;
+
+}
+
+.btn:disabled{
+
+    opacity:.5;
+
+    cursor:not-allowed;
+
 }
 
 .back-link{
+
     display:inline-block;
+
     margin-top:20px;
+
     color:#888;
+
     text-decoration:none;
+
     font-size:14px;
+
 }
 
 .back-link:hover{
+
     color:#fff;
+
 }
 
-#loadingMsg {
-    display: none;
-    text-align: center;
-    color: #1ed760;
-    margin-bottom: 15px;
-    font-weight: bold;
+#loadingMsg{
+
+    display:none;
+
+    text-align:center;
+
+    color:#1ed760;
+
+    margin-bottom:15px;
+
+    font-weight:bold;
+
 }
+
+.status{
+
+    display:none;
+
+    padding:12px;
+
+    border-radius:10px;
+
+    margin-bottom:15px;
+
+    font-size:14px;
+
+}
+
+.status.success{
+
+    display:block;
+
+    background:#12351f;
+
+    color:#1ed760;
+
+}
+
+.status.error{
+
+    display:block;
+
+    background:#351414;
+
+    color:#ff6666;
+
+}
+
+
+/* GUIAS */
+
+.guia-item{
+
+    background:#202020;
+
+    border:1px solid #303030;
+
+    border-radius:14px;
+
+    padding:12px;
+
+    margin-bottom:12px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+}
+
+.guia-capa{
+
+    width:60px;
+
+    height:60px;
+
+    object-fit:cover;
+
+    border-radius:10px;
+
+    flex-shrink:0;
+
+    background:#292929;
+
+}
+
+.guia-info{
+
+    flex:1;
+
+    min-width:0;
+
+}
+
+.guia-nome{
+
+    display:block;
+
+    font-weight:bold;
+
+    white-space:nowrap;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+
+}
+
+.guia-plays{
+
+    display:block;
+
+    color:#888;
+
+    font-size:12px;
+
+    margin-top:5px;
+
+}
+
+.btn-excluir{
+
+    background:#e63946;
+
+    color:#fff;
+
+    border:0;
+
+    padding:10px 14px;
+
+    border-radius:20px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    flex-shrink:0;
+
+}
+
+.btn-excluir:hover{
+
+    background:#ff4d5a;
+
+}
+
+.lista-vazia{
+
+    text-align:center;
+
+    color:#888;
+
+    padding:25px 10px;
+
+    background:#202020;
+
+    border-radius:12px;
+
+}
+
+.separador{
+
+    margin-top:40px;
+
+    border-top:1px solid #222;
+
+    padding-top:25px;
+
+}
+
+
+/* MOBILE */
+
+@media(max-width:500px){
+
+    body{
+
+        padding:15px 10px;
+
+    }
+
+    .container{
+
+        padding:20px 15px;
+
+    }
+
+    .guia-item{
+
+        padding:10px;
+
+    }
+
+    .guia-capa{
+
+        width:52px;
+
+        height:52px;
+
+    }
+
+    .btn-excluir{
+
+        padding:8px 10px;
+
+        font-size:12px;
+
+    }
+
+}
+
 </style>
+
 </head>
 
 <body>
 
 <div class="container">
-    <a href="index.html" class="back-link">← Voltar para o site</a>
-    
-    <h1>Painel de Cadastro • UnderFy</h1>
 
-    <!-- FORMULÁRIO DE ARTISTA -->
-    <div id="formArtista">
-        <h2>Cadastrar Novo Artista</h2>
-        <label>Nome do Artista</label>
-        <input type="text" id="nomeArtista" placeholder="Ex: Matuê">
+<a
+    href="index.html"
+    class="back-link"
+>
+    ← Voltar para o site
+</a>
 
-        <label>Foto do Artista (Arquivo)</label>
-        <input type="file" id="fotoArtistaFile" accept="image/*">
+<h1>
+    Painel de Cadastro • UnderFy
+</h1>
 
-        <button class="btn" onclick="cadastrarArtista()">Cadastrar Artista</button>
-    </div>
 
-    <!-- FORMULÁRIO DE MÚSICA -->
-    <div id="formMusica" style="margin-top: 40px;">
-        <h2>Cadastrar Nova Guia</h2>
-        <label>Nome da Música</label>
-        <input type="text" id="nomeMusica" placeholder="Ex: Som de Camping #1">
+<div
+    id="status"
+    class="status"
+></div>
 
-        <label>Artistas Participantes (Selecione um ou mais para Feat)</label>
-        <div class="checkbox-group" id="listaArtistasCheckbox">
-            <span style="color:#888;font-size:13px;">Carregando artistas...</span>
-        </div>
 
-        <label>Capa da Guia (Imagem)</label>
-        <input type="file" id="capaMusicaFile" accept="image/*">
+<!-- =========================
+     ARTISTA
+========================= -->
 
-        <label>Arquivo de Áudio (.mp3 / WAV)</label>
-        <input type="file" id="audioMusicaFile" accept="audio/*">
+<div id="formArtista">
 
-        <div id="loadingMsg">Enviando arquivos e salvando... Aguarde ⏳</div>
+    <h2>
+        Cadastrar Novo Artista
+    </h2>
 
-        <button class="btn" onclick="cadastrarMusica()">Salvar Guia</button>
-    </div>
+    <label>
+        Nome do Artista
+    </label>
 
-    <!-- FORMULÁRIO DE PROJETO -->
-    <div id="formProjeto" style="margin-top: 40px; border-top: 1px solid #222; padding-top: 25px;">
-        <h2>Cadastrar Novo Projeto / Sessão</h2>
-        
-        <label>Nome do Projeto</label>
-        <input type="text" id="nomeProjeto" placeholder="Ex: UnderFy Session Vol. 1">
+    <input
+        type="text"
+        id="nomeArtista"
+        placeholder="Ex: Matuê"
+    >
 
-        <label>Descrição</label>
-        <input type="text" id="descProjeto" placeholder="Ex: Sessão ao vivo gravada em estúdio">
+    <label>
+        Foto do Artista
+    </label>
 
-        <label>Capa do Projeto (Imagem)</label>
-        <input type="file" id="capaProjetoFile" accept="image/*">
+    <input
+        type="file"
+        id="fotoArtistaFile"
+        accept="image/*"
+    >
 
-        <button class="btn" onclick="cadastrarProjeto()">Salvar Projeto</button>
-    </div>
+    <button
+        class="btn"
+        onclick="cadastrarArtista()"
+    >
+        Cadastrar Artista
+    </button>
+
 </div>
 
-<!-- SUPABASE SDK -->
+
+<!-- =========================
+     MÚSICA
+========================= -->
+
+<div
+    id="formMusica"
+    class="separador"
+>
+
+    <h2>
+        Cadastrar Nova Guia
+    </h2>
+
+    <label>
+        Nome da Música
+    </label>
+
+    <input
+        type="text"
+        id="nomeMusica"
+        placeholder="Ex: Som de Camping #1"
+    >
+
+    <label>
+        Artistas Participantes
+    </label>
+
+    <div
+        class="checkbox-group"
+        id="listaArtistasCheckbox"
+    >
+
+        <span style="color:#888;font-size:13px;">
+            Carregando artistas...
+        </span>
+
+    </div>
+
+    <label>
+        Capa da Guia
+    </label>
+
+    <input
+        type="file"
+        id="capaMusicaFile"
+        accept="image/*"
+    >
+
+    <label>
+        Arquivo de Áudio
+    </label>
+
+    <input
+        type="file"
+        id="audioMusicaFile"
+        accept="audio/*"
+    >
+
+    <div
+        id="loadingMsg"
+    >
+        Enviando arquivos e salvando...
+        Aguarde ⏳
+    </div>
+
+    <button
+        class="btn"
+        id="btnSalvarGuia"
+        onclick="cadastrarMusica()"
+    >
+        Salvar Guia
+    </button>
+
+</div>
+
+
+<!-- =========================
+     PROJETO
+========================= -->
+
+<div
+    id="formProjeto"
+    class="separador"
+>
+
+    <h2>
+        Cadastrar Novo Projeto / Sessão
+    </h2>
+
+    <label>
+        Nome do Projeto
+    </label>
+
+    <input
+        type="text"
+        id="nomeProjeto"
+        placeholder="Ex: UnderFy Session Vol. 1"
+    >
+
+    <label>
+        Descrição
+    </label>
+
+    <input
+        type="text"
+        id="descProjeto"
+        placeholder="Ex: Sessão ao vivo gravada em estúdio"
+    >
+
+    <label>
+        Capa do Projeto
+    </label>
+
+    <input
+        type="file"
+        id="capaProjetoFile"
+        accept="image/*"
+    >
+
+    <button
+        class="btn"
+        onclick="cadastrarProjeto()"
+    >
+        Salvar Projeto
+    </button>
+
+</div>
+
+
+<!-- =========================
+     GERENCIAR GUIAS
+========================= -->
+
+<div
+    id="gerenciarGuias"
+    class="separador"
+>
+
+    <h2>
+        Gerenciar Guias
+    </h2>
+
+    <div id="listaGuiasADM">
+
+        <div class="lista-vazia">
+            Carregando guias...
+        </div>
+
+    </div>
+
+</div>
+
+
+</div>
+
+
+<!-- SUPABASE -->
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const SUPABASE_URL = "https://gnibzbnypirjrcaoibkx.supabase.co";
-const SUPABASE_KEY = "sb_publishable_b9yvSbmWOLVJvq4AB4CLmQ_VRuzpG5T";
 
-const supabaseClient = supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
+const SUPABASE_URL =
+    "https://gnibzbnypirjrcaoibkx.supabase.co";
 
-async function checarAuth() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session) {
-        alert("Área restrita! Faça login no site principal primeiro.");
-        window.location.href = "index.html";
-    }
-}
+const SUPABASE_KEY =
+    "sb_publishable_b9yvSbmWOLVJvq4AB4CLmQ_VRuzpG5T";
+
+const supabaseClient =
+    supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
 
 let artistasDisponiveis = [];
 
-async function carregarArtistasParaSelecao() {
-    await checarAuth();
-    
-    const { data, error } = await supabaseClient
-        .from('artistas')
-        .select('*')
-        .order('nome', { ascending: true });
 
-    if (error) {
-        console.error("Erro ao carregar artistas:", error);
-        return;
+/* ================================
+   VERIFICAR LOGIN
+================================ */
+
+async function checarAuth(){
+
+    const {
+        data: {
+            session
+        }
+    } =
+        await supabaseClient
+        .auth
+        .getSession();
+
+
+    if(!session){
+
+        alert(
+            "Área restrita! Faça login no site principal primeiro."
+        );
+
+        window.location.href =
+            "index.html";
+
+        return false;
+
     }
 
-    artistasDisponiveis = data || [];
-    const container = document.getElementById("listaArtistasCheckbox");
+    return true;
+
+}
+
+
+/* ================================
+   CARREGAR ARTISTAS
+================================ */
+
+async function carregarArtistasParaSelecao(){
+
+    const autorizado =
+        await checarAuth();
+
+
+    if(!autorizado){
+
+        return;
+
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+        .from("artistas")
+        .select("*")
+        .order(
+            "nome",
+            {
+                ascending:true
+            }
+        );
+
+
+    if(error){
+
+        console.error(
+            "Erro ao carregar artistas:",
+            error
+        );
+
+        document.getElementById(
+            "listaArtistasCheckbox"
+        ).innerHTML = `
+
+            <span style="color:#ff5555;font-size:13px;">
+                Erro ao carregar artistas.
+            </span>
+
+        `;
+
+        return;
+
+    }
+
+
+    artistasDisponiveis =
+        data || [];
+
+
+    const container =
+        document.getElementById(
+            "listaArtistasCheckbox"
+        );
+
+
     container.innerHTML = "";
 
-    if (artistasDisponiveis.length === 0) {
-        container.innerHTML = `<span style="color:#888;font-size:13px;">Nenhum artista cadastrado ainda.</span>`;
+
+    if(
+        artistasDisponiveis.length === 0
+    ){
+
+        container.innerHTML = `
+
+            <span style="color:#888;font-size:13px;">
+                Nenhum artista cadastrado ainda.
+            </span>
+
+        `;
+
         return;
+
     }
 
-    artistasDisponiveis.forEach(artista => {
-        container.innerHTML += `
-            <label class="checkbox-item">
-                <input type="checkbox" name="artistaCheck" value="${artista.id}">
-                ${artista.nome}
-            </label>
-        `;
-    });
+
+    artistasDisponiveis.forEach(
+        function(artista){
+
+            const label =
+                document.createElement(
+                    "label"
+                );
+
+            label.className =
+                "checkbox-item";
+
+
+            const checkbox =
+                document.createElement(
+                    "input"
+                );
+
+            checkbox.type =
+                "checkbox";
+
+            checkbox.name =
+                "artistaCheck";
+
+            checkbox.value =
+                artista.id;
+
+
+            label.appendChild(
+                checkbox
+            );
+
+
+            label.appendChild(
+                document.createTextNode(
+                    " " + artista.nome
+                )
+            );
+
+
+            container.appendChild(
+                label
+            );
+
+        }
+    );
+
 }
 
-document.addEventListener('DOMContentLoaded', carregarArtistasParaSelecao);
 
-// Função de upload direcionada para o bucket correto
-async function fazerUploadArquivo(file, nomeBucket) {
-    if (!file) return '';
-    const nomeUnico = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-    
-    const { data, error } = await supabaseClient.storage
-        .from(nomeBucket)
-        .upload(nomeUnico, file);
+/* ================================
+   UPLOAD DE ARQUIVO
+================================ */
 
-    if (error) {
-        throw new Error("Erro no upload para o bucket " + nomeBucket + ": " + error.message);
+async function fazerUploadArquivo(
+    file,
+    nomeBucket
+){
+
+    if(!file){
+
+        return "";
+
     }
 
-    const { data: urlData } = supabaseClient.storage
+
+    const nomeSeguro =
+        file.name
+        .replace(
+            /[^a-zA-Z0-9._-]/g,
+            "_"
+        );
+
+
+    const nomeUnico =
+        Date.now() +
+        "_" +
+        Math.random()
+        .toString(36)
+        .substring(2,8) +
+        "_" +
+        nomeSeguro;
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+        .storage
         .from(nomeBucket)
-        .getPublicUrl(nomeUnico);
+        .upload(
+            nomeUnico,
+            file
+        );
+
+
+    if(error){
+
+        throw new Error(
+            "Erro no upload para o bucket " +
+            nomeBucket +
+            ": " +
+            error.message
+        );
+
+    }
+
+
+    const {
+        data:urlData
+    } =
+        supabaseClient
+        .storage
+        .from(nomeBucket)
+        .getPublicUrl(
+            nomeUnico
+        );
+
 
     return urlData.publicUrl;
+
 }
 
-// Cadastrar Artista
-async function cadastrarArtista() {
-    const nome = document.getElementById("nomeArtista").value.trim();
-    const fotoFile = document.getElementById("fotoArtistaFile").files[0];
 
-    if (!nome) {
-        alert("Preencha o nome do artista.");
+/* ================================
+   MOSTRAR STATUS
+================================ */
+
+function mostrarStatus(
+    mensagem,
+    tipo
+){
+
+    const status =
+        document.getElementById(
+            "status"
+        );
+
+
+    status.textContent =
+        mensagem;
+
+
+    status.className =
+        "status " + tipo;
+
+
+    setTimeout(
+        function(){
+
+            status.className =
+                "status";
+
+        },
+        5000
+    );
+
+}
+
+/* ================================
+   CADASTRAR ARTISTA
+================================ */
+
+async function cadastrarArtista(){
+
+    const nome =
+        document.getElementById(
+            "nomeArtista"
+        ).value.trim();
+
+    const fotoFile =
+        document.getElementById(
+            "fotoArtistaFile"
+        ).files[0];
+
+
+    if(!nome){
+
+        alert(
+            "Preencha o nome do artista."
+        );
+
         return;
+
     }
 
-    try {
-        let foto_url = '';
-        if (fotoFile) {
-            foto_url = await fazerUploadArquivo(fotoFile, 'fotos-artistas');
+
+    try{
+
+        let foto_url = "";
+
+
+        if(fotoFile){
+
+            foto_url =
+                await fazerUploadArquivo(
+                    fotoFile,
+                    "fotos-artistas"
+                );
+
         }
 
-        const { error } = await supabaseClient
-            .from('artistas')
-            .insert([{ nome, foto_url }]);
 
-        if (error) throw error;
+        const {
+            error
+        } =
+            await supabaseClient
+            .from("artistas")
+            .insert([
+                {
+                    nome: nome,
+                    foto_url: foto_url
+                }
+            ]);
 
-        alert("Artista cadastrado com sucesso!");
-        document.getElementById("nomeArtista").value = "";
-        document.getElementById("fotoArtistaFile").value = "";
+
+        if(error){
+
+            throw error;
+
+        }
+
+
+        mostrarStatus(
+            "Artista cadastrado com sucesso!",
+            "success"
+        );
+
+
+        document.getElementById(
+            "nomeArtista"
+        ).value = "";
+
+
+        document.getElementById(
+            "fotoArtistaFile"
+        ).value = "";
+
+
         carregarArtistasParaSelecao();
-    } catch (err) {
-        alert("Erro: " + err.message);
+
+
+    }catch(error){
+
+        console.error(error);
+
+        mostrarStatus(
+            "Erro ao cadastrar artista: " +
+            error.message,
+            "error"
+        );
+
     }
+
 }
 
-// Cadastrar Música com Upload de Arquivo e Feats
-async function cadastrarMusica() {
-    const nome = document.getElementById("nomeMusica").value.trim();
-    const capaFile = document.getElementById("capaMusicaFile").files[0];
-    const audioFile = document.getElementById("audioMusicaFile").files[0];
 
-    const checkboxesSelecionados = document.querySelectorAll('input[name="artistaCheck"]:checked');
-    const artistasIds = Array.from(checkboxesSelecionados).map(cb => cb.value);
+/* ================================
+   CADASTRAR GUIA
+================================ */
 
-    if (!nome || artistasIds.length === 0) {
-        alert("Preencha o nome da música e selecione pelo menos um artista.");
+async function cadastrarMusica(){
+
+    const nome =
+        document.getElementById(
+            "nomeMusica"
+        ).value.trim();
+
+
+    const capaFile =
+        document.getElementById(
+            "capaMusicaFile"
+        ).files[0];
+
+
+    const audioFile =
+        document.getElementById(
+            "audioMusicaFile"
+        ).files[0];
+
+
+    const checkboxesSelecionados =
+        document.querySelectorAll(
+            'input[name="artistaCheck"]:checked'
+        );
+
+
+    const artistasIds =
+        Array.from(
+            checkboxesSelecionados
+        ).map(
+            function(cb){
+                return cb.value;
+            }
+        );
+
+
+    if(
+        !nome ||
+        artistasIds.length === 0
+    ){
+
+        alert(
+            "Preencha o nome da música e selecione pelo menos um artista."
+        );
+
         return;
+
     }
 
-    const loadingMsg = document.getElementById("loadingMsg");
-    loadingMsg.style.display = "block";
 
-    try {
-        let capa_url = '';
-        let audio_url = '';
+    const loadingMsg =
+        document.getElementById(
+            "loadingMsg"
+        );
 
-        if (capaFile) {
-            capa_url = await fazerUploadArquivo(capaFile, 'capas-musicas');
+
+    const botao =
+        document.getElementById(
+            "btnSalvarGuia"
+        );
+
+
+    loadingMsg.style.display =
+        "block";
+
+
+    botao.disabled =
+        true;
+
+
+    let capa_url = "";
+
+    let audio_url = "";
+
+
+    try{
+
+        /* CAPA */
+
+        if(capaFile){
+
+            capa_url =
+                await fazerUploadArquivo(
+                    capaFile,
+                    "capas-musicas"
+                );
+
         }
-        if (audioFile) {
-            audio_url = await fazerUploadArquivo(audioFile, 'audios');
+
+
+        /* ÁUDIO */
+
+        if(audioFile){
+
+            audio_url =
+                await fazerUploadArquivo(
+                    audioFile,
+                    "audios"
+                );
+
         }
 
-        // 1. Insere a música
-        const { data: musicaData, error: musicaError } = await supabaseClient
-            .from('musicas')
-            .insert([{ nome, capa_url, audio_url, plays: 0 }])
+
+        /* CRIAR MÚSICA */
+
+        const {
+            data: musicaData,
+            error: musicaError
+        } =
+            await supabaseClient
+            .from("musicas")
+            .insert([
+                {
+                    nome: nome,
+                    capa_url: capa_url,
+                    audio_url: audio_url,
+                    plays: 0
+                }
+            ])
             .select()
             .single();
 
-        if (musicaError) throw musicaError;
 
-        const musicaId = musicaData.id;
+        if(musicaError){
 
-        // 2. Insere as relações na tabela de feats (`musica_artistas`)
-        const relacoesParaInserir = artistasIds.map(artistaId => ({
-            musica_id: musicaId,
-            artista_id: artistaId
-        }));
+            throw musicaError;
 
-        const { error: relError } = await supabaseClient
-            .from('musica_artistas')
-            .insert(relacoesParaInserir);
+        }
 
-        if (relError) throw relError;
 
-        alert("Guia cadastrada com sucesso!");
-        
-        document.getElementById("nomeMusica").value = "";
-        document.getElementById("capaMusicaFile").value = "";
-        document.getElementById("audioMusicaFile").value = "";
-        checkboxesSelecionados.forEach(cb => cb.checked = false);
+        const musicaId =
+            musicaData.id;
 
-    } catch (err) {
-        alert("Erro ao cadastrar guia: " + err.message);
-    } finally {
-        loadingMsg.style.display = "none";
+
+        /* CRIAR RELAÇÕES */
+
+        const relacoesParaInserir =
+            artistasIds.map(
+                function(artistaId){
+
+                    return {
+                        musica_id: musicaId,
+                        artista_id: artistaId
+                    };
+
+                }
+            );
+
+
+        const {
+            error: relError
+        } =
+            await supabaseClient
+            .from("musica_artistas")
+            .insert(
+                relacoesParaInserir
+            );
+
+
+        if(relError){
+
+            throw relError;
+
+        }
+
+
+        mostrarStatus(
+            "Guia cadastrada com sucesso!",
+            "success"
+        );
+
+
+        document.getElementById(
+            "nomeMusica"
+        ).value = "";
+
+
+        document.getElementById(
+            "capaMusicaFile"
+        ).value = "";
+
+
+        document.getElementById(
+            "audioMusicaFile"
+        ).value = "";
+
+
+        checkboxesSelecionados.forEach(
+            function(cb){
+
+                cb.checked = false;
+
+            }
+        );
+
+
+        /* ATUALIZA A LISTA */
+
+        carregarGuiasADM();
+
+
+    }catch(error){
+
+        console.error(
+            "Erro ao cadastrar guia:",
+            error
+        );
+
+
+        mostrarStatus(
+            "Erro ao cadastrar guia: " +
+            error.message,
+            "error"
+        );
+
+
+    }finally{
+
+        loadingMsg.style.display =
+            "none";
+
+        botao.disabled =
+            false;
+
     }
+
 }
 
-// Cadastrar Projeto
-async function cadastrarProjeto() {
-    const nome = document.getElementById("nomeProjeto").value.trim();
-    const descricao = document.getElementById("descProjeto").value.trim();
-    const capaFile = document.getElementById("capaProjetoFile").files[0];
 
-    if (!nome) {
-        alert("Preencha o nome do projeto.");
+/* ================================
+   CADASTRAR PROJETO
+================================ */
+
+async function cadastrarProjeto(){
+
+    const nome =
+        document.getElementById(
+            "nomeProjeto"
+        ).value.trim();
+
+
+    const descricao =
+        document.getElementById(
+            "descProjeto"
+        ).value.trim();
+
+
+    const capaFile =
+        document.getElementById(
+            "capaProjetoFile"
+        ).files[0];
+
+
+    if(!nome){
+
+        alert(
+            "Preencha o nome do projeto."
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        let capa_url = "";
+
+
+        if(capaFile){
+
+            capa_url =
+                await fazerUploadArquivo(
+                    capaFile,
+                    "capas-musicas"
+                );
+
+        }
+
+
+        const {
+            error
+        } =
+            await supabaseClient
+            .from("projetos")
+            .insert([
+                {
+                    nome: nome,
+                    descricao: descricao,
+                    capa_url: capa_url
+                }
+            ]);
+
+
+        if(error){
+
+            throw error;
+
+        }
+
+
+        mostrarStatus(
+            "Projeto cadastrado com sucesso!",
+            "success"
+        );
+
+
+        document.getElementById(
+            "nomeProjeto"
+        ).value = "";
+
+
+        document.getElementById(
+            "descProjeto"
+        ).value = "";
+
+
+        document.getElementById(
+            "capaProjetoFile"
+        ).value = "";
+
+
+    }catch(error){
+
+        console.error(error);
+
+        mostrarStatus(
+            "Erro ao cadastrar projeto: " +
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+/* ================================
+   PEGAR CAMINHO DO ARQUIVO
+================================ */
+
+function pegarCaminhoStorage(url){
+
+    if(!url){
+        return null;
+    }
+
+    try{
+
+        const partes =
+            url.split("/public/");
+
+        if(partes.length < 2){
+            return null;
+        }
+
+        const caminhoCompleto =
+            partes[1];
+
+        const partesCaminho =
+            caminhoCompleto.split("/");
+
+        if(partesCaminho.length < 2){
+            return null;
+        }
+
+        partesCaminho.shift();
+
+        return partesCaminho.join("/");
+
+    }catch(error){
+
+        console.error(
+            "Erro ao identificar arquivo:",
+            error
+        );
+
+        return null;
+
+    }
+
+}
+
+
+/* ================================
+   EXCLUIR ARQUIVO DO STORAGE
+================================ */
+
+async function excluirArquivoStorage(
+    url,
+    bucket
+){
+
+    const caminho =
+        pegarCaminhoStorage(url);
+
+    if(!caminho){
         return;
     }
 
-    try {
-        let capa_url = '';
-        if (capaFile) {
-            capa_url = await fazerUploadArquivo(capaFile, 'capas-musicas');
+    const {
+        error
+    } =
+        await supabaseClient
+        .storage
+        .from(bucket)
+        .remove([
+            caminho
+        ]);
+
+    if(error){
+
+        console.error(
+            "Erro ao apagar arquivo:",
+            error
+        );
+
+    }
+
+}
+
+
+/* ================================
+   CARREGAR GUIAS DO ADM
+================================ */
+
+async function carregarGuiasADM(){
+
+    const container =
+        document.getElementById(
+            "listaGuiasADM"
+        );
+
+
+    container.innerHTML = `
+
+        <div class="lista-vazia">
+            Carregando guias...
+        </div>
+
+    `;
+
+
+    try{
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+    .from("musicas")
+            .select("*")
+            .order(
+                "created_at",
+                {
+                    ascending:false
+                }
+            );
+
+
+        if(error){
+
+            throw error;
+
         }
 
-        const { error } = await supabaseClient
-            .from('projetos')
-            .insert([{ nome, descricao, capa_url }]);
 
-        if (error) throw error;
+        if(!data || data.length === 0){
 
-        alert("Projeto cadastrado com sucesso!");
-        
-        document.getElementById("nomeProjeto").value = "";
-        document.getElementById("descProjeto").value = "";
-        document.getElementById("capaProjetoFile").value = "";
+            container.innerHTML = `
 
-    } catch (err) {
-        alert("Erro ao cadastrar projeto: " + err.message);
+                <div class="lista-vazia">
+                    Nenhuma guia cadastrada.
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        container.innerHTML = "";
+
+
+        data.forEach(
+            function(musica){
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                item.className =
+                    "guia-item";
+
+
+                const capa =
+                    document.createElement(
+                        "img"
+                    );
+
+
+                capa.className =
+                    "guia-capa";
+
+
+                capa.src =
+                    musica.capa_url ||
+                    "https://via.placeholder.com/100";
+
+
+                capa.onerror =
+                    function(){
+
+                        this.src =
+                            "https://via.placeholder.com/100";
+
+                    };
+
+
+                const info =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                info.className =
+                    "guia-info";
+
+
+                const nome =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                nome.className =
+                    "guia-nome";
+
+
+                nome.textContent =
+                    musica.nome ||
+                    "Sem nome";
+
+
+                const plays =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                plays.className =
+                    "guia-plays";
+
+
+                plays.textContent =
+                    (
+                        musica.plays || 0
+                    ) +
+                    " reproduções";
+
+
+                info.appendChild(
+                    nome
+                );
+
+                info.appendChild(
+                    plays
+                );
+
+
+                const botao =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                botao.className =
+                    "btn-excluir";
+
+
+                botao.textContent =
+                    "🗑 Excluir";
+
+
+                botao.onclick =
+                    function(){
+
+                        excluirGuia(
+                            musica
+                        );
+
+                    };
+
+
+                item.appendChild(
+                    capa
+                );
+
+                item.appendChild(
+                    info
+                );
+
+                item.appendChild(
+                    botao
+                );
+
+
+                container.appendChild(
+                    item
+                );
+
+            }
+        );
+
+
+    }catch(error){
+
+        console.error(
+            "Erro ao carregar guias:",
+            error
+        );
+
+
+        container.innerHTML = `
+
+            <div class="lista-vazia"
+                 style="color:#ff5555;">
+
+                Erro ao carregar as guias.
+
+            </div>
+
+        `;
+
     }
+
 }
+
+
+/* ================================
+   EXCLUIR GUIA
+================================ */
+
+async function excluirGuia(
+    musica
+){
+
+    const confirmar =
+        confirm(
+
+            "Excluir esta guia?\n\n" +
+
+            musica.nome +
+
+            "\n\n" +
+
+            "A música, os vínculos com os artistas " +
+            "e os arquivos enviados serão removidos."
+
+        );
+
+
+    if(!confirmar){
+
+        return;
+
+    }
+
+
+    try{
+
+        /*
+         * PRIMEIRO:
+         * apagar relações
+         */
+
+        const {
+            error:
+                relacaoError
+        } =
+            await supabaseClient
+            .from("musica_artistas")
+            .delete()
+            .eq(
+                "musica_id",
+                musica.id
+            );
+
+
+        if(relacaoError){
+
+            throw relacaoError;
+
+        }
+
+
+        /*
+         * SEGUNDO:
+         * apagar registro da música
+         */
+
+        const {
+            error:
+                musicaError
+        } =
+            await supabaseClient
+            .from("musicas")
+            .delete()
+            .eq(
+                "id",
+                musica.id
+            );
+
+
+        if(musicaError){
+
+            throw musicaError;
+
+        }
+
+
+        /*
+         * TERCEIRO:
+         * apagar capa
+         */
+
+        if(musica.capa_url){
+
+            await excluirArquivoStorage(
+                musica.capa_url,
+                "capas-musicas"
+            );
+
+        }
+
+
+        /*
+         * QUARTO:
+         * apagar áudio
+         */
+
+        if(musica.audio_url){
+
+            await excluirArquivoStorage(
+                musica.audio_url,
+                "audios"
+            );
+
+        }
+
+
+        mostrarStatus(
+            "Guia excluída com sucesso!",
+            "success"
+        );
+
+
+        carregarGuiasADM();
+
+
+    }catch(error){
+
+        console.error(
+            "Erro ao excluir guia:",
+            error
+        );
+
+
+        mostrarStatus(
+
+            "Erro ao excluir guia: " +
+            error.message,
+
+            "error"
+
+        );
+
+    }
+
+}
+
+
+/* ================================
+   INICIAR PAINEL
+================================ */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    async function(){
+
+        const autorizado =
+            await checarAuth();
+
+
+        if(!autorizado){
+
+            return;
+
+        }
+
+
+        carregarArtistasParaSelecao();
+
+        carregarGuiasADM();
+
+    }
+);
+
 </script>
 
 </body>
+
 </html>
