@@ -4,9 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UnderFy</title>
-<!-- Importando ícones profissionais (Lucide Icons) -->
-<script src="https://unpkg.com/lucide@latest"></script>
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:#0b0b0b;color:#fff;font-family:Arial,Helvetica,sans-serif;}
@@ -53,8 +50,8 @@ main{width:90%;max-width:1200px;margin:auto;}
 
 .empty{color:#888;text-align:center;padding:30px 10px;grid-column:1/-1;}
 .search-box{position:relative;margin-top:25px;}
-.search-box i{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:#777;width:18px;height:18px;}
-input{width:100%;padding:13px 13px 13px 45px;margin:0 0 13px;background:#252525;border:1px solid #333;color:#fff;border-radius:9px;outline:none;}
+.search-box span{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:#777;font-weight:bold;}
+input{width:100%;padding:13px 13px 13px 35px;margin:0 0 13px;background:#252525;border:1px solid #333;color:#fff;border-radius:9px;outline:none;}
 input:focus{border-color:#1ed760;}
 
 /* MINI PLAYER FIXO */
@@ -67,7 +64,7 @@ input:focus{border-color:#1ed760;}
 .mini-player-info{flex:1;min-width:0;}
 .mini-player-info strong, .mini-player-info span{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
 .mini-player-info span{color:#999;font-size:13px;margin-top:3px;}
-.mini-player button{background:none;border:0;color:#1ed760;display:flex;align-items:center;justify-content:center;margin-right:10px;}
+.mini-player button{background:none;border:0;color:#1ed760;font-weight:bold;font-size:18px;margin-right:10px;}
 
 /* TELA / MODAL DO PLAYER COMPLETO */
 .player-modal{
@@ -81,7 +78,7 @@ input:focus{border-color:#1ed760;}
     box-shadow:0 25px 50px rgba(0,0,0,0.8);
 }
 .player-header{width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
-.player-header button{background:none;border:0;color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;}
+.player-header button{background:none;border:0;color:#fff;font-size:22px;}
 .player-header span{font-size:15px;font-weight:bold;letter-spacing:1px;color:#ccc;}
 
 .player-cover-container{width:100%;aspect-ratio:1;border-radius:25px;overflow:hidden;margin-bottom:25px;}
@@ -96,11 +93,11 @@ input:focus{border-color:#1ed760;}
 .time-stamps{display:flex;justify-content:space-between;font-size:12px;color:#777;margin-top:8px;}
 
 .player-actions{display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:25px;width:100%;}
-.action-btn{background:none;border:0;color:#aaa;display:flex;align-items:center;justify-content:center;}
+.action-btn{background:none;border:0;color:#aaa;font-weight:bold;font-size:14px;}
 .action-btn.active{color:#1ed760;}
 .main-play-btn{
     background:#1ed760;color:#000;border:0;width:65px;height:65px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
+    display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:20px;
 }
 
 /* NAV INFERIOR */
@@ -139,20 +136,20 @@ nav button:hover, nav button:active{color:#1ed760;}
         </section>
 
         <div class="search-box">
-            <i data-lucide="search"></i>
+            <span>🔍</span>
             <input id="pesquisa" placeholder="Pesquisar música ou artista..." oninput="pesquisar()">
         </div>
 
         <section class="section">
             <div class="section-title">
-                <h2><i data-lucide="headphones" style="width:20px;height:20px;color:#1ed760;"></i> Guias recentes</h2>
+                <h2>Guias recentes</h2>
             </div>
             <div class="grid" id="listaMusicas"><div class="empty">Carregando músicas...</div></div>
         </section>
 
         <section class="section">
             <div class="section-title">
-                <h2><i data-lucide="mic" style="width:20px;height:20px;color:#1ed760;"></i> Artistas</h2>
+                <h2>Artistas</h2>
             </div>
             <div class="grid" id="listaArtistas"><div class="empty">Carregando artistas...</div></div>
         </section>
@@ -166,18 +163,16 @@ nav button:hover, nav button:active{color:#1ed760;}
         <strong id="miniMusica">Música</strong>
         <span id="miniArtista">Artista</span>
     </div>
-    <button onclick="event.stopPropagation(); pausarRetomar();">
-        <i data-lucide="pause" id="miniPlayIcon"></i>
-    </button>
+    <button onclick="event.stopPropagation(); pausarRetomar();" id="miniPlayBtn">⏸</button>
 </div>
 
 <!-- TELA / MODAL DO PLAYER COMPLETO -->
 <div class="player-modal" id="playerModal">
     <div class="player-card">
         <div class="player-header">
-            <button onclick="fecharInterfacePlayer()"><i data-lucide="chevron-down"></i></button>
+            <button onclick="fecharInterfacePlayer()">⌄</button>
             <span>SESSÃO</span>
-            <button onclick="alert('Player v2.0')"><i data-lucide="more-horizontal"></i></button>
+            <button onclick="alert('Player v2.0')">•••</button>
         </div>
 
         <div class="player-cover-container">
@@ -200,13 +195,11 @@ nav button:hover, nav button:active{color:#1ed760;}
         </div>
 
         <div class="player-actions">
-            <button class="action-btn" id="btnShuffle" onclick="toggleShuffle()"><i data-lucide="shuffle"></i></button>
-            <button class="action-btn" onclick="tocarAnterior()"><i data-lucide="skip-back"></i></button>
-            <button class="main-play-btn" id="btnPlayPauseModal" onclick="pausarRetomar()">
-                <i data-lucide="pause" style="color:#000; width:28px; height:28px;"></i>
-            </button>
-            <button class="action-btn" onclick="tocarProxima()"><i data-lucide="skip-forward"></i></button>
-            <button class="action-btn" id="btnRepeat" onclick="toggleRepeat()"><i data-lucide="repeat"></i></button>
+            <button class="action-btn" id="btnShuffle" onclick="toggleShuffle()">🔀</button>
+            <button class="action-btn" onclick="tocarAnterior()">⏮</button>
+            <button class="main-play-btn" id="btnPlayPauseModal" onclick="pausarRetomar()">⏸</button>
+            <button class="action-btn" onclick="tocarProxima()">⏭</button>
+            <button class="action-btn" id="btnRepeat" onclick="toggleRepeat()">🔁</button>
         </div>
     </div>
 </div>
@@ -215,28 +208,16 @@ nav button:hover, nav button:active{color:#1ed760;}
 
 <!-- NAV INFERIOR -->
 <nav>
-    <button onclick="irInicio()">
-        <i data-lucide="home" style="width:20px;height:20px;"></i>
-        Início
-    </button>
-    <button onclick="mostrarMusicas()">
-        <i data-lucide="music" style="width:20px;height:20px;"></i>
-        Guias
-    </button>
-    <button onclick="mostrarArtistas()">
-        <i data-lucide="users" style="width:20px;height:20px;"></i>
-        Artistas
-    </button>
-    <button onclick="abrirADM()">
-        <i data-lucide="settings" style="width:20px;height:20px;"></i>
-        ADM
-    </button>
+    <button onclick="irInicio()">🏠 Início</button>
+    <button onclick="mostrarMusicas()">🎵 Guias</button>
+    <button onclick="mostrarArtistas()">👥 Artistas</button>
+    <button onclick="abrirADM()">⚙️ ADM</button>
 </nav>
 
 <!-- MODAL LOGIN ADM -->
 <div class="modal" id="modalLogin">
     <div class="modal-content">
-        <button class="close" onclick="fecharModal('modalLogin')">×️</button>
+        <button class="close" onclick="fecharModal('modalLogin')">×</button>
         <h2>Área administrativa</h2>
         <input type="email" id="emailADM" placeholder="E-mail">
         <input type="password" id="senhaADM" placeholder="Senha">
@@ -256,9 +237,7 @@ let musicaAtualIndex = -1;
 let modoShuffle = false;
 let modoRepeat = false;
 
-// Inicializa os ícones estáticos assim que o HTML carregar
 document.addEventListener("DOMContentLoaded", () => {
-    if (window.lucide) lucide.createIcons();
     iniciarApp();
 });
 
@@ -298,8 +277,8 @@ async function iniciarApp() {
 
     } catch (err) {
         console.error("Erro:", err);
-        document.getElementById("listaMusicas").innerHTML = `<div class="empty" style="color:#ff5555;">Erro ao carregar dados.</div>`;
-        document.getElementById("listaArtistas").innerHTML = `<div class="empty" style="color:#ff5555;">Erro ao carregar dados.</div>`;
+        document.getElementById("listaMusicas").innerHTML = `<div class="empty" style="color:#ff5555;">Erro ao carregar dados do banco.</div>`;
+        document.getElementById("listaArtistas").innerHTML = `<div class="empty" style="color:#ff5555;">Erro ao carregar dados do banco.</div>`;
     }
 }
 
@@ -315,7 +294,7 @@ function renderizarTudo() {
                 <p>${m.artistaFormatado}</p>
                 <div class="card-plays">${m.plays} reproduções</div>
                 <button class="play" onclick="tocarMusicaPorIndex(${index})">
-                    <i data-lucide="play" style="width:16px;height:16px;fill:#000;"></i> Ouvir guia
+                    ▶ Ouvir guia
                 </button>
             </div>
         `).join('');
@@ -331,11 +310,6 @@ function renderizarTudo() {
                 <h3>${a.nome}</h3>
             </div>
         `).join('');
-    }
-
-    // Renderiza os ícones inseridos dinamicamente de forma segura
-    if (window.lucide) {
-        try { lucide.createIcons(); } catch(e){}
     }
 }
 
@@ -382,16 +356,15 @@ function pausarRetomar() {
 
 function atualizarIconePlayPause(pausado) {
     const modalBtn = document.getElementById("btnPlayPauseModal");
-    const miniIcon = document.getElementById("miniPlayIcon");
+    const miniBtn = document.getElementById("miniPlayBtn");
     
     if (pausado) {
-        modalBtn.innerHTML = `<i data-lucide="play" style="color:#000; width:28px; height:28px; fill:#000; margin-left:3px;"></i>`;
-        if(miniIcon) miniIcon.setAttribute('data-lucide', 'play');
+        modalBtn.textContent = "▶";
+        if(miniBtn) miniBtn.textContent = "▶";
     } else {
-        modalBtn.innerHTML = `<i data-lucide="pause" style="color:#000; width:28px; height:28px; fill:#000;"></i>`;
-        if(miniIcon) miniIcon.setAttribute('data-lucide', 'pause');
+        modalBtn.textContent = "⏸";
+        if(miniBtn) miniBtn.textContent = "⏸";
     }
-    if (window.lucide) lucide.createIcons();
 }
 
 function atualizarBarraProgresso() {
@@ -456,7 +429,26 @@ function pesquisar() {
                 <p>${m.artistaFormatado}</p>
                 <div class="card-plays">${m.plays} reproduções</div>
                 <button class="play" onclick="tocarMusicaPorIndex(${musicas.findIndex(x => x.id === m.id)})">
-                    <i data-lucide="play" style="width:16px;height:16px;fill:#000;"></i> Ouvir guia
+                    ▶ Ouvir guia
                 </button>
             </div>
-        `).jo
+        `).join('');
+    }
+}
+
+function irInicio() { window.scrollTo({ top: 0, behavior: "smooth" }); }
+function mostrarMusicas() { document.getElementById("listaMusicas").scrollIntoView({ behavior: "smooth" }); }
+function mostrarArtistas() { document.getElementById("listaArtistas").scrollIntoView({ behavior: "smooth" }); }
+function abrirADM() { document.getElementById("modalLogin").style.display = "flex"; }
+function fecharModal(id) { document.getElementById(id).style.display = "none"; }
+
+async function loginADM() {
+    const email = document.getElementById("emailADM").value.trim();
+    const senha = document.getElementById("senhaADM").value.trim();
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password: senha });
+    if (error) { alert("Dados incorretos."); return; }
+    window.location.href = "upload.html";
+}
+</script>
+</body>
+</html>
