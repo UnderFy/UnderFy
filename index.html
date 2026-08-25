@@ -6,818 +6,226 @@
 <title>UnderFy</title>
 
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#0b0b0b;color:#fff;font-family:Arial,Helvetica,sans-serif;}
+button,input{font:inherit;}
+button{cursor:pointer;}
+.app{min-height:100vh;padding-bottom:110px;}
 
-body{
-    background:#0b0b0b;
-    color:#fff;
-    font-family:Arial,Helvetica,sans-serif;
-}
-
-button,input{
-    font:inherit;
-}
-
-button{
-    cursor:pointer;
-}
-
-.app{
-    min-height:100vh;
-    padding-bottom:110px;
-}
-
-/* HEADER */
 header{
-    position:sticky;
-    top:0;
-    z-index:20;
-    background:rgba(11,11,11,.95);
-    backdrop-filter:blur(15px);
-    padding:18px 5%;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
+    position:sticky;top:0;z-index:20;
+    background:rgba(11,11,11,.95);backdrop-filter:blur(15px);
+    padding:18px 5%;display:flex;align-items:center;justify-content:space-between;
     border-bottom:1px solid #202020;
 }
+.logo{font-size:27px;font-weight:900;letter-spacing:-1px;display:flex;align-items:center;gap:12px;}
+.logo .fy{color:#1ed760;}
+.logo .by-uta{color:#ffffff;}
+.header-btn{border:0;background:#1ed760;color:#000;font-weight:bold;padding:10px 16px;border-radius:25px;}
 
-.logo{
-    font-size:27px;
-    font-weight:900;
-    letter-spacing:-1px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.logo .fy{
-    color:#1ed760;
-}
-
-.logo .by-uta {
-    color: #ffffff;
-    font-size: 27px;
-    font-weight: 900;
-    letter-spacing: -1px;
-}
-
-.header-btn{
-    border:0;
-    background:#1ed760;
-    color:#000;
-    font-weight:bold;
-    padding:10px 16px;
-    border-radius:25px;
-}
-
-/* CONTEÚDO */
-main{
-    width:90%;
-    max-width:1200px;
-    margin:auto;
-}
-
+main{width:90%;max-width:1200px;margin:auto;}
 .hero{
-    margin-top:25px;
-    min-height:260px;
-    border-radius:25px;
-    padding:35px;
-    display:flex;
-    flex-direction:column;
-    justify-content:flex-end;
-    background:linear-gradient(135deg,#171717,#063d20);
-    overflow:hidden;
+    margin-top:25px;min-height:260px;border-radius:25px;padding:35px;
+    display:flex;flex-direction:column;justify-content:flex-end;
+    background:linear-gradient(135deg,#171717,#063d20);overflow:hidden;
 }
+.hero small{color:#1ed760;font-weight:bold;margin-bottom:10px;}
+.hero h1{font-size:42px;margin-bottom:10px;}
+.hero p{color:#bbb;max-width:600px;}
 
-.hero small{
-    color:#1ed760;
-    font-weight:bold;
-    margin-bottom:10px;
-}
+.section{margin-top:35px;}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.section-title h2{font-size:22px;}
 
-.hero h1{
-    font-size:42px;
-    margin-bottom:10px;
-}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:18px;}
+.card{background:#151515;padding:14px;border-radius:15px;position:relative;}
+.cover{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:#252525;}
+.card h3{margin-top:12px;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card p{color:#999;margin-top:5px;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-plays{color:#1ed760;font-size:12px;margin-top:4px;font-weight:bold;}
+.play{margin-top:12px;width:100%;border:0;background:#1ed760;color:#000;padding:10px;border-radius:20px;font-weight:bold;}
 
-.hero p{
-    color:#bbb;
-    max-width:600px;
-}
+.empty{color:#888;text-align:center;padding:30px 10px;grid-column:1/-1;}
+.search{margin-top:25px;}
+input{width:100%;padding:13px;margin:7px 0 13px;background:#252525;border:1px solid #333;color:#fff;border-radius:9px;outline:none;}
 
-.section{
-    margin-top:35px;
-}
-
-.section-title{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:18px;
-}
-
-.section-title h2{
-    font-size:22px;
-}
-
-.grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
-    gap:18px;
-}
-
-.card{
-    background:#151515;
-    padding:14px;
-    border-radius:15px;
-    transition:.2s;
-    cursor:pointer;
-    position: relative;
-}
-
-.card:hover{
-    background:#202020;
-    transform:translateY(-3px);
-}
-
-.btn-excluir {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(220, 38, 38, 0.9);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 10;
-    transition: 0.2s;
-}
-
-.btn-excluir:hover {
-    background: rgb(220, 38, 38);
-    transform: scale(1.1);
-}
-
-.cover{
-    width:100%;
-    aspect-ratio:1;
-    object-fit:cover;
-    border-radius:10px;
-    background:#252525;
-}
-
-.card h3{
-    margin-top:12px;
-    font-size:16px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-}
-
-.card p{
-    color:#999;
-    margin-top:5px;
-    font-size:14px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-}
-
-.card-plays {
-    color: #1ed760;
-    font-size: 12px;
-    margin-top: 4px;
-    font-weight: bold;
-}
-
-.play{
-    margin-top:12px;
-    width:100%;
-    border:0;
-    background:#1ed760;
-    color:#000;
-    padding:10px;
-    border-radius:20px;
-    font-weight:bold;
-}
-
-/* MINI PLAYER FIXO (Rodapé) */
-.mini-player{
-    position:fixed;
-    bottom:65px;
-    left:0;
-    right:0;
-    z-index:30;
-    background:#171717;
-    border-top:1px solid #292929;
-    padding:12px 5%;
-    display:none;
-    align-items:center;
-    gap:15px;
-    cursor: pointer;
-}
+/* MINI PLAYER E MODAL PLAYER (Mantidos compactos) */
+.mini-player{position:fixed;bottom:65px;left:0;right:0;z-index:30;background:#171717;border-top:1px solid #292929;padding:12px 5%;display:none;align-items:center;gap:15px;cursor:pointer;}
 .mini-player img{width:50px;height:50px;object-fit:cover;border-radius:7px;}
 .mini-player-info{flex:1;min-width:0;}
 .mini-player-info strong, .mini-player-info span{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
 .mini-player-info span{color:#999;font-size:13px;margin-top:3px;}
 
+.player-modal{display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,0.85);backdrop-filter:blur(20px);align-items:center;justify-content:center;padding:20px;}
+.player-card{background:#141414;border:1px solid #262626;width:100%;max-width:420px;border-radius:35px;padding:30px 25px;display:flex;flex-direction:column;align-items:center;}
+.player-cover-container{width:100%;aspect-ratio:1;border-radius:25px;overflow:hidden;margin-bottom:25px;}
+.player-cover-container img{width:100%;height:100%;object-fit:cover;}
+.player-song-info{text-align:center;margin-bottom:20px;width:100%;}
+.player-actions{display:flex;align-items:center;justify-content:center;gap:25px;margin-bottom:20px;}
+.main-play-btn{background:#1ed760;color:#000;border:0;width:65px;height:65px;border-radius:50%;font-size:24px;font-weight:bold;display:flex;align-items:center;justify-content:center;}
 
-/* ==========================================================
-   INTERFACE DE REPRODUÇÃO
-========================================================== */
-.player-modal{
-    display:none;
-    position:fixed;
-    inset:0;
-    z-index:150;
-    background:rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(20px);
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-}
-
-.player-card{
-    background:#141414;
-    border: 1px solid #262626;
-    width:100%;
-    max-width:420px;
-    border-radius:35px;
-    padding:30px 25px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.8);
-    position:relative;
-}
-
-.player-header{
-    width:100%;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:20px;
-}
-
-.player-header button{
-    background:none;
-    border:0;
-    color:#fff;
-    font-size:22px;
-    cursor:pointer;
-}
-
-.player-header span{
-    font-size:15px;
-    font-weight:bold;
-    letter-spacing:1px;
-    color:#ccc;
-}
-
-.player-cover-container{
-    width:100%;
-    aspect-ratio:1;
-    border-radius:25px;
-    overflow:hidden;
-    margin-bottom:25px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-
-.player-cover-container img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-}
-
-.player-song-info{
-    text-align:center;
-    margin-bottom:30px;
-    width: 100%;
-}
-
-.player-song-info h2{
-    font-size:26px;
-    font-weight:bold;
-    margin-bottom:8px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-}
-
-.player-song-info p{
-    color:#888;
-    font-size:15px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-}
-
-/* CONTROLES CENTRAIS */
-.player-actions{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:25px;
-    margin-bottom:30px;
-    width: 100%;
-}
-
-.action-btn{
-    background:none;
-    border:0;
-    color:#aaa;
-    font-size:20px;
-    cursor:pointer;
-    transition:.2s;
-}
-
-.action-btn.active{
-    color:#1ed760;
-}
-
-.main-play-btn{
-    background:#1ed760;
-    color:#000;
-    border:0;
-    width:65px;
-    height:65px;
-    border-radius:50%;
-    font-size:24px;
-    font-weight:bold;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    box-shadow: 0 0 20px rgba(30,215,96,0.4);
-    transition: transform 0.1s;
-}
-.main-play-btn:active{
-    transform: scale(0.95);
-}
-
-/* PROGRESS BAR */
-.progress-container{
-    width:100%;
-    margin-bottom:15px;
-}
-
-.progress-bar-bg{
-    width:100%;
-    height:6px;
-    background:#252525;
-    border-radius:3px;
-    cursor:pointer;
-    position:relative;
-    overflow:hidden;
-}
-
-.progress-bar-fill{
-    height:100%;
-    background:#1ed760;
-    width:0%;
-    border-radius:3px;
-}
-
-.time-stamps{
-    display:flex;
-    justify-content:space-between;
-    font-size:12px;
-    color:#777;
-    margin-top:8px;
-}
-
-.player-card-footer{
-    display:flex;
-    justify-content:space-around;
-    width:100%;
-    border-top:1px solid #202020;
-    padding-top:20px;
-    margin-top:10px;
-}
-
-.footer-icon-btn{
-    background:none;
-    border:0;
-    color:#aaa;
-    font-size:20px;
-    cursor:pointer;
-}
-.footer-icon-btn:hover{color:#1ed760;}
-
-/* NAV INFERIOR */
-nav{
-    position:fixed;
-    bottom:0;
-    left:0;
-    right:0;
-    height:65px;
-    background:#101010;
-    border-top:1px solid #252525;
-    z-index:40;
-    display:flex;
-    justify-content:center;
-    gap:40px;
-}
-
-nav button{
-    border:0;
-    background:none;
-    color:#aaa;
-    font-size:12px;
-}
-
-nav button:hover{
-    color:#1ed760;
-}
-
-/* MODAL LOGIN */
-.modal{
-    display:none;
-    position:fixed;
-    inset:0;
-    z-index:200;
-    background:rgba(0,0,0,.75);
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-}
-
-.modal-content{
-    background:#181818;
-    width:100%;
-    max-width:550px;
-    max-height:90vh;
-    overflow:auto;
-    border-radius:20px;
-    padding:25px;
-}
-
-.modal-content h2{margin-bottom:20px;}
-.close{float:right;border:0;background:#292929;color:#fff;width:35px;height:35px;border-radius:50%;}
-
-input{
-    width:100%;
-    padding:13px;
-    margin:7px 0 13px;
-    background:#252525;
-    border:1px solid #333;
-    color:#fff;
-    border-radius:9px;
-    outline:none;
-}
-input:focus{border-color:#1ed760;}
-
-.form-btn{
-    width:100%;
-    padding:13px;
-    background:#1ed760;
-    color:#000;
-    border:0;
-    border-radius:25px;
-    font-weight:bold;
-    margin-top:5px;
-}
-
-.empty{
-    color:#888;
-    text-align:center;
-    padding:30px 10px;
-    grid-column: 1 / -1;
-}
-
-.search{margin-top:25px;}
-
-@media(max-width:700px){
-    header{padding:15px 5%;}
-    .logo{font-size:23px;}
-    .hero{min-height:230px;padding:25px;}
-    .hero h1{font-size:30px;}
-    .grid{grid-template-columns:repeat(2,1fr);gap:12px;}
-    .card{padding:10px;}
-    nav{gap:20px;}
-}
+nav{position:fixed;bottom:0;left:0;right:0;height:65px;background:#101010;border-top:1px solid #252525;z-index:40;display:flex;justify-content:center;gap:40px;}
+nav button{border:0;background:none;color:#aaa;font-size:12px;}
 </style>
 </head>
-
 <body>
 
 <div class="app">
+    <header>
+        <div class="logo">Under<span class="fy">Fy</span> <span class="by-uta">• UTA</span></div>
+        <button class="header-btn" onclick="alert('Painel ADM')">ADM</button>
+    </header>
 
-<header>
-    <div class="logo">
-        Under<span class="fy">Fy</span>
-        <span class="by-uta">• UTA</span>
-    </div>
-    <button class="header-btn" onclick="abrirADM()">ADM</button>
-</header>
+    <main>
+        <section class="hero">
+            <small>UNDERFY • STUDIO CAMP</small>
+            <h1>As guias da sessão.</h1>
+            <p>Um espaço para ouvir, descobrir e organizar as músicas criadas.</p>
+        </section>
 
-<main>
-<section class="hero">
-    <small>UNDERFY • STUDIO CAMP</small>
-    <h1>As guias da sessão.</h1>
-    <p>Um espaço para ouvir, descobrir e organizar as músicas criadas durante as sessões.</p>
-</section>
+        <input class="search" id="pesquisa" placeholder="🔎 Pesquisar música ou artista..." oninput="pesquisar()">
 
-<input class="search" id="pesquisa" placeholder="🔎 Pesquisar música ou artista..." oninput="pesquisar()">
+        <section class="section">
+            <div class="section-title"><h2>🎧 Guias recentes</h2></div>
+            <div class="grid" id="listaMusicas"><div class="empty">Carregando músicas...</div></div>
+        </section>
 
-<section class="section">
-    <div class="section-title">
-        <h2>🎧 Guias recentes</h2>
-    </div>
-    <div class="grid" id="listaMusicas">
-        <div class="empty">Carregando músicas...</div>
-    </div>
-</section>
-
-<section class="section">
-    <div class="section-title">
-        <h2>🎤 Artistas</h2>
-    </div>
-    <div class="grid" id="listaArtistas">
-        <div class="empty">Carregando artistas...</div>
-    </div>
-</section>
-</main>
+        <section class="section">
+            <div class="section-title"><h2>🎤 Artistas</h2></div>
+            <div class="grid" id="listaArtistas"><div class="empty">Carregando artistas...</div></div>
+        </section>
+    </main>
 </div>
 
-<!-- MINI PLAYER FIXO -->
-<div class="mini-player" id="miniPlayer" onclick="abrirInterfacePlayer()">
+<!-- MINI PLAYER -->
+<div class="mini-player" id="miniPlayer">
     <img id="miniCapa" src="">
     <div class="mini-player-info">
         <strong id="miniMusica">Música</strong>
         <span id="miniArtista">Artista</span>
     </div>
-    <button style="background:none;border:0;color:#1ed760;font-size:22px;margin-right:10px;" onclick="event.stopPropagation(); pausarRetomar();">⏸</button>
-</div>
-
-<!-- TELA / MODAL DO PLAYER -->
-<div class="player-modal" id="playerModal">
-    <div class="player-card">
-        
-        <div class="player-header">
-            <button onclick="fecharInterfacePlayer()">⌄</button>
-            <span>UnderFy Session</span>
-            <button onclick="toggleMenuOpcoes()">≡</button>
-        </div>
-
-        <div class="player-cover-container">
-            <img id="modalCapa" src="" alt="Capa da Guia">
-        </div>
-
-        <div class="player-song-info">
-            <h2 id="modalMusica">Nome da Música</h2>
-            <p id="modalArtista">Artista</p>
-        </div>
-
-        <div class="progress-container">
-            <div class="progress-bar-bg" id="progressBarBg" onclick="mudarProgresso(event)">
-                <div class="progress-bar-fill" id="progressBarFill"></div>
-            </div>
-            <div class="time-stamps">
-                <span id="currentTime">0:00</span>
-                <span id="durationTime">0:00</span>
-            </div>
-        </div>
-
-        <div class="player-actions">
-            <button class="action-btn" id="btnShuffle" onclick="toggleShuffle()" title="Aleatório">🔀</button>
-            <button class="action-btn" onclick="tocarAnterior()" title="Anterior">⏮</button>
-            
-            <button class="main-play-btn" id="btnPlayPauseModal" onclick="pausarRetomar()">⏸</button>
-            
-            <button class="action-btn" onclick="tocarProxima()" title="Próxima">⏭</button>
-            <button class="action-btn" id="btnRepeat" onclick="toggleRepeat()" title="Repetir">🔁</button>
-        </div>
-
-        <div class="player-card-footer">
-            <button class="footer-icon-btn" title="Lista de Guias">🎵</button>
-            <button class="footer-icon-btn" onclick="favoritarMusica()" title="Curtir">❤️</button>
-            <button class="footer-icon-btn" onclick="compartilharMusica()" title="Compartilhar">🔗</button>
-        </div>
-
-    </div>
 </div>
 
 <audio id="audio" style="display:none;"></audio>
 
-<nav>
-    <button onclick="irInicio()">🏠<br>Início</button>
-    <button onclick="mostrarMusicas()">🎵<br>Guias</button>
-    <button onclick="mostrarArtistas()">🎤<br>Artistas</button>
-    <button onclick="abrirADM()">⚙️<br>ADM</button>
-</nav>
-
-<div class="modal" id="modalLogin">
-<div class="modal-content">
-<button class="close" onclick="fecharModal('modalLogin')">×</button>
-<h2>🔐 Área administrativa</h2>
-<input type="email" id="emailADM" placeholder="E-mail">
-<input type="password" id="senhaADM" placeholder="Senha">
-<button class="form-btn" onclick="loginADM()">Entrar</button>
-</div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+console.log("Script carregando...");
+
 const SUPABASE_URL = "https://gnibzbnypirjrcaoibkx.supabase.co";
 const SUPABASE_KEY = "sb_publishable_b9yvSbmWOLVJvq4AB4CLmQ_VRuzpG5T";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let musicas = [];
 let artistasCache = [];
-let usuarioLogado = false;
 
-let musicaAtualIndex = -1;
-let modoShuffle = false;
-let modoRepeat = false;
-
-async function verificarSessaoAdmin() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    usuarioLogado = !!session;
-}
-
-async function carregarDadosDoSupabase() {
+async function iniciarApp() {
     try {
-        await verificarSessaoAdmin();
+        console.log("Buscando dados no Supabase...");
+        
+        // Timeout de segurança de 5 segundos para destravar a tela caso a rede falhe
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Tempo de conexão esgotado.")), 5000));
 
-        // 1. Busca artistas com tratamento de erro isolado
-        const { data: dadosArtistas, error: errArt } = await supabaseClient.from('artistas').select('*').order('nome', { ascending: true });
-        if (errArt) throw new Error("Erro na tabela 'artistas': " + errArt.message);
-        artistasCache = dadosArtistas || [];
+        const fetchDados = async () => {
+            const resArtistas = await supabaseClient.from('artistas').select('*');
+            artistasCache = resArtistas.data || [];
 
-        // 2. Busca músicas
-        const { data: dadosMusicas, error: errMus } = await supabaseClient.from('musicas').select('*').order('created_at', { ascending: false });
-        if (errMus) throw new Error("Erro na tabela 'musicas': " + errMus.message);
+            const resMusicas = await supabaseClient.from('musicas').select('*');
+            const dadosMusicas = resMusicas.data || [];
 
-        // 3. Busca relações
-        const { data: dadosRelacao, error: errRel } = await supabaseClient.from('musica_artistas').select('*');
-        if (errRel) throw new Error("Erro na tabela 'musica_artistas': " + errRel.message);
+            const resRel = await supabaseClient.from('musica_artistas').select('*');
+            const dadosRelacao = resRel.data || [];
 
-        musicas = (dadosMusicas || []).map(m => {
-            const relsDaMusica = (dadosRelacao || []).filter(r => r.musica_id === m.id);
-            const objsArtistas = relsDaMusica.map(r => artistasCache.find(a => a.id === r.artista_id)).filter(Boolean);
+            return { dadosMusicas, dadosRelacao };
+        };
 
+        const { dadosMusicas, dadosRelacao } = await Promise.race([fetchDados(), timeout]);
+
+        musicas = dadosMusicas.map(m => {
+            const rels = dadosRelacao.filter(r => r.musica_id === m.id);
+            const objsArtistas = rels.map(r => artistasCache.find(a => a.id === r.artista_id)).filter(Boolean);
             let artistasNomes = objsArtistas.length > 0 ? objsArtistas.map(a => a.nome) : ['Desconhecido'];
-            let textoArtistaFormatado = artistasNomes[0];
-            if (artistasNomes.length > 1) {
-                textoArtistaFormatado += ` feat. ${artistasNomes.slice(1).join(', ')}`;
-            }
-
+            
             return {
                 id: m.id,
                 nome: m.nome,
-                artistas: artistasNomes,
-                artistaFormatado: textoArtistaFormatado,
+                artistaFormatado: artistasNomes.join(', '),
                 capa: m.capa_url || 'https://via.placeholder.com/500',
                 audio: m.audio_url || '',
                 plays: m.plays || 0
             };
         });
 
-        renderizarMusicas(musicas);
-        renderizarArtistasNaTela();
+        renderizarTudo();
 
-        const audio = document.getElementById("audio");
-        audio.addEventListener('ended', lidarFimDaMusica);
-        audio.addEventListener('timeupdate', atualizarBarraProgresso);
-
-    } catch (error) {
-        console.error('Erro detalhado:', error);
-        document.getElementById("listaMusicas").innerHTML = `<div class="empty" style="color: #ff5555; text-align: left; padding: 15px;"><strong>Falha ao carregar:</strong><br>${error.message}</div>`;
-        document.getElementById("listaArtistas").innerHTML = `<div class="empty" style="color: #ff5555;">Erro de conexão.</div>`;
-    }
-}
-
-document.addEventListener('DOMContentLoaded', carregarDadosDoSupabase);
-
-function renderizarMusicas(lista = musicas) {
-    const container = document.getElementById("listaMusicas");
-    container.innerHTML = "";
-
-    if (lista.length === 0) {
-        container.innerHTML = `<div class="empty">Nenhuma música encontrada.</div>`;
-        return;
-    }
-
-    lista.forEach((musica) => {
-        const indexReal = musicas.findIndex(m => m.id === musica.id);
-        const botaoExcluirHtml = usuarioLogado 
-            ? `<button class="btn-excluir" onclick="excluirMusica('${musica.id}', event)">✕</button>` 
-            : '';
-
-        container.innerHTML += `
-        <div class="card">
-            ${botaoExcluirHtml}
-            <img class="cover" src="${musica.capa}" onerror="this.src='https://via.placeholder.com/500'">
-            <h3>${musica.nome}</h3>
-            <p>${musica.artistaFormatado}</p>
-            <div class="card-plays">▶ ${musica.plays} reprodução(ões)</div>
-            <button class="play" onclick="tocarMusicaPorIndex(${indexReal})">
-                ▶ Ouvir guia
-            </button>
-        </div>
-        `;
-    });
-}
-
-async function excluirMusica(id, event) {
-    event.stopPropagation();
-    if (!confirm("Deseja excluir esta guia?")) return;
-    try {
-        await supabaseClient.from('musicas').delete().eq('id', id);
-        musicas = musicas.filter(m => m.id != id);
-        renderizarMusicas(musicas);
-        renderizarArtistasNaTela();
     } catch (err) {
-        alert("Erro ao excluir.");
+        console.error("Erro capturado:", err);
+        document.getElementById("listaMusicas").innerHTML = `<div class="empty" style="color:#ff5555;">Erro ao carregar: ${err.message}</div>`;
+        document.getElementById("listaArtistas").innerHTML = `<div class="empty" style="color:#ff5555;">Falha na conexão.</div>`;
     }
 }
 
-function renderizarArtistasNaTela() {
-    const container = document.getElementById("listaArtistas");
-    container.innerHTML = "";
-    if (artistasCache.length === 0) {
-        container.innerHTML = `<div class="empty">Nenhum artista cadastrado.</div>`;
-        return;
-    }
-    artistasCache.forEach(artista => {
-        const qtdMusicas = musicas.filter(m => m.artistas.includes(artista.nome)).length;
-        container.innerHTML += `
-        <div class="card" onclick="window.location.href='artista.html?nome=${encodeURIComponent(artista.nome)}'">
-            <img class="cover" src="${artista.foto_url || 'https://via.placeholder.com/500'}" onerror="this.src='https://via.placeholder.com/500'">
-            <h3>${artista.nome}</h3>
-            <p>${qtdMusicas} guia(s)</p>
-        </div>
-        `;
-    });
-}
-
-async function tocarMusicaPorIndex(index) {
-    if (index < 0 || index >= musicas.length) return;
-    musicaAtualIndex = index;
-    const musica = musicas[musicaAtualIndex];
-
-    document.getElementById("miniPlayer").style.display = "flex";
-    document.getElementById("miniMusica").textContent = musica.nome;
-    document.getElementById("miniArtista").textContent = musica.artistaFormatado;
-    document.getElementById("miniCapa").src = musica.capa;
-
-    document.getElementById("modalMusica").textContent = musica.nome;
-    document.getElementById("modalArtista").textContent = musica.artistaFormatado;
-    document.getElementById("modalCapa").src = musica.capa;
-
-    const audio = document.getElementById("audio");
-    if (!musica.audio) {
-        alert("Áudio não cadastrado.");
-        return;
-    }
-
-    audio.src = musica.audio;
-    audio.play();
-    document.getElementById("btnPlayPauseModal").textContent = "⏸";
-
-    abrirInterfacePlayer();
-
-    musica.plays += 1;
-    renderizarMusicas(musicas);
-
-    try {
-        await supabaseClient.from('musicas').update({ plays: musica.plays }).eq('id', musica.id);
-    } catch (err) {}
-}
-
-function abrirInterfacePlayer() {
-    if (musicaAtualIndex === -1) return;
-    document.getElementById("playerModal").style.display = "flex";
-}
-
-function fecharInterfacePlayer() {
-    document.getElementById("playerModal").style.display = "none";
-}
-
-function pausarRetomar() {
-    const audio = document.getElementById("audio");
-    const btn = document.getElementById("btnPlayPauseModal");
-    if (audio.paused) {
-        audio.play();
-        btn.textContent = "⏸";
+function renderizarTudo() {
+    const container = document.getElementById("listaMusicas");
+    if (musicas.length === 0) {
+        container.innerHTML = `<div class="empty">Nenhuma música cadastrada ainda.</div>`;
     } else {
-        audio.pause();
-        btn.textContent = "▶";
+        container.innerHTML = musicas.map((m, index) => `
+            <div class="card">
+                <img class="cover" src="${m.capa}">
+                <h3>${m.nome}</h3>
+                <p>${m.artistaFormatado}</p>
+                <div class="card-plays">▶ ${m.plays} plays</div>
+                <button class="play" onclick="tocar(${index})">Ouvir</button>
+            </div>
+        `).join('');
+    }
+
+    const containerArtistas = document.getElementById("listaArtistas");
+    if (artistasCache.length === 0) {
+        containerArtistas.innerHTML = `<div class="empty">Nenhum artista cadastrado.</div>`;
+    } else {
+        containerArtistas.innerHTML = artistasCache.map(a => `
+            <div class="card">
+                <img class="cover" src="${a.foto_url || 'https://via.placeholder.com/500'}">
+                <h3>${a.nome}</h3>
+            </div>
+        `).join('');
     }
 }
 
-function atualizarBarraProgresso() {
+function tocar(index) {
+    const m = musicas[index];
     const audio = document.getElementById("audio");
-    if (isNaN(audio.duration)) return;
-    
-    const
+    audio.src = m.audio;
+    audio.play();
+    document.getElementById("miniPlayer").style.display = "flex";
+    document.getElementById("miniMusica").textContent = m.nome;
+    document.getElementById("miniArtista").textContent = m.artistaFormatado;
+    document.getElementById("miniCapa").src = m.capa;
+}
+
+function pesquisar() {
+    const termo = document.getElementById("pesquisa").value.toLowerCase();
+    const filtrado = musicas.filter(m => m.nome.toLowerCase().includes(termo) || m.artistaFormatado.toLowerCase().includes(termo));
+    // Renderiza apenas os filtrados de forma rápida
+    const container = document.getElementById("listaMusicas");
+    if(filtrado.length === 0) {
+        container.innerHTML = `<div class="empty">Nenhum resultado encontrado.</div>`;
+    } else {
+        container.innerHTML = filtrado.map(m => `
+            <div class="card">
+                <img class="cover" src="${m.capa}">
+                <h3>${m.nome}</h3>
+                <p>${m.artistaFormatado}</p>
+                <div class="card-plays">▶ ${m.plays} plays</div>
+            </div>
+        `).join('');
+    }
+}
+
+// Executa direto para evitar travamento de carregamento de DOM
+iniciarApp();
+</script>
+</body>
+</html>
