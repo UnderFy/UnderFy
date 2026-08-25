@@ -227,10 +227,16 @@ nav button:hover, nav button:active{color:#1ed760;}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// Limpeza automática de travamentos do navegador mobile ao carregar
+if (!sessionStorage.getItem("limpeza_feita")) {
+    localStorage.clear();
+    sessionStorage.setItem("limpeza_feita", "true");
+    window.location.reload();
+}
+
 const SUPABASE_URL = "https://gnibzbnypirjrcaoibkx.supabase.co";
 const SUPABASE_KEY = "sb_publishable_b9yvSbmWOLVJvq4AB4CLmQ_VRuzpG5T";
 
-// Desativa persistência e locks internos para evitar qualquer travamento/deadlock no navegador
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
     auth: {
         persistSession: false,
@@ -251,7 +257,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function iniciarApp() {
-    // Timeout estricto de 1.5s por requisição para renderizar instantaneamente
     const buscarComSeguranca = async (queryFn) => {
         try {
             return await Promise.race([
@@ -263,7 +268,6 @@ async function iniciarApp() {
         }
     };
 
-    // Verifica se há token salvo manualmente no sessionStorage
     if (sessionStorage.getItem("underfy_admin") === "true") {
         usuarioLogado = true;
     }
@@ -468,4 +472,4 @@ function pesquisar() {
                 <div class="card-plays">${m.plays} reproduções</div>
                 <button class="play" onclick="tocarMusicaPorIndex(${musicas.findIndex(x => x.id === m.id)})">
                     &#9654; OUVIR GUIA
-     
+                
