@@ -10,7 +10,7 @@
 body{background:#0b0b0b;color:#fff;font-family:Arial,Helvetica,sans-serif;}
 button,input{font:inherit;}
 button{cursor:pointer;}
-.app{min-height:100vh;padding-bottom:110px;}
+.app{min-height:100vh;padding-bottom:130px;}
 
 header{
     position:sticky;top:0;z-index:20;
@@ -38,7 +38,8 @@ main{width:90%;max-width:1200px;margin:auto;}
 .section-title h2{font-size:22px;}
 
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:18px;}
-.card{background:#151515;padding:14px;border-radius:15px;position:relative;}
+.card{background:#151515;padding:14px;border-radius:15px;position:relative;transition:.2s;}
+.card:hover{background:#202020;transform:translateY(-3px);}
 .cover{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:#252525;}
 .card h3{margin-top:12px;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .card p{color:#999;margin-top:5px;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -48,24 +49,71 @@ main{width:90%;max-width:1200px;margin:auto;}
 .empty{color:#888;text-align:center;padding:30px 10px;grid-column:1/-1;}
 .search{margin-top:25px;}
 input{width:100%;padding:13px;margin:7px 0 13px;background:#252525;border:1px solid #333;color:#fff;border-radius:9px;outline:none;}
+input:focus{border-color:#1ed760;}
 
-/* MINI PLAYER E MODAL PLAYER (Mantidos compactos) */
-.mini-player{position:fixed;bottom:65px;left:0;right:0;z-index:30;background:#171717;border-top:1px solid #292929;padding:12px 5%;display:none;align-items:center;gap:15px;cursor:pointer;}
-.mini-player img{width:50px;height:50px;object-fit:cover;border-radius:7px;}
+/* MINI PLAYER FIXO (Rodapé acima da NAV) */
+.mini-player{
+    position:fixed;bottom:65px;left:0;right:0;z-index:30;
+    background:#171717;border-top:1px solid #292929;
+    padding:10px 5%;display:none;align-items:center;gap:15px;cursor:pointer;
+}
+.mini-player img{width:45px;height:45px;object-fit:cover;border-radius:7px;}
 .mini-player-info{flex:1;min-width:0;}
 .mini-player-info strong, .mini-player-info span{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
 .mini-player-info span{color:#999;font-size:13px;margin-top:3px;}
 
-.player-modal{display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,0.85);backdrop-filter:blur(20px);align-items:center;justify-content:center;padding:20px;}
-.player-card{background:#141414;border:1px solid #262626;width:100%;max-width:420px;border-radius:35px;padding:30px 25px;display:flex;flex-direction:column;align-items:center;}
+/* TELA / MODAL DO PLAYER COMPLETO */
+.player-modal{
+    display:none;position:fixed;inset:0;z-index:150;
+    background:rgba(0,0,0,0.85);backdrop-filter:blur(20px);
+    align-items:center;justify-content:center;padding:20px;
+}
+.player-card{
+    background:#141414;border:1px solid #262626;width:100%;max-width:420px;
+    border-radius:35px;padding:30px 25px;display:flex;flex-direction:column;align-items:center;
+    box-shadow:0 25px 50px rgba(0,0,0,0.8);
+}
+.player-header{width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+.player-header button{background:none;border:0;color:#fff;font-size:22px;}
+.player-header span{font-size:15px;font-weight:bold;letter-spacing:1px;color:#ccc;}
+
 .player-cover-container{width:100%;aspect-ratio:1;border-radius:25px;overflow:hidden;margin-bottom:25px;}
 .player-cover-container img{width:100%;height:100%;object-fit:cover;}
-.player-song-info{text-align:center;margin-bottom:20px;width:100%;}
-.player-actions{display:flex;align-items:center;justify-content:center;gap:25px;margin-bottom:20px;}
-.main-play-btn{background:#1ed760;color:#000;border:0;width:65px;height:65px;border-radius:50%;font-size:24px;font-weight:bold;display:flex;align-items:center;justify-content:center;}
+.player-song-info{text-align:center;margin-bottom:25px;width:100%;}
+.player-song-info h2{font-size:24px;font-weight:bold;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.player-song-info p{color:#888;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-nav{position:fixed;bottom:0;left:0;right:0;height:65px;background:#101010;border-top:1px solid #252525;z-index:40;display:flex;justify-content:center;gap:40px;}
-nav button{border:0;background:none;color:#aaa;font-size:12px;}
+.progress-container{width:100%;margin-bottom:20px;}
+.progress-bar-bg{width:100%;height:6px;background:#252525;border-radius:3px;cursor:pointer;position:relative;}
+.progress-bar-fill{height:100%;background:#1ed760;width:0%;border-radius:3px;}
+.time-stamps{display:flex;justify-content:space-between;font-size:12px;color:#777;margin-top:8px;}
+
+.player-actions{display:flex;align-items:center;justify-content:center;gap:25px;margin-bottom:25px;width:100%;}
+.action-btn{background:none;border:0;color:#aaa;font-size:20px;}
+.action-btn.active{color:#1ed760;}
+.main-play-btn{
+    background:#1ed760;color:#000;border:0;width:65px;height:65px;border-radius:50%;
+    font-size:24px;font-weight:bold;display:flex;align-items:center;justify-content:center;
+}
+
+/* NAV INFERIOR */
+nav{
+    position:fixed;bottom:0;left:0;right:0;height:65px;
+    background:#101010;border-top:1px solid #252525;z-index:40;
+    display:flex;justify-content:space-around;align-items:center;padding:0 10px;
+}
+nav button{border:0;background:none;color:#aaa;font-size:11px;text-align:center;cursor:pointer;}
+nav button:hover, nav button:active{color:#1ed760;}
+
+/* MODAL LOGIN ADM */
+.modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);align-items:center;justify-content:center;padding:20px;}
+.modal-content{background:#181818;width:100%;max-width:450px;border-radius:20px;padding:25px;position:relative;}
+.close{position:absolute;top:15px;right:15px;border:0;background:#292929;color:#fff;width:30px;height:30px;border-radius:50%;}
+.form-btn{width:100%;padding:13px;background:#1ed760;color:#000;border:0;border-radius:25px;font-weight:bold;margin-top:10px;}
+
+@media(max-width:700px){
+    .grid{grid-template-columns:repeat(2,1fr);gap:12px;}
+}
 </style>
 </head>
 <body>
@@ -73,14 +121,14 @@ nav button{border:0;background:none;color:#aaa;font-size:12px;}
 <div class="app">
     <header>
         <div class="logo">Under<span class="fy">Fy</span> <span class="by-uta">• UTA</span></div>
-        <button class="header-btn" onclick="alert('Painel ADM')">ADM</button>
+        <button class="header-btn" onclick="abrirADM()">ADM</button>
     </header>
 
     <main>
         <section class="hero">
             <small>UNDERFY • STUDIO CAMP</small>
             <h1>As guias da sessão.</h1>
-            <p>Um espaço para ouvir, descobrir e organizar as músicas criadas.</p>
+            <p>Um espaço para ouvir, descobrir e organizar as músicas criadas durante as sessões.</p>
         </section>
 
         <input class="search" id="pesquisa" placeholder="🔎 Pesquisar música ou artista..." oninput="pesquisar()">
@@ -97,59 +145,109 @@ nav button{border:0;background:none;color:#aaa;font-size:12px;}
     </main>
 </div>
 
-<!-- MINI PLAYER -->
-<div class="mini-player" id="miniPlayer">
+<!-- MINI PLAYER FIXO -->
+<div class="mini-player" id="miniPlayer" onclick="abrirInterfacePlayer()">
     <img id="miniCapa" src="">
     <div class="mini-player-info">
         <strong id="miniMusica">Música</strong>
         <span id="miniArtista">Artista</span>
     </div>
+    <button style="background:none;border:0;color:#1ed760;font-size:22px;margin-right:10px;" onclick="event.stopPropagation(); pausarRetomar();">⏸</button>
+</div>
+
+<!-- MODAL / TELA DO PLAYER COMPLETO -->
+<div class="player-modal" id="playerModal">
+    <div class="player-card">
+        <div class="player-header">
+            <button onclick="fecharInterfacePlayer()">⌄</button>
+            <span>UnderFy Session</span>
+            <button onclick="alert('Player v2.0')">≡</button>
+        </div>
+
+        <div class="player-cover-container">
+            <img id="modalCapa" src="" alt="Capa">
+        </div>
+
+        <div class="player-song-info">
+            <h2 id="modalMusica">Nome</h2>
+            <p id="modalArtista">Artista</p>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar-bg" id="progressBarBg" onclick="mudarProgresso(event)">
+                <div class="progress-bar-fill" id="progressBarFill"></div>
+            </div>
+            <div class="time-stamps">
+                <span id="currentTime">0:00</span>
+                <span id="durationTime">0:00</span>
+            </div>
+        </div>
+
+        <div class="player-actions">
+            <button class="action-btn" id="btnShuffle" onclick="toggleShuffle()">🔀</button>
+            <button class="action-btn" onclick="tocarAnterior()">⏮</button>
+            <button class="main-play-btn" id="btnPlayPauseModal" onclick="pausarRetomar()">⏸</button>
+            <button class="action-btn" onclick="tocarProxima()">⏭</button>
+            <button class="action-btn" id="btnRepeat" onclick="toggleRepeat()">🔁</button>
+        </div>
+    </div>
 </div>
 
 <audio id="audio" style="display:none;"></audio>
 
+<!-- NAV INFERIOR RESTAURADA -->
+<nav>
+    <button onclick="irInicio()">🏠<br>Início</button>
+    <button onclick="mostrarMusicas()">🎵<br>Guias</button>
+    <button onclick="mostrarArtistas()">🎤<br>Artistas</button>
+    <button onclick="abrirADM()">⚙️<br>ADM</button>
+</nav>
+
+<!-- MODAL LOGIN ADM -->
+<div class="modal" id="modalLogin">
+    <div class="modal-content">
+        <button class="close" onclick="fecharModal('modalLogin')">×</button>
+        <h2>🔐 Área administrativa</h2>
+        <input type="email" id="emailADM" placeholder="E-mail">
+        <input type="password" id="senhaADM" placeholder="Senha">
+        <button class="form-btn" onclick="loginADM()">Entrar</button>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-console.log("Script carregando...");
-
 const SUPABASE_URL = "https://gnibzbnypirjrcaoibkx.supabase.co";
 const SUPABASE_KEY = "sb_publishable_b9yvSbmWOLVJvq4AB4CLmQ_VRuzpG5T";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let musicas = [];
 let artistasCache = [];
+let musicaAtualIndex = -1;
+let modoShuffle = false;
+let modoRepeat = false;
 
 async function iniciarApp() {
     try {
-        console.log("Buscando dados no Supabase...");
-        
-        // Timeout de segurança de 5 segundos para destravar a tela caso a rede falhe
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Tempo de conexão esgotado.")), 5000));
+        const resArtistas = await supabaseClient.from('artistas').select('*').order('nome', { ascending: true });
+        artistasCache = resArtistas.data || [];
 
-        const fetchDados = async () => {
-            const resArtistas = await supabaseClient.from('artistas').select('*');
-            artistasCache = resArtistas.data || [];
+        const resMusicas = await supabaseClient.from('musicas').select('*').order('created_at', { ascending: false });
+        const dadosMusicas = resMusicas.data || [];
 
-            const resMusicas = await supabaseClient.from('musicas').select('*');
-            const dadosMusicas = resMusicas.data || [];
-
-            const resRel = await supabaseClient.from('musica_artistas').select('*');
-            const dadosRelacao = resRel.data || [];
-
-            return { dadosMusicas, dadosRelacao };
-        };
-
-        const { dadosMusicas, dadosRelacao } = await Promise.race([fetchDados(), timeout]);
+        const resRel = await supabaseClient.from('musica_artistas').select('*');
+        const dadosRelacao = resRel.data || [];
 
         musicas = dadosMusicas.map(m => {
             const rels = dadosRelacao.filter(r => r.musica_id === m.id);
             const objsArtistas = rels.map(r => artistasCache.find(a => a.id === r.artista_id)).filter(Boolean);
             let artistasNomes = objsArtistas.length > 0 ? objsArtistas.map(a => a.nome) : ['Desconhecido'];
-            
+            let textoArtista = artistasNomes[0];
+            if (artistasNomes.length > 1) textoArtista += ` feat. ${artistasNomes.slice(1).join(', ')}`;
+
             return {
                 id: m.id,
                 nome: m.nome,
-                artistaFormatado: artistasNomes.join(', '),
+                artistaFormatado: textoArtista,
                 capa: m.capa_url || 'https://via.placeholder.com/500',
                 audio: m.audio_url || '',
                 plays: m.plays || 0
@@ -158,10 +256,13 @@ async function iniciarApp() {
 
         renderizarTudo();
 
+        const audio = document.getElementById("audio");
+        audio.addEventListener('ended', lidarFimDaMusica);
+        audio.addEventListener('timeupdate', atualizarBarraProgresso);
+
     } catch (err) {
-        console.error("Erro capturado:", err);
-        document.getElementById("listaMusicas").innerHTML = `<div class="empty" style="color:#ff5555;">Erro ao carregar: ${err.message}</div>`;
-        document.getElementById("listaArtistas").innerHTML = `<div class="empty" style="color:#ff5555;">Falha na conexão.</div>`;
+        console.error("Erro:", err);
+        document.getElementById("listaMusicas").innerHTML = `<div class="empty" style="color:#ff5555;">Erro ao carregar dados.</div>`;
     }
 }
 
@@ -172,11 +273,11 @@ function renderizarTudo() {
     } else {
         container.innerHTML = musicas.map((m, index) => `
             <div class="card">
-                <img class="cover" src="${m.capa}">
+                <img class="cover" src="${m.capa}" onerror="this.src='https://via.placeholder.com/500'">
                 <h3>${m.nome}</h3>
                 <p>${m.artistaFormatado}</p>
                 <div class="card-plays">▶ ${m.plays} plays</div>
-                <button class="play" onclick="tocar(${index})">Ouvir</button>
+                <button class="play" onclick="tocarMusicaPorIndex(${index})">▶ Ouvir guia</button>
             </div>
         `).join('');
     }
@@ -186,32 +287,98 @@ function renderizarTudo() {
         containerArtistas.innerHTML = `<div class="empty">Nenhum artista cadastrado.</div>`;
     } else {
         containerArtistas.innerHTML = artistasCache.map(a => `
-            <div class="card">
-                <img class="cover" src="${a.foto_url || 'https://via.placeholder.com/500'}">
+            <div class="card" onclick="window.location.href='artista.html?nome=${encodeURIComponent(a.nome)}'">
+                <img class="cover" src="${a.foto_url || 'https://via.placeholder.com/500'}" onerror="this.src='https://via.placeholder.com/500'">
                 <h3>${a.nome}</h3>
             </div>
         `).join('');
     }
 }
 
-function tocar(index) {
+async function tocarMusicaPorIndex(index) {
+    if (index < 0 || index >= musicas.length) return;
+    musicaAtualIndex = index;
     const m = musicas[index];
-    const audio = document.getElementById("audio");
-    audio.src = m.audio;
-    audio.play();
+
     document.getElementById("miniPlayer").style.display = "flex";
     document.getElementById("miniMusica").textContent = m.nome;
     document.getElementById("miniArtista").textContent = m.artistaFormatado;
     document.getElementById("miniCapa").src = m.capa;
+
+    document.getElementById("modalMusica").textContent = m.nome;
+    document.getElementById("modalArtista").textContent = m.artistaFormatado;
+    document.getElementById("modalCapa").src = m.capa;
+
+    const audio = document.getElementById("audio");
+    if (!m.audio) { alert("Áudio indisponível."); return; }
+    audio.src = m.audio;
+    audio.play();
+    document.getElementById("btnPlayPauseModal").textContent = "⏸";
+
+    abrirInterfacePlayer();
+
+    m.plays += 1;
+    renderizarTudo();
+    try { await supabaseClient.from('musicas').update({ plays: m.plays }).eq('id', m.id); } catch(e){}
 }
+
+function abrirInterfacePlayer() { if (musicaAtualIndex !== -1) document.getElementById("playerModal").style.display = "flex"; }
+function fecharInterfacePlayer() { document.getElementById("playerModal").style.display = "none"; }
+
+function pausarRetomar() {
+    const audio = document.getElementById("audio");
+    const btn = document.getElementById("btnPlayPauseModal");
+    if (audio.paused) { audio.play(); btn.textContent = "⏸"; } 
+    else { audio.pause(); btn.textContent = "▶"; }
+}
+
+function atualizarBarraProgresso() {
+    const audio = document.getElementById("audio");
+    if (isNaN(audio.duration)) return;
+    document.getElementById("progressBarFill").style.width = (audio.currentTime / audio.duration) * 100 + "%";
+    document.getElementById("currentTime").textContent = formatarTempo(audio.currentTime);
+    document.getElementById("durationTime").textContent = formatarTempo(audio.duration);
+}
+
+function mudarProgresso(event) {
+    const audio = document.getElementById("audio");
+    const bg = document.getElementById("progressBarBg");
+    if (!audio.duration) return;
+    audio.currentTime = (event.offsetX / bg.clientWidth) * audio.duration;
+}
+
+function formatarTempo(sec) {
+    const min = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${min}:${s < 10 ? '0' : ''}${s}`;
+}
+
+function tocarProxima() {
+    if (musicas.length === 0) return;
+    let next = modoShuffle ? Math.floor(Math.random() * musicas.length) : (musicaAtualIndex + 1) % musicas.length;
+    tocarMusicaPorIndex(next);
+}
+
+function tocarAnterior() {
+    if (musicas.length === 0) return;
+    let prev = (musicaAtualIndex - 1 + musicas.length) % musicas.length;
+    tocarMusicaPorIndex(prev);
+}
+
+function lidarFimDaMusica() {
+    if (modoRepeat) { document.getElementById("audio").currentTime = 0; document.getElementById("audio").play(); } 
+    else { tocarProxima(); }
+}
+
+function toggleShuffle() { modoShuffle = !modoShuffle; document.getElementById("btnShuffle").classList.toggle("active", modoShuffle); }
+function toggleRepeat() { modoRepeat = !modoRepeat; document.getElementById("btnRepeat").classList.toggle("active", modoRepeat); }
 
 function pesquisar() {
     const termo = document.getElementById("pesquisa").value.toLowerCase();
     const filtrado = musicas.filter(m => m.nome.toLowerCase().includes(termo) || m.artistaFormatado.toLowerCase().includes(termo));
-    // Renderiza apenas os filtrados de forma rápida
     const container = document.getElementById("listaMusicas");
     if(filtrado.length === 0) {
-        container.innerHTML = `<div class="empty">Nenhum resultado encontrado.</div>`;
+        container.innerHTML = `<div class="empty">Nenhuma música encontrada.</div>`;
     } else {
         container.innerHTML = filtrado.map(m => `
             <div class="card">
@@ -219,12 +386,26 @@ function pesquisar() {
                 <h3>${m.nome}</h3>
                 <p>${m.artistaFormatado}</p>
                 <div class="card-plays">▶ ${m.plays} plays</div>
+                <button class="play" onclick="tocarMusicaPorIndex(${musicas.findIndex(x => x.id === m.id)})">▶ Ouvir guia</button>
             </div>
         `).join('');
     }
 }
 
-// Executa direto para evitar travamento de carregamento de DOM
+function irInicio() { window.scrollTo({ top: 0, behavior: "smooth" }); }
+function mostrarMusicas() { document.getElementById("listaMusicas").scrollIntoView({ behavior: "smooth" }); }
+function mostrarArtistas() { document.getElementById("listaArtistas").scrollIntoView({ behavior: "smooth" }); }
+function abrirADM() { document.getElementById("modalLogin").style.display = "flex"; }
+function fecharModal(id) { document.getElementById(id).style.display = "none"; }
+
+async function loginADM() {
+    const email = document.getElementById("emailADM").value.trim();
+    const senha = document.getElementById("senhaADM").value.trim();
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password: senha });
+    if (error) { alert("Dados incorretos."); return; }
+    window.location.href = "upload.html";
+}
+
 iniciarApp();
 </script>
 </body>
