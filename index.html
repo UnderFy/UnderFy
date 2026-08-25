@@ -233,7 +233,7 @@ main{
 
 
 /* ==========================================================
-   INTERFACE DE REPRODUÇÃO (ESTILO DA INSPIRAÇÃO)
+   INTERFACE DE REPRODUÇÃO
 ========================================================== */
 .player-modal{
     display:none;
@@ -322,7 +322,7 @@ main{
     text-overflow:ellipsis;
 }
 
-/* CONTROLES CENTRAIS ESTILO APP */
+/* CONTROLES CENTRAIS */
 .player-actions{
     display:flex;
     align-items:center;
@@ -395,7 +395,6 @@ main{
     margin-top:8px;
 }
 
-/* FOOTER ICONS DO CARD */
 .player-card-footer{
     display:flex;
     justify-content:space-around;
@@ -413,7 +412,6 @@ main{
     cursor:pointer;
 }
 .footer-icon-btn:hover{color:#1ed760;}
-
 
 /* NAV INFERIOR */
 nav{
@@ -551,7 +549,7 @@ input:focus{border-color:#1ed760;}
 </main>
 </div>
 
-<!-- MINI PLAYER FIXO (Rodapé) -->
+<!-- MINI PLAYER FIXO -->
 <div class="mini-player" id="miniPlayer" onclick="abrirInterfacePlayer()">
     <img id="miniCapa" src="">
     <div class="mini-player-info">
@@ -561,10 +559,7 @@ input:focus{border-color:#1ed760;}
     <button style="background:none;border:0;color:#1ed760;font-size:22px;margin-right:10px;" onclick="event.stopPropagation(); pausarRetomar();">⏸</button>
 </div>
 
-
-<!-- ==========================================================
-   TELA / MODAL DO PLAYER (ESTILO INSPIRAÇÃO)
-========================================================== -->
+<!-- TELA / MODAL DO PLAYER -->
 <div class="player-modal" id="playerModal">
     <div class="player-card">
         
@@ -583,7 +578,6 @@ input:focus{border-color:#1ed760;}
             <p id="modalArtista">Artista</p>
         </div>
 
-        <!-- BARRA DE PROGRESSO INTERATIVA -->
         <div class="progress-container">
             <div class="progress-bar-bg" id="progressBarBg" onclick="mudarProgresso(event)">
                 <div class="progress-bar-fill" id="progressBarFill"></div>
@@ -594,7 +588,6 @@ input:focus{border-color:#1ed760;}
             </div>
         </div>
 
-        <!-- CONTROLES -->
         <div class="player-actions">
             <button class="action-btn" id="btnShuffle" onclick="toggleShuffle()" title="Aleatório">🔀</button>
             <button class="action-btn" onclick="tocarAnterior()" title="Anterior">⏮</button>
@@ -605,7 +598,6 @@ input:focus{border-color:#1ed760;}
             <button class="action-btn" id="btnRepeat" onclick="toggleRepeat()" title="Repetir">🔁</button>
         </div>
 
-        <!-- FOOTER ICONS DO CARD -->
         <div class="player-card-footer">
             <button class="footer-icon-btn" title="Lista de Guias">🎵</button>
             <button class="footer-icon-btn" onclick="favoritarMusica()" title="Curtir">❤️</button>
@@ -615,11 +607,8 @@ input:focus{border-color:#1ed760;}
     </div>
 </div>
 
-<!-- ELEMENTO AUDIO OCULTO -->
 <audio id="audio" style="display:none;"></audio>
 
-
-<!-- NAV -->
 <nav>
     <button onclick="irInicio()">🏠<br>Início</button>
     <button onclick="mostrarMusicas()">🎵<br>Guias</button>
@@ -627,7 +616,6 @@ input:focus{border-color:#1ed760;}
     <button onclick="abrirADM()">⚙️<br>ADM</button>
 </nav>
 
-<!-- MODAL LOGIN -->
 <div class="modal" id="modalLogin">
 <div class="modal-content">
 <button class="close" onclick="fecharModal('modalLogin')">×</button>
@@ -661,25 +649,18 @@ async function carregarDadosDoSupabase() {
     try {
         await verificarSessaoAdmin();
 
-        const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Tempo limite esgotado ao conectar com o Supabase.')), 10000)
-        );
+        // 1. Busca artistas com tratamento de erro isolado
+        const { data: dadosArtistas, error: errArt } = await supabaseClient.from('artistas').select('*').order('nome', { ascending: true });
+        if (errArt) throw new Error("Erro na tabela 'artistas': " + errArt.message);
+        artistasCache = dadosArtistas || [];
 
-        const fetchPromise = (async () => {
-            const { data: dadosArtistas, error: errArt } = await supabaseClient.from('artistas').select('*').order('nome', { ascending: true });
-            if (errArt) throw errArt;
-            artistasCache = dadosArtistas || [];
+        // 2. Busca músicas
+        const { data: dadosMusicas, error: errMus } = await supabaseClient.from('musicas').select('*').order('created_at', { ascending: false });
+        if (errMus) throw new Error("Erro na tabela 'musicas': " + errMus.message);
 
-            const { data: dadosMusicas, error: errMus } = await supabaseClient.from('musicas').select('*').order('created_at', { ascending: false });
-            if (errMus) throw errMus;
-
-            const { data: dadosRelacao, error: errRel } = await supabaseClient.from('musica_artistas').select('*');
-            if (errRel) throw errRel;
-
-            return { dadosMusicas, dadosRelacao };
-        })();
-
-        const { dadosMusicas, dadosRelacao } = await Promise.race([fetchPromise, timeoutPromise]);
+        // 3. Busca relações
+        const { data: dadosRelacao, error: errRel } = await supabaseClient.from('musica_artistas').select('*');
+        if (errRel) throw new Error("Erro na tabela 'musica_artistas': " + errRel.message);
 
         musicas = (dadosMusicas || []).map(m => {
             const relsDaMusica = (dadosRelacao || []).filter(r => r.musica_id === m.id);
@@ -710,9 +691,9 @@ async function carregarDadosDoSupabase() {
         audio.addEventListener('timeupdate', atualizarBarraProgresso);
 
     } catch (error) {
-        console.error('Erro ao carregar dados:', error.message);
-        document.getElementById("listaMusicas").innerHTML = `<div class="empty" style="color: #ff5555;">Erro ao carregar guias: ${error.message}</div>`;
-        document.getElementById("listaArtistas").innerHTML = `<div class="empty" style="color: #ff5555;">Falha ao carregar artistas.</div>`;
+        console.error('Erro detalhado:', error);
+        document.getElementById("listaMusicas").innerHTML = `<div class="empty" style="color: #ff5555; text-align: left; padding: 15px;"><strong>Falha ao carregar:</strong><br>${error.message}</div>`;
+        document.getElementById("listaArtistas").innerHTML = `<div class="empty" style="color: #ff5555;">Erro de conexão.</div>`;
     }
 }
 
@@ -780,7 +761,6 @@ function renderizarArtistasNaTela() {
     });
 }
 
-// Lógica de Tocar Música e Abrir Interface
 async function tocarMusicaPorIndex(index) {
     if (index < 0 || index >= musicas.length) return;
     musicaAtualIndex = index;
@@ -817,4 +797,27 @@ async function tocarMusicaPorIndex(index) {
 
 function abrirInterfacePlayer() {
     if (musicaAtualIndex === -1) return;
-    document.getElementById("playerModal").style.display
+    document.getElementById("playerModal").style.display = "flex";
+}
+
+function fecharInterfacePlayer() {
+    document.getElementById("playerModal").style.display = "none";
+}
+
+function pausarRetomar() {
+    const audio = document.getElementById("audio");
+    const btn = document.getElementById("btnPlayPauseModal");
+    if (audio.paused) {
+        audio.play();
+        btn.textContent = "⏸";
+    } else {
+        audio.pause();
+        btn.textContent = "▶";
+    }
+}
+
+function atualizarBarraProgresso() {
+    const audio = document.getElementById("audio");
+    if (isNaN(audio.duration)) return;
+    
+    const
