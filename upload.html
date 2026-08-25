@@ -140,7 +140,7 @@ input[type="file"]{
 <body>
 
 <div class="upload-container">
-    <a href="upload.html" onclick="event.preventDefault(); window.location.href='upload.html'.replace('upload','index'); /* Ajuste para voltar ao painel adm */" class="btn-voltar" style="cursor:pointer;" onclick="history.back()">← Voltar ao Painel ADM</a>
+    <a href="index.html" class="btn-voltar">← Voltar ao Painel ADM</a>
     
     <h1>Novo Cadastro</h1>
     <p class="sub">Adicione novas guias, artistas ou projetos ao UnderFy.</p>
@@ -220,6 +220,8 @@ input[type="file"]{
 <script>
 const SUPABASE_URL = "https://gnibzbnypirjrcaoibkx.supabase.co";
 const SUPABASE_KEY = "sb_publishable_b9yvSbmWOLVJvq4AB4CLmQ_VRuzpG5T";
+const BUCKET_NAME = "underfy-files"; // Nome padronizado do bucket
+
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -245,7 +247,7 @@ function mostrarToast(mensagem, erro = false){
     setTimeout(() => {
         toast.style.opacity = "0";
         toast.style.transform = "translate(-50%,20px)";
-    }, 3000);
+    }, 4000);
 }
 
 async function carregarArtistasSelect(){
@@ -273,15 +275,18 @@ async function enviarParaStorage(file, pasta){
     const caminho = `${pasta}/${nomeUnico}`;
 
     const { data, error } = await supabaseClient.storage
-        .from("underfy-files") // Certifique-se de que o bucket no Supabase chama 'underfy-files' ou altere aqui
+        .from(BUCKET_NAME)
         .upload(caminho, file);
 
     if(error){
-        throw new Error("Erro no upload do arquivo: " + error.message);
+        if(error.message.includes("Bucket not found") || error.message.includes("not found")){
+            throw new Error("Erro: O bucket 'underfy-files' não foi encontrado no Supabase. Crie-o na aba Storage.");
+        }
+        throw new Error("Erro no upload: " + error.message);
     }
 
     const { data: urlData } = supabaseClient.storage
-        .from("underfy-files")
+        .from(BUCKET_NAME)
         .getPublicUrl(caminho);
 
     return urlData.publicUrl;
@@ -307,8 +312,7 @@ async function cadastrarArtista(e){
         if(error) throw error;
 
         mostrarToast("Artista cadastrado com sucesso!");
-        document.getElementById("artistaNome").value = "";
-        document.getElementById("artistaFoto").value = "";
+        e.target.reset();
         carregarArtistasSelect();
     } catch(err) {
         console.error(err);
