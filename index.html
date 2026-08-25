@@ -43,6 +43,15 @@ main{width:90%;max-width:1200px;margin:auto;}
 .card h3{margin-top:12px;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .card p{color:#999;margin-top:5px;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .card-plays{color:#1ed760;font-size:12px;margin-top:4px;font-weight:bold;}
+
+/* BOTÃO DE REMOVER GUIA NO CARD */
+.delete-card-btn{
+    position:absolute;top:14px;right:14px;background:rgba(0,0,0,0.7);
+    color:#ff5555;border:1px solid #ff5555;width:28px;height:28px;border-radius:50%;
+    font-size:12px;display:none;align-items:center;justify-content:center;z-index:5;
+}
+.delete-card-btn:hover{background:#ff5555;color:#000;}
+
 .play{
     margin-top:12px;width:100%;border:0;background:#1ed760;color:#000;padding:10px;
     border-radius:20px;font-weight:bold;display:flex;align-items:center;justify-content:center;gap:6px;
@@ -236,12 +245,21 @@ let artistasCache = [];
 let musicaAtualIndex = -1;
 let modoShuffle = false;
 let modoRepeat = false;
+let usuarioLogado = false;
 
 document.addEventListener("DOMContentLoaded", () => {
     iniciarApp();
 });
 
 async function iniciarApp() {
+    // Verifica se já existe uma sessão ativa do Supabase
+    supabaseClient.auth.getSession().then(({ data }) => {
+        if (data && data.session) {
+            usuarioLogado = true;
+            renderizarTudo();
+        }
+    }).catch(() => {});
+
     try {
         const fetchComTimeout = (promise) => {
             return Promise.race([
@@ -296,6 +314,7 @@ function renderizarTudo() {
     } else {
         container.innerHTML = musicas.map((m, index) => `
             <div class="card">
+                ${usuarioLogado ? `<button class="delete-card-btn" style="display:flex;" onclick="event.stopPropagation(); removerGuia('${m.id}')" title="Remover Guia">&#10005;</button>` : ''}
                 <img class="cover" src="${m.capa}" onerror="this.src='https://via.placeholder.com/500'">
                 <h3>${m.nome}</h3>
                 <p>${m.artistaFormatado}</p>
@@ -317,6 +336,24 @@ function renderizarTudo() {
                 <h3>${a.nome}</h3>
             </div>
         `).join('');
+    }
+}
+
+async function removerGuia(id) {
+    if (!confirm("Deseja realmente remover esta guia do UnderFy?")) return;
+    
+    try {
+        // Remove primeiro a relação na tabela associativa
+        await supabaseClient.from('musica_artistas').delete().eq('musica_id', id);
+        // Depois remove a música principal
+        const { error } = await supabaseClient.from('musicas').delete().eq('id', id);
+        if (error) throw error;
+
+        musicas = musicas.filter(m => m.id !== id);
+        renderizarTudo();
+    } catch (err) {
+        console.error("Erro ao remover:", err);
+        alert("Erro ao excluir a música.");
     }
 }
 
@@ -431,31 +468,4 @@ function pesquisar() {
     } else {
         container.innerHTML = filtrado.map(m => `
             <div class="card">
-                <img class="cover" src="${m.capa}">
-                <h3>${m.nome}</h3>
-                <p>${m.artistaFormatado}</p>
-                <div class="card-plays">${m.plays} reproduções</div>
-                <button class="play" onclick="tocarMusicaPorIndex(${musicas.findIndex(x => x.id === m.id)})">
-                    &#9654; OUVIR GUIA
-                </button>
-            </div>
-        `).join('');
-    }
-}
-
-function irInicio() { window.scrollTo({ top: 0, behavior: "smooth" }); }
-function mostrarMusicas() { document.getElementById("listaMusicas").scrollIntoView({ behavior: "smooth" }); }
-function mostrarArtistas() { document.getElementById("listaArtistas").scrollIntoView({ behavior: "smooth" }); }
-function abrirADM() { document.getElementById("modalLogin").style.display = "flex"; }
-function fecharModal(id) { document.getElementById(id).style.display = "none"; }
-
-async function loginADM() {
-    const email = document.getElementById("emailADM").value.trim();
-    const senha = document.getElementById("senhaADM").value.trim();
-    const { error } = await supabaseClient.auth.signInWithPassword({ email, password: senha });
-    if (error) { alert("Dados incorretos."); return; }
-    window.location.href = "upload.html";
-}
-</script>
-</body>
-</html>
+                ${usuarioLogado ? `<button class="delete-card-bt
