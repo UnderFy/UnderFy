@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Playlist do Artista • UnderFy</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#0b0b0b;color:#fff;font-family:Arial,Helvetica,sans-serif;padding-bottom:110px;}
+.container{width:90%;max-width:900px;margin:auto;padding-top:30px;}
+.back-link{display:inline-block;margin-bottom:20px;color:#888;text-decoration:none;font-size:14px;}
+.back-link:hover{color:#fff;}
+
+.artist-header{
+    display:flex;
+    align-items:center;
+    gap:25px;
+    background:linear-gradient(135deg,#171717,#063d20);
+    padding:30px;
+    border-radius:20px;
+    margin-bottom:30px;
+}
+.artist-header img{
+    width:120px;
+    height:120px;
+    object-fit:cover;
+    border-radius:50%;
+    border:3px solid #1ed760;
+}
+.artist-info h1{font-size:32px;margin-bottom:8px;}
+.artist-info p{color:#aaa;font-size:15px;}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+    gap:18px;
+}
+.card{
+    background:#151515;
+    padding:14px;
+    border-radius:15px;
+    position:relative;
+}
+.cover{
+    width:100%;
+    aspect-ratio:1;
+    object-fit:cover;
+    border-radius:10px;
+    background:#252525;
+}
+.card h3{margin-top:12px;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card p{color:#999;margin-top:5px;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-plays{color:#1ed760;font-size:12px;margin-top:4px;font-weight:bold;}
+.play{
+    margin-top:12px;width:100%;border:0;background:#1ed760;color:#000;
+    padding:10px;border-radius:20px;font-weight:bold;cursor:pointer;
+}
+
+/* PLAYER FIXO */
+.player{
+    position:fixed;bottom:0;left:0;right:0;z-index:30;
+    background:#171717;border-top:1px solid #292929;
+    padding:12px 5%;display:none;align-items:center;gap:15px;
+}
+.player img{width:50px;height:50px;object-fit:cover;border-radius:7px;}
+.player-info{flex:1;min-width:0;}
+.player-info strong, .player-info span{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.player-info span{color:#999;font-size:13px;margin-top:3px;}
+audio{max-width:300px;}
+.empty{color:#888;text-align:center;padding:30px 10px;grid-column:1/-1;}
+
+@media(max-width:600px){
+    .artist-header{flex-direction:column;text-align:center;}
+    .grid{grid-template-columns:repeat(2,1fr);gap:12px;}
+    audio{width:130px;}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <a href="index.html" class="back-link">← Voltar para o início</a>
+
+    <!-- CABEÇALHO DO ARTISTA -->
+    <div class="artist-header" id="cabecalhoArtista">
+        <div class="empty">Carregando artista...</div>
+    </div>
+
+    <h2 style="margin-bottom: 18px; font-size: 20px;">🎧 Guias e Participações</h2>
+
+    <!-- LISTA DE GUIAS DO ARTISTA -->
+    <div class="grid" id="listaMusicasArtista">
+        <div class="empty">Carregando guias...</div>
+    </div>
+</div>
+
+<!-- PLAYER -->
+<div class="player" id="player">
+    <img id="playerCapa" src="">
+    <div class="player-info">
+        <strong id="playerMusica">Música</strong>
+        <span id="playerArtista">Artista</span>
+    </div>
+    <audio id="audio" controls></audio>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://gnibzbnypirjrcaoibkx.supabase.co";
+const SUPABASE_KEY = "sb_publishable_b9yvSbmWOLVJvq4AB4CLmQ_VRuzpG5T";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Pega o nome do artista enviado pela URL (ex: artista.html?nome=ASTRO)
+const urlParams = new URLSearchParams(window.location.search);
+const nomeArtistaParam = urlParams.get('nome');
+
+async function carregarPaginaArtista() {
+    if (!nomeArtistaParam) {
+        window.location.href = "index.html";
+        return;
+    }
+
+    try {
+        // 1. Busca os dados do artista
+        const { data: artistaData, error: errArtista } = await supabaseClient
+            .from('artistas')
+            .select('*')
+            .ilike('nome', nomeArtistaParam)
+            .single();
+
+        if (errArtista || !artistaData) {
+            document.getElementById("cabecalhoArtista").innerHTML = `<div class="empty">Artista não encontrado.</div>`;
+            return;
+        }
+
+        // Renderiza o topo com a foto e nome do artista
+        document.getElementById("cabecalhoArtista").innerHTML = `
+            <img src="${artistaData.foto_url || 'https://via.placeholder.com/500'}" onerror="this.src='https://via.placeholder.com/500'">
+            <div class="artist-info">
+                <h1>${artistaData.nome}</h1>
+                <p>Playlist oficial de guias e participações no UnderFy</p>
+            </div>
+        `;
+
+        // 2. Busca todas as músicas e relações para filtrar as deste artista
+        const { data: dadosMusicas } = await supabaseClient.from('musicas').select('*');
+        const { data: dadosRelacao } = await supabaseClient.from('musica_artistas').select('*');
+        const { data: artistasCache } = await supabaseClient.from('artistas').select('*');
+
+        const musicasFormatadas = (dadosMusicas || []).map(m => {
+            const relsDaMusica = (dadosRelacao || []).filter(r => r.musica_id === m.id);
+            const objsArtistas = relsDaMusica.map(r => artistasCache.find(a => a.id === r.artista_id)).filter(Boolean);
+            const artistasNomes = objsArtistas.length > 0 ? objsArtistas.map(a => a.nome) : ['Desconhecido'];
+
+            let textoArtistaFormatado = artistasNomes[0];
+            if (artistasNomes.length > 1) {
+                textoArtistaFormatado += ` feat. ${artistasNomes.slice(1).join(', ')}`;
+            }
+
+            return {
+                id: m.id,
+                nome: m.nome,
+                artistas: artistasNomes,
+                artistaFormatado: textoArtistaFormatado,
+                capa: m.capa_url || 'https://via.placeholder.com/500',
+                audio: m.audio_url || '',
+                plays: m.plays || 0
+            };
+        });
+
+        // Filtra apenas as músicas onde este artista participa
+        const minhasMusicas = musicasFormatadas.filter(m => m.artistas.includes(artistaData.nome));
+        
+        const container = document.getElementById("listaMusicasArtista");
+        container.innerHTML = "";
+
+        if (minhasMusicas.length === 0) {
+            container.innerHTML = `<div class="empty">Este artista ainda não possui guias cadastradas.</div>`;
+            return;
+        }
+
+        minhasMusicas.forEach(musica => {
+            container.innerHTML += `
+            <div class="card">
+                <img class="cover" src="${musica.capa}" onerror="this.src='https://via.placeholder.com/500'">
+                <h3>${musica.nome}</h3>
+                <p>${musica.artistaFormatado}</p>
+                <div class="card-plays">▶ ${musica.plays} reprodução(ões)</div>
+                <button class="play" onclick="tocarMusica('${musica.audio}', '${musica.nome}', '${musica.artistaFormatado}', '${musica.capa}')">
+                    ▶ Ouvir guia
+                </button>
+            </div>
+            `;
+        });
+
+    } catch (err) {
+        console.error("Erro:", err);
+    }
+}
+
+function tocarMusica(audioUrl, nome, artista, capa) {
+    if (!audioUrl) {
+        alert("Essa guia não possui áudio cadastrado.");
+        return;
+    }
+    document.getElementById("player").style.display = "flex";
+    document.getElementById("playerMusica").textContent = nome;
+    document.getElementById("playerArtista").textContent = artista;
+    document.getElementById("playerCapa").src = capa;
+    
+    const audio = document.getElementById("audio");
+    audio.src = audioUrl;
+    audio.play();
+}
+
+document.addEventListener('DOMContentLoaded', carregarPaginaArtista);
+</script>
+
+</body>
+</html>
+
