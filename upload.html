@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
 
 <meta charset="UTF-8">
@@ -27,6 +28,7 @@ body{
 }
 
 .container{
+    width:100%;
     max-width:650px;
     margin:auto;
     background:#151515;
@@ -59,44 +61,33 @@ input,
 select{
 
     width:100%;
-
     padding:12px;
-
     margin-bottom:18px;
 
     background:#202020;
-
     border:1px solid #333;
 
     color:#fff;
 
     border-radius:9px;
-
     outline:none;
 
     font:inherit;
-
 }
 
 input[type="file"]{
-
     padding:9px;
-
     cursor:pointer;
-
 }
 
 input:focus,
 select:focus{
-
     border-color:#1ed760;
-
 }
 
 .checkbox-group{
 
     background:#202020;
-
     border:1px solid #333;
 
     border-radius:9px;
@@ -108,7 +99,6 @@ select:focus{
     overflow-y:auto;
 
     margin-bottom:18px;
-
 }
 
 .checkbox-item{
@@ -124,7 +114,6 @@ select:focus{
     font-size:14px;
 
     cursor:pointer;
-
 }
 
 .checkbox-item input{
@@ -134,7 +123,6 @@ select:focus{
     margin:0;
 
     cursor:pointer;
-
 }
 
 .btn{
@@ -158,13 +146,10 @@ select:focus{
     font:inherit;
 
     transition:.2s;
-
 }
 
 .btn:hover{
-
     opacity:.9;
-
 }
 
 .btn:disabled{
@@ -172,7 +157,6 @@ select:focus{
     opacity:.5;
 
     cursor:not-allowed;
-
 }
 
 .back-link{
@@ -186,13 +170,10 @@ select:focus{
     text-decoration:none;
 
     font-size:14px;
-
 }
 
 .back-link:hover{
-
     color:#fff;
-
 }
 
 #loadingMsg{
@@ -206,7 +187,6 @@ select:focus{
     margin-bottom:15px;
 
     font-weight:bold;
-
 }
 
 .status{
@@ -220,7 +200,6 @@ select:focus{
     margin-bottom:15px;
 
     font-size:14px;
-
 }
 
 .status.success{
@@ -230,7 +209,6 @@ select:focus{
     background:#12351f;
 
     color:#1ed760;
-
 }
 
 .status.error{
@@ -240,11 +218,29 @@ select:focus{
     background:#351414;
 
     color:#ff6666;
-
 }
 
+.separador{
 
-/* GUIAS */
+    margin-top:40px;
+
+    border-top:1px solid #222;
+
+    padding-top:25px;
+}
+
+.lista-vazia{
+
+    text-align:center;
+
+    color:#888;
+
+    padding:25px 10px;
+
+    background:#202020;
+
+    border-radius:12px;
+}
 
 .guia-item{
 
@@ -263,7 +259,6 @@ select:focus{
     align-items:center;
 
     gap:12px;
-
 }
 
 .guia-capa{
@@ -279,7 +274,6 @@ select:focus{
     flex-shrink:0;
 
     background:#292929;
-
 }
 
 .guia-info{
@@ -287,7 +281,6 @@ select:focus{
     flex:1;
 
     min-width:0;
-
 }
 
 .guia-nome{
@@ -301,7 +294,6 @@ select:focus{
     overflow:hidden;
 
     text-overflow:ellipsis;
-
 }
 
 .guia-plays{
@@ -313,7 +305,6 @@ select:focus{
     font-size:12px;
 
     margin-top:5px;
-
 }
 
 .btn-excluir{
@@ -333,76 +324,35 @@ select:focus{
     cursor:pointer;
 
     flex-shrink:0;
-
 }
 
 .btn-excluir:hover{
 
     background:#ff4d5a;
-
 }
-
-.lista-vazia{
-
-    text-align:center;
-
-    color:#888;
-
-    padding:25px 10px;
-
-    background:#202020;
-
-    border-radius:12px;
-
-}
-
-.separador{
-
-    margin-top:40px;
-
-    border-top:1px solid #222;
-
-    padding-top:25px;
-
-}
-
-
-/* MOBILE */
 
 @media(max-width:500px){
 
     body{
-
         padding:15px 10px;
-
     }
 
     .container{
-
         padding:20px 15px;
-
     }
 
     .guia-item{
-
         padding:10px;
-
     }
 
     .guia-capa{
-
         width:52px;
-
         height:52px;
-
     }
 
     .btn-excluir{
-
         padding:8px 10px;
-
         font-size:12px;
-
     }
 
 }
@@ -423,9 +373,8 @@ select:focus{
 </a>
 
 <h1>
-    Painel de Cadastro • UnderFy
+    Painel ADM • UnderFy
 </h1>
-
 
 <div
     id="status"
@@ -434,7 +383,7 @@ select:focus{
 
 
 <!-- =========================
-     ARTISTA
+     CADASTRAR ARTISTA
 ========================= -->
 
 <div id="formArtista">
@@ -474,7 +423,7 @@ select:focus{
 
 
 <!-- =========================
-     MÚSICA
+     CADASTRAR GUIA
 ========================= -->
 
 <div
@@ -531,9 +480,7 @@ select:focus{
         accept="audio/*"
     >
 
-    <div
-        id="loadingMsg"
-    >
+    <div id="loadingMsg">
         Enviando arquivos e salvando...
         Aguarde ⏳
     </div>
@@ -548,9 +495,8 @@ select:focus{
 
 </div>
 
-
 <!-- =========================
-     PROJETO
+     CADASTRAR PROJETO
 ========================= -->
 
 <div
@@ -626,8 +572,6 @@ select:focus{
 </div>
 
 
-</div>
-
 <!-- =========================
      GERENCIAR ARTISTAS
 ========================= -->
@@ -652,17 +596,25 @@ select:focus{
 </div>
 
 
-<!-- SUPABASE -->
+</div>
+
+
+<!-- =========================
+     SUPABASE
+========================= -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 
 <script>
 
 const SUPABASE_URL =
     "https://gnibzbnypirjrcaoibkx.supabase.co";
 
+
 const SUPABASE_KEY =
     "sb_publishable_b9yvSbmWOLVJvq4AB4CLmQ_VRuzpG5T";
+
 
 const supabaseClient =
     supabase.createClient(
@@ -671,179 +623,123 @@ const supabaseClient =
     );
 
 
+/* =========================
+   VARIÁVEIS
+========================= */
+
 let artistasDisponiveis = [];
 
 
-/* ================================
-   VERIFICAR LOGIN
-================================ */
+/* =========================
+   STATUS
+========================= */
 
-async function checarAuth(){
+function mostrarStatus(
+    mensagem,
+    tipo
+){
 
-    const {
-        data: {
-            session
-        }
-    } =
-        await supabaseClient
-        .auth
-        .getSession();
-
-
-    if(!session){
-
-        alert(
-            "Área restrita! Faça login no site principal primeiro."
-        );
-
-        window.location.href =
-            "index.html";
-
-        return false;
-
-    }
-
-    return true;
-
-}
-
-
-/* ================================
-   CARREGAR ARTISTAS
-================================ */
-
-async function carregarArtistasParaSelecao(){
-
-    const autorizado =
-        await checarAuth();
-
-
-    if(!autorizado){
-
-        return;
-
-    }
-
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-        .from("artistas")
-        .select("*")
-        .order(
-            "nome",
-            {
-                ascending:true
-            }
-        );
-
-
-    if(error){
-
-        console.error(
-            "Erro ao carregar artistas:",
-            error
-        );
-
+    const status =
         document.getElementById(
-            "listaArtistasCheckbox"
-        ).innerHTML = `
-
-            <span style="color:#ff5555;font-size:13px;">
-                Erro ao carregar artistas.
-            </span>
-
-        `;
-
-        return;
-
-    }
-
-
-    artistasDisponiveis =
-        data || [];
-
-
-    const container =
-        document.getElementById(
-            "listaArtistasCheckbox"
+            "status"
         );
 
 
-    container.innerHTML = "";
-
-
-    if(
-        artistasDisponiveis.length === 0
-    ){
-
-        container.innerHTML = `
-
-            <span style="color:#888;font-size:13px;">
-                Nenhum artista cadastrado ainda.
-            </span>
-
-        `;
-
+    if(!status){
         return;
-
     }
 
 
-    artistasDisponiveis.forEach(
-        function(artista){
-
-            const label =
-                document.createElement(
-                    "label"
-                );
-
-            label.className =
-                "checkbox-item";
+    status.textContent =
+        mensagem;
 
 
-            const checkbox =
-                document.createElement(
-                    "input"
-                );
-
-            checkbox.type =
-                "checkbox";
-
-            checkbox.name =
-                "artistaCheck";
-
-            checkbox.value =
-                artista.id;
+    status.className =
+        "status " + tipo;
 
 
-            label.appendChild(
-                checkbox
-            );
+    setTimeout(
+        function(){
 
+            status.className =
+                "status";
 
-            label.appendChild(
-                document.createTextNode(
-                    " " + artista.nome
-                )
-            );
+            status.textContent =
+                "";
 
-
-            container.appendChild(
-                label
-            );
-
-        }
+        },
+        5000
     );
 
 }
 
 
-/* ================================
+/* =========================
+   AUTENTICAÇÃO
+========================= */
+
+async function checarAuth(){
+
+    try{
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+            .auth
+            .getSession();
+
+
+        if(error){
+
+            console.error(
+                "Erro de autenticação:",
+                error
+            );
+
+            return false;
+
+        }
+
+
+        if(!data.session){
+
+            alert(
+                "Área restrita! Faça login no site principal primeiro."
+            );
+
+
+            window.location.href =
+                "index.html";
+
+
+            return false;
+
+        }
+
+
+        return true;
+
+
+    }catch(error){
+
+        console.error(
+            "Erro ao verificar login:",
+            error
+        );
+
+
+        return false;
+
+    }
+
+}
+
+
+/* =========================
    UPLOAD DE ARQUIVO
-================================ */
+========================= */
 
 async function fazerUploadArquivo(
     file,
@@ -869,8 +765,8 @@ async function fazerUploadArquivo(
         Date.now() +
         "_" +
         Math.random()
-        .toString(36)
-        .substring(2,8) +
+            .toString(36)
+            .substring(2,8) +
         "_" +
         nomeSeguro;
 
@@ -901,7 +797,7 @@ async function fazerUploadArquivo(
 
 
     const {
-        data:urlData
+        data: urlData
     } =
         supabaseClient
         .storage
@@ -915,57 +811,170 @@ async function fazerUploadArquivo(
 
 }
 
+/* =========================
+   CARREGAR ARTISTAS
+   PARA SELEÇÃO DAS GUIAS
+========================= */
 
-/* ================================
-   MOSTRAR STATUS
-================================ */
+async function carregarArtistasParaSelecao(){
 
-function mostrarStatus(
-    mensagem,
-    tipo
-){
-
-    const status =
+    const container =
         document.getElementById(
-            "status"
+            "listaArtistasCheckbox"
         );
 
 
-    status.textContent =
-        mensagem;
+    if(!container){
+        return;
+    }
 
 
-    status.className =
-        "status " + tipo;
+    container.innerHTML = `
+        <span style="color:#888;font-size:13px;">
+            Carregando artistas...
+        </span>
+    `;
 
 
-    setTimeout(
-        function(){
+    try{
 
-            status.className =
-                "status";
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+            .from("artistas")
+            .select("id,nome")
+            .order(
+                "nome",
+                {
+                    ascending:true
+                }
+            );
 
-        },
-        5000
-    );
+
+        if(error){
+
+            throw error;
+
+        }
+
+
+        artistasDisponiveis =
+            data || [];
+
+
+        container.innerHTML = "";
+
+
+        if(
+            artistasDisponiveis.length === 0
+        ){
+
+            container.innerHTML = `
+                <span style="color:#888;font-size:13px;">
+                    Nenhum artista cadastrado ainda.
+                </span>
+            `;
+
+            return;
+
+        }
+
+
+        artistasDisponiveis.forEach(
+            function(artista){
+
+                const label =
+                    document.createElement(
+                        "label"
+                    );
+
+
+                label.className =
+                    "checkbox-item";
+
+
+                const checkbox =
+                    document.createElement(
+                        "input"
+                    );
+
+
+                checkbox.type =
+                    "checkbox";
+
+
+                checkbox.name =
+                    "artistaCheck";
+
+
+                checkbox.value =
+                    artista.id;
+
+
+                label.appendChild(
+                    checkbox
+                );
+
+
+                label.appendChild(
+                    document.createTextNode(
+                        " " + artista.nome
+                    )
+                );
+
+
+                container.appendChild(
+                    label
+                );
+
+            }
+        );
+
+
+    }catch(error){
+
+        console.error(
+            "Erro ao carregar artistas:",
+            error
+        );
+
+
+        container.innerHTML = `
+            <span
+                style="color:#ff5555;font-size:13px;"
+            >
+                Erro ao carregar artistas.
+            </span>
+        `;
+
+    }
 
 }
 
-/* ================================
+
+/* =========================
    CADASTRAR ARTISTA
-================================ */
+========================= */
 
 async function cadastrarArtista(){
 
     const nome =
-        document.getElementById(
+        document
+        .getElementById(
             "nomeArtista"
-        ).value.trim();
+        )
+        .value
+        .trim();
+
 
     const fotoFile =
-        document.getElementById(
+        document
+        .getElementById(
             "fotoArtistaFile"
-        ).files[0];
+        )
+        .files[0];
 
 
     if(!nome){
@@ -1002,8 +1011,11 @@ async function cadastrarArtista(){
             .from("artistas")
             .insert([
                 {
-                    nome: nome,
-                    foto_url: foto_url
+                    nome:
+                        nome,
+
+                    foto_url:
+                        foto_url
                 }
             ]);
 
@@ -1021,22 +1033,32 @@ async function cadastrarArtista(){
         );
 
 
-        document.getElementById(
+        document
+        .getElementById(
             "nomeArtista"
-        ).value = "";
+        )
+        .value = "";
 
 
-        document.getElementById(
+        document
+        .getElementById(
             "fotoArtistaFile"
-        ).value = "";
+        )
+        .value = "";
 
 
-        carregarArtistasParaSelecao();
+        await carregarArtistasParaSelecao();
+
+        await carregarArtistasADM();
 
 
     }catch(error){
 
-        console.error(error);
+        console.error(
+            "Erro ao cadastrar artista:",
+            error
+        );
+
 
         mostrarStatus(
             "Erro ao cadastrar artista: " +
@@ -1049,31 +1071,38 @@ async function cadastrarArtista(){
 }
 
 
-/* ================================
+/* =========================
    CADASTRAR GUIA
-================================ */
+========================= */
 
 async function cadastrarMusica(){
 
     const nome =
-        document.getElementById(
+        document
+        .getElementById(
             "nomeMusica"
-        ).value.trim();
+        )
+        .value
+        .trim();
 
 
     const capaFile =
-        document.getElementById(
+        document
+        .getElementById(
             "capaMusicaFile"
-        ).files[0];
+        )
+        .files[0];
 
 
     const audioFile =
-        document.getElementById(
+        document
+        .getElementById(
             "audioMusicaFile"
-        ).files[0];
+        )
+        .files[0];
 
 
-    const checkboxesSelecionados =
+    const selecionados =
         document.querySelectorAll(
             'input[name="artistaCheck"]:checked'
         );
@@ -1081,10 +1110,12 @@ async function cadastrarMusica(){
 
     const artistasIds =
         Array.from(
-            checkboxesSelecionados
+            selecionados
         ).map(
-            function(cb){
-                return cb.value;
+            function(checkbox){
+
+                return checkbox.value;
+
             }
         );
 
@@ -1123,12 +1154,12 @@ async function cadastrarMusica(){
         true;
 
 
-    let capa_url = "";
-
-    let audio_url = "";
-
-
     try{
+
+        let capa_url = "";
+
+        let audio_url = "";
+
 
         /* CAPA */
 
@@ -1156,7 +1187,7 @@ async function cadastrarMusica(){
         }
 
 
-        /* CRIAR MÚSICA */
+        /* MÚSICA */
 
         const {
             data: musicaData,
@@ -1166,10 +1197,17 @@ async function cadastrarMusica(){
             .from("musicas")
             .insert([
                 {
-                    nome: nome,
-                    capa_url: capa_url,
-                    audio_url: audio_url,
-                    plays: 0
+                    nome:
+                        nome,
+
+                    capa_url:
+                        capa_url,
+
+                    audio_url:
+                        audio_url,
+
+                    plays:
+                        0
                 }
             ])
             .select()
@@ -1183,19 +1221,18 @@ async function cadastrarMusica(){
         }
 
 
-        const musicaId =
-            musicaData.id;
+        /* RELAÇÕES */
 
-
-        /* CRIAR RELAÇÕES */
-
-        const relacoesParaInserir =
+        const relacoes =
             artistasIds.map(
                 function(artistaId){
 
                     return {
-                        musica_id: musicaId,
-                        artista_id: artistaId
+                        musica_id:
+                            musicaData.id,
+
+                        artista_id:
+                            artistaId
                     };
 
                 }
@@ -1203,18 +1240,18 @@ async function cadastrarMusica(){
 
 
         const {
-            error: relError
+            error: relacaoError
         } =
             await supabaseClient
             .from("musica_artistas")
             .insert(
-                relacoesParaInserir
+                relacoes
             );
 
 
-        if(relError){
+        if(relacaoError){
 
-            throw relError;
+            throw relacaoError;
 
         }
 
@@ -1225,33 +1262,38 @@ async function cadastrarMusica(){
         );
 
 
-        document.getElementById(
+        document
+        .getElementById(
             "nomeMusica"
-        ).value = "";
+        )
+        .value = "";
 
 
-        document.getElementById(
+        document
+        .getElementById(
             "capaMusicaFile"
-        ).value = "";
+        )
+        .value = "";
 
 
-        document.getElementById(
+        document
+        .getElementById(
             "audioMusicaFile"
-        ).value = "";
+        )
+        .value = "";
 
 
-        checkboxesSelecionados.forEach(
-            function(cb){
+        selecionados.forEach(
+            function(checkbox){
 
-                cb.checked = false;
+                checkbox.checked =
+                    false;
 
             }
         );
 
 
-        /* ATUALIZA A LISTA */
-
-        carregarGuiasADM();
+        await carregarGuiasADM();
 
 
     }catch(error){
@@ -1274,6 +1316,7 @@ async function cadastrarMusica(){
         loadingMsg.style.display =
             "none";
 
+
         botao.disabled =
             false;
 
@@ -1282,28 +1325,36 @@ async function cadastrarMusica(){
 }
 
 
-/* ================================
+/* =========================
    CADASTRAR PROJETO
-================================ */
+========================= */
 
 async function cadastrarProjeto(){
 
     const nome =
-        document.getElementById(
+        document
+        .getElementById(
             "nomeProjeto"
-        ).value.trim();
+        )
+        .value
+        .trim();
 
 
     const descricao =
-        document.getElementById(
+        document
+        .getElementById(
             "descProjeto"
-        ).value.trim();
+        )
+        .value
+        .trim();
 
 
     const capaFile =
-        document.getElementById(
+        document
+        .getElementById(
             "capaProjetoFile"
-        ).files[0];
+        )
+        .files[0];
 
 
     if(!nome){
@@ -1340,9 +1391,14 @@ async function cadastrarProjeto(){
             .from("projetos")
             .insert([
                 {
-                    nome: nome,
-                    descricao: descricao,
-                    capa_url: capa_url
+                    nome:
+                        nome,
+
+                    descricao:
+                        descricao,
+
+                    capa_url:
+                        capa_url
                 }
             ]);
 
@@ -1360,24 +1416,34 @@ async function cadastrarProjeto(){
         );
 
 
-        document.getElementById(
+        document
+        .getElementById(
             "nomeProjeto"
-        ).value = "";
+        )
+        .value = "";
 
 
-        document.getElementById(
+        document
+        .getElementById(
             "descProjeto"
-        ).value = "";
+        )
+        .value = "";
 
 
-        document.getElementById(
+        document
+        .getElementById(
             "capaProjetoFile"
-        ).value = "";
+        )
+        .value = "";
 
 
     }catch(error){
 
-        console.error(error);
+        console.error(
+            "Erro ao cadastrar projeto:",
+            error
+        );
+
 
         mostrarStatus(
             "Erro ao cadastrar projeto: " +
@@ -1389,9 +1455,10 @@ async function cadastrarProjeto(){
 
 }
 
-/* ================================
-   PEGAR CAMINHO DO ARQUIVO
-================================ */
+/* =========================
+   CAMINHO DO ARQUIVO
+   NO STORAGE
+========================= */
 
 function pegarCaminhoStorage(url){
 
@@ -1401,26 +1468,49 @@ function pegarCaminhoStorage(url){
 
     try{
 
+        const marcador =
+            "/public/";
+
+        const posicao =
+            url.indexOf(
+                marcador
+            );
+
+
+        if(posicao === -1){
+            return null;
+        }
+
+
+        let caminho =
+            url.substring(
+                posicao +
+                marcador.length
+            );
+
+
+        /*
+         * O caminho vem como:
+         *
+         * bucket/arquivo.mp3
+         *
+         * Removemos o nome do bucket.
+         */
+
         const partes =
-            url.split("/public/");
+            caminho.split("/");
+
 
         if(partes.length < 2){
             return null;
         }
 
-        const caminhoCompleto =
-            partes[1];
 
-        const partesCaminho =
-            caminhoCompleto.split("/");
+        partes.shift();
 
-        if(partesCaminho.length < 2){
-            return null;
-        }
 
-        partesCaminho.shift();
+        return partes.join("/");
 
-        return partesCaminho.join("/");
 
     }catch(error){
 
@@ -1429,6 +1519,7 @@ function pegarCaminhoStorage(url){
             error
         );
 
+
         return null;
 
     }
@@ -1436,36 +1527,57 @@ function pegarCaminhoStorage(url){
 }
 
 
-/* ================================
+/* =========================
    EXCLUIR ARQUIVO DO STORAGE
-================================ */
+========================= */
 
 async function excluirArquivoStorage(
     url,
     bucket
 ){
 
+    if(!url){
+        return;
+    }
+
+
     const caminho =
-        pegarCaminhoStorage(url);
+        pegarCaminhoStorage(
+            url
+        );
+
 
     if(!caminho){
         return;
     }
 
-    const {
-        error
-    } =
-        await supabaseClient
-        .storage
-        .from(bucket)
-        .remove([
-            caminho
-        ]);
 
-    if(error){
+    try{
+
+        const {
+            error
+        } =
+            await supabaseClient
+            .storage
+            .from(bucket)
+            .remove([
+                caminho
+            ]);
+
+
+        if(error){
+
+            console.error(
+                "Erro ao apagar arquivo do Storage:",
+                error
+            );
+
+        }
+
+    }catch(error){
 
         console.error(
-            "Erro ao apagar arquivo:",
+            "Erro no Storage:",
             error
         );
 
@@ -1474,9 +1586,9 @@ async function excluirArquivoStorage(
 }
 
 
-/* ================================
-   CARREGAR GUIAS DO ADM
-================================ */
+/* =========================
+   GERENCIAR GUIAS
+========================= */
 
 async function carregarGuiasADM(){
 
@@ -1486,12 +1598,15 @@ async function carregarGuiasADM(){
         );
 
 
-    container.innerHTML = `
+    if(!container){
+        return;
+    }
 
+
+    container.innerHTML = `
         <div class="lista-vazia">
             Carregando guias...
         </div>
-
     `;
 
 
@@ -1502,8 +1617,10 @@ async function carregarGuiasADM(){
             error
         } =
             await supabaseClient
-    .from("musicas")
-            .select("*")
+            .from("musicas")
+            .select(
+                "id,nome,capa_url,audio_url,plays,created_at"
+            )
             .order(
                 "created_at",
                 {
@@ -1519,14 +1636,15 @@ async function carregarGuiasADM(){
         }
 
 
-        if(!data || data.length === 0){
+        if(
+            !data ||
+            data.length === 0
+        ){
 
             container.innerHTML = `
-
                 <div class="lista-vazia">
                     Nenhuma guia cadastrada.
                 </div>
-
             `;
 
             return;
@@ -1620,6 +1738,7 @@ async function carregarGuiasADM(){
                     nome
                 );
 
+
                 info.appendChild(
                     plays
                 );
@@ -1653,9 +1772,11 @@ async function carregarGuiasADM(){
                     capa
                 );
 
+
                 item.appendChild(
                     info
                 );
+
 
                 item.appendChild(
                     botao
@@ -1679,14 +1800,13 @@ async function carregarGuiasADM(){
 
 
         container.innerHTML = `
-
-            <div class="lista-vazia"
-                 style="color:#ff5555;">
-
-                Erro ao carregar as guias.
-
+            <div
+                class="lista-vazia"
+                style="color:#ff5555;"
+            >
+                Erro ao carregar guias:
+                ${error.message}
             </div>
-
         `;
 
     }
@@ -1694,9 +1814,9 @@ async function carregarGuiasADM(){
 }
 
 
-/* ================================
+/* =========================
    EXCLUIR GUIA
-================================ */
+========================= */
 
 async function excluirGuia(
     musica
@@ -1704,31 +1824,22 @@ async function excluirGuia(
 
     const confirmar =
         confirm(
-
-            "Excluir esta guia?\n\n" +
-
+            "Excluir a guia \"" +
             musica.nome +
-
-            "\n\n" +
-
-            "A música, os vínculos com os artistas " +
-            "e os arquivos enviados serão removidos."
-
+            "\"?\n\n" +
+            "A guia e suas relações com os artistas serão removidas."
         );
 
 
     if(!confirmar){
-
         return;
-
     }
 
 
     try{
 
         /*
-         * PRIMEIRO:
-         * apagar relações
+         * 1 — REMOVER RELAÇÕES
          */
 
         const {
@@ -1752,8 +1863,7 @@ async function excluirGuia(
 
 
         /*
-         * SEGUNDO:
-         * apagar registro da música
+         * 2 — REMOVER MÚSICA
          */
 
         const {
@@ -1777,33 +1887,23 @@ async function excluirGuia(
 
 
         /*
-         * TERCEIRO:
-         * apagar capa
+         * 3 — REMOVER CAPA
          */
 
-        if(musica.capa_url){
-
-            await excluirArquivoStorage(
-                musica.capa_url,
-                "capas-musicas"
-            );
-
-        }
+        await excluirArquivoStorage(
+            musica.capa_url,
+            "capas-musicas"
+        );
 
 
         /*
-         * QUARTO:
-         * apagar áudio
+         * 4 — REMOVER ÁUDIO
          */
 
-        if(musica.audio_url){
-
-            await excluirArquivoStorage(
-                musica.audio_url,
-                "audios"
-            );
-
-        }
+        await excluirArquivoStorage(
+            musica.audio_url,
+            "audios"
+        );
 
 
         mostrarStatus(
@@ -1812,7 +1912,7 @@ async function excluirGuia(
         );
 
 
-        carregarGuiasADM();
+        await carregarGuiasADM();
 
 
     }catch(error){
@@ -1824,12 +1924,9 @@ async function excluirGuia(
 
 
         mostrarStatus(
-
             "Erro ao excluir guia: " +
             error.message,
-
             "error"
-
         );
 
     }
@@ -1837,35 +1934,9 @@ async function excluirGuia(
 }
 
 
-/* ================================
-   INICIAR PAINEL
-================================ */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    async function(){
-
-        const autorizado =
-            await checarAuth();
-
-
-        if(!autorizado){
-
-            return;
-
-        }
-
-
-        carregarArtistasParaSelecao();
-
-        carregarGuiasADM();
-
-    }
-);
-
-/* ================================
-   CARREGAR ARTISTAS DO ADM
-================================ */
+/* =========================
+   GERENCIAR ARTISTAS
+========================= */
 
 async function carregarArtistasADM(){
 
@@ -1881,11 +1952,9 @@ async function carregarArtistasADM(){
 
 
     container.innerHTML = `
-
         <div class="lista-vazia">
             Carregando artistas...
         </div>
-
     `;
 
 
@@ -1897,7 +1966,9 @@ async function carregarArtistasADM(){
         } =
             await supabaseClient
             .from("artistas")
-            .select("*")
+            .select(
+                "id,nome,foto_url"
+            )
             .order(
                 "nome",
                 {
@@ -1913,14 +1984,15 @@ async function carregarArtistasADM(){
         }
 
 
-        if(!data || data.length === 0){
+        if(
+            !data ||
+            data.length === 0
+        ){
 
             container.innerHTML = `
-
                 <div class="lista-vazia">
                     Nenhum artista cadastrado.
                 </div>
-
             `;
 
             return;
@@ -2026,9 +2098,11 @@ async function carregarArtistasADM(){
                     foto
                 );
 
+
                 item.appendChild(
                     info
                 );
+
 
                 item.appendChild(
                     botao
@@ -2052,14 +2126,13 @@ async function carregarArtistasADM(){
 
 
         container.innerHTML = `
-
             <div
                 class="lista-vazia"
                 style="color:#ff5555;"
             >
-                Erro ao carregar artistas.
+                Erro ao carregar artistas:
+                ${error.message}
             </div>
-
         `;
 
     }
@@ -2067,9 +2140,9 @@ async function carregarArtistasADM(){
 }
 
 
-/* ================================
+/* =========================
    EXCLUIR ARTISTA
-================================ */
+========================= */
 
 async function excluirArtista(
     artista
@@ -2077,60 +2150,27 @@ async function excluirArtista(
 
     const confirmar =
         confirm(
-
-            "Excluir este artista?\n\n" +
-
+            "Excluir o artista \"" +
             artista.nome +
-
-            "\n\n" +
-
-            "As relações dele com as guias " +
-            "também serão removidas."
-
+            "\"?\n\n" +
+            "Ele será removido das guias em que participa."
         );
 
 
     if(!confirmar){
-
         return;
-
     }
 
 
     try{
 
         /*
-         * 1.
-         * Buscar as relações do artista
+         * 1 — REMOVER RELAÇÕES
          */
 
         const {
-            data: relacoes,
-            error: buscaError
-        } =
-            await supabaseClient
-            .from("musica_artistas")
-            .select("musica_id")
-            .eq(
-                "artista_id",
-                artista.id
-            );
-
-
-        if(buscaError){
-
-            throw buscaError;
-
-        }
-
-
-        /*
-         * 2.
-         * Remover relações
-         */
-
-        const {
-            error: relacaoError
+            error:
+                relacaoError
         } =
             await supabaseClient
             .from("musica_artistas")
@@ -2149,27 +2189,22 @@ async function excluirArtista(
 
 
         /*
-         * 3.
-         * Remover foto do Storage
+         * 2 — REMOVER FOTO
          */
 
-        if(artista.foto_url){
-
-            await excluirArquivoStorage(
-                artista.foto_url,
-                "fotos-artistas"
-            );
-
-        }
+        await excluirArquivoStorage(
+            artista.foto_url,
+            "fotos-artistas"
+        );
 
 
         /*
-         * 4.
-         * Remover artista da tabela
+         * 3 — REMOVER ARTISTA
          */
 
         const {
-            error: artistaError
+            error:
+                artistaError
         } =
             await supabaseClient
             .from("artistas")
@@ -2187,20 +2222,19 @@ async function excluirArtista(
         }
 
 
-        /*
-         * 5.
-         * Atualizar listas
-         */
-
         mostrarStatus(
             "Artista excluído com sucesso!",
             "success"
         );
 
 
-        carregarArtistasADM();
+        /*
+         * ATUALIZAR AS DUAS LISTAS
+         */
 
-        carregarArtistasParaSelecao();
+        await carregarArtistasADM();
+
+        await carregarArtistasParaSelecao();
 
 
     }catch(error){
@@ -2212,17 +2246,55 @@ async function excluirArtista(
 
 
         mostrarStatus(
-
             "Erro ao excluir artista: " +
             error.message,
-
             "error"
-
         );
 
     }
 
 }
+
+
+/* =========================
+   INICIALIZAÇÃO
+========================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    async function(){
+
+        console.log(
+            "UnderFy ADM iniciando..."
+        );
+
+
+        const autorizado =
+            await checarAuth();
+
+
+        if(!autorizado){
+
+            return;
+
+        }
+
+
+        await carregarArtistasParaSelecao();
+
+
+        await carregarGuiasADM();
+
+
+        await carregarArtistasADM();
+
+
+        console.log(
+            "UnderFy ADM carregado."
+        );
+
+    }
+);
 
 </script>
 
