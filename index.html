@@ -252,58 +252,53 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function iniciarApp() {
-    try {
-        // Timeout rígido de 3 segundos para evitar qualquer carregamento infinito
-        const fetchComTimeout = (promise) => {
-            return Promise.race([
-                promise,
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
-            ]);
+    // Timeout máximo de 2 segundos por requisição para isolar falhas de rede ou banco
+    const comTimeout = (promise, fallbackVal = []) => {
+        return Promise.race([
+            promise.then(res => res.error ? fallbackVal : (res.data || fallbackVal)).catch(() => fallbackVal),
+            new Promise(resolve => setTimeout(() => resolve(fallbackVal), 2000))
+        ]);
+    };
+
+    // Verificação de sessão super rápida e isolada (não bloqueia a renderização)
+    supabaseClient.auth.getSession().then(({ data }) => {
+        if (data && data.session) {
+            usuarioLogado = true;
+            renderizarTudo();
+        }
+    }).catch(() => {});
+
+    // Executa as requisições de forma independente
+    const [dadosArtistas, dadosMusicas, dadosRelacao] = await Promise.all([
+        comTimeout(supabaseClient.from('artistas').select('*').order('nome', { ascending: true })),
+        comTimeout(supabaseClient.from('musicas').select('*').order('created_at', { ascending: false })),
+        comTimeout(supabaseClient.from('musica_artistas').select('*'))
+    ]);
+
+    artistasCache = dadosArtistas;
+
+    musicas = dadosMusicas.map(m => {
+        const rels = dadosRelacao.filter(r => r.musica_id === m.id);
+        const objsArtistas = rels.map(r => artistasCache.find(a => a.id === r.artista_id)).filter(Boolean);
+        let artistasNomes = objsArtistas.length > 0 ? objsArtistas.map(a => a.nome) : ['Desconhecido'];
+        let textoArtista = artistasNomes[0];
+        if (artistasNomes.length > 1) textoArtista += ` feat. ${artistasNomes.slice(1).join(', ')}`;
+
+        return {
+            id: m.id,
+            nome: m.nome,
+            artistaFormatado: textoArtista,
+            capa: m.capa_url || 'https://via.placeholder.com/500',
+            audio: m.audio_url || '',
+            plays: m.plays || 0
         };
+    });
 
-        // Verifica sessão em segundo plano sem travar o carregamento
-        supabaseClient.auth.getSession().then(({ data: { session } }) => {
-            usuarioLogado = !!session;
-            if (usuarioLogado && musicas.length > 0) renderizarTudo();
-        }).catch(() => {});
+    renderizarTudo();
 
-        const resArtistas = await fetchComTimeout(supabaseClient.from('artistas').select('*').order('nome', { ascending: true }));
-        artistasCache = resArtistas.data || [];
-
-        const resMusicas = await fetchComTimeout(supabaseClient.from('musicas').select('*').order('created_at', { ascending: false }));
-        const dadosMusicas = resMusicas.data || [];
-
-        const resRel = await fetchComTimeout(supabaseClient.from('musica_artistas').select('*'));
-        const dadosRelacao = resRel.data || [];
-
-        musicas = dadosMusicas.map(m => {
-            const rels = dadosRelacao.filter(r => r.musica_id === m.id);
-            const objsArtistas = rels.map(r => artistasCache.find(a => a.id === r.artista_id)).filter(Boolean);
-            let artistasNomes = objsArtistas.length > 0 ? objsArtistas.map(a => a.nome) : ['Desconhecido'];
-            let textoArtista = artistasNomes[0];
-            if (artistasNomes.length > 1) textoArtista += ` feat. ${artistasNomes.slice(1).join(', ')}`;
-
-            return {
-                id: m.id,
-                nome: m.nome,
-                artistaFormatado: textoArtista,
-                capa: m.capa_url || 'https://via.placeholder.com/500',
-                audio: m.audio_url || '',
-                plays: m.plays || 0
-            };
-        });
-
-        renderizarTudo();
-
-        const audio = document.getElementById("audio");
-        audio.addEventListener('ended', lidarFimDaMusica);
-        audio.addEventListener('timeupdate', atualizarBarraProgresso);
-
-    } catch (err) {
-        console.error("Erro ao carregar:", err);
-        document.getElementById("listaMusicas").innerHTML = `<div class="empty" style="color:#ff5555;">Falha ao carregar guias. Verifique a conexão.</div>`;
-        document.getElementById("listaArtistas").innerHTML = `<div class="empty" style="color:#ff5555;">Falha ao carregar artistas.</div>`;
-    }
+    const audio = document.getElementById("audio");
+    audio.addEventListener('ended', lidarFimDaMusica);
+    audio.addEventListener('timeupdate', atualizarBarraProgresso);
 }
 
 function renderizarTudo() {
@@ -465,4 +460,11 @@ function pesquisar() {
     } else {
         container.innerHTML = filtrado.map(m => `
             <div class="card">
-                ${usuarioLogado ? `<button class="delete-card-btn" style="display:flex;" o
+                ${usuarioLogado ? `<button class="delete-card-btn" style="display:flex;" onclick="event.stopPropagation(); removerGuia('${m.id}')" title="Remover Guia">&#10005;</button>` : ''}
+                <img class="cover" src="${m.capa}">
+                <h3>${m.nome}</h3>
+                <p>${m.artistaFormatado}</p>
+                <div class="card-plays">${m.plays} reproduções</div>
+                <button class="play" onclick="tocarMusicaPorIndex(${musicas.findIndex(x => x.id === m.id)})">
+                    &#9654; OUVIR GUIA
+          
