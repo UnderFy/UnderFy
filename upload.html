@@ -119,7 +119,6 @@ input[type="file"]{
 }
 .btn-voltar:hover{color:#fff;}
 
-/* Estilos para a listagem e gerenciamento */
 .manage-list{
     margin-top:20px;
     border-top:1px solid #252525;
@@ -227,7 +226,12 @@ input[type="file"]{
                 <select id="guiaArtista" required>
                     <option value="">Carregando artistas...</option>
                 </select>
-                <small style="color:#555; display:block; margin-top:5px;">Certifique-se de cadastrar o artista na aba ao lado caso ele nao apareca.</small>
+            </div>
+            <div class="form-group">
+                <label>Projeto / Album (Opcional)</label>
+                <select id="guiaProjeto">
+                    <option value="">Nenhum (Solta avulsa)</option>
+                </select>
             </div>
             <div class="form-group">
                 <label>Capa da Guia (Imagem)</label>
@@ -284,10 +288,10 @@ input[type="file"]{
         </form>
     </div>
 
-    <!-- SECAO DE GERENCIAMENTO (LISTA) -->
+    <!-- SECAO DE GERENCIAMENTO -->
     <div id="form-gerenciar" class="form-section">
         <div style="margin-bottom:15px; display:flex; gap:10px;">
-            <button class="btn-action btn-edit activeManageTab" onclick="mudarSubGerenciar('musicas', this)" style="background:#1ed760; color:#000;">Guias / Musicas</button>
+            <button class="btn-action btn-edit" onclick="mudarSubGerenciar('musicas', this)" style="background:#1ed760; color:#000;">Guias / Musicas</button>
             <button class="btn-action btn-edit" onclick="mudarSubGerenciar('artistas', this)" style="background:#222; color:#fff;">Artistas</button>
             <button class="btn-action btn-edit" onclick="mudarSubGerenciar('projetos', this)" style="background:#222; color:#fff;">Projetos</button>
         </div>
@@ -309,6 +313,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 document.addEventListener("DOMContentLoaded", () => {
     carregarArtistasSelect();
+    carregarProjetosSelect();
 });
 
 let subGerenciarAtual = 'musicas';
@@ -361,45 +366,28 @@ function mostrarToast(mensagem, erro = false){
 async function carregarArtistasSelect(){
     const select = document.getElementById("guiaArtista");
     const { data, error } = await supabaseClient.from("artistas").select("*").order("nome");
-    
-    if(error){
-        select.innerHTML = '<option value="">Erro ao carregar artistas</option>';
-        return;
-    }
-
-    if(!data || data.length === 0){
-        select.innerHTML = '<option value="">Nenhum artista cadastrado</option>';
-        return;
-    }
-
+    if(error) return select.innerHTML = '<option value="">Erro ao carregar artistas</option>';
+    if(!data || data.length === 0) return select.innerHTML = '<option value="">Nenhum artista cadastrado</option>';
     select.innerHTML = '<option value="">Selecione o artista...</option>' + data.map(a => `<option value="${a.id}">${a.nome}</option>`).join("");
+}
+
+async function carregarProjetosSelect(){
+    const select = document.getElementById("guiaProjeto");
+    const { data, error } = await supabaseClient.from("projetos").select("*").order("nome");
+    if(error) return select.innerHTML = '<option value="">Erro ao carregar projetos</option>';
+    if(!data || data.length === 0) return select.innerHTML = '<option value="">Nenhum projeto cadastrado</option>';
+    select.innerHTML = '<option value="">Nenhum (Solta avulsa)</option>' + data.map(p => `<option value="${p.id}">${p.nome}</option>`).join("");
 }
 
 async function enviarParaStorage(file, pasta){
     const nomeUnico = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
     const caminho = `${pasta}/${nomeUnico}`;
-
-    const { data, error } = await supabaseClient.storage
-        .from(BUCKET_NAME)
-        .upload(caminho, file);
-
-    if(error){
-        if(error.message.includes("Bucket not found") || error.message.includes("not found")){
-            throw new Error("Erro: O bucket 'underfy-files' nao foi encontrado no Supabase. Crie-o na aba Storage.");
-        }
-        throw new Error("Erro no upload: " + error.message);
-    }
-
-    const { data: urlData } = supabaseClient.storage
-        .from(BUCKET_NAME)
-        .getPublicUrl(caminho);
-
+    const { data, error } = await supabaseClient.storage.from(BUCKET_NAME).upload(caminho, file);
+    if(error) throw new Error("Erro no upload: " + error.message);
+    const { data: urlData } = supabaseClient.storage.from(BUCKET_NAME).getPublicUrl(caminho);
     return urlData.publicUrl;
 }
 
-/* ================================
-   CADASTRAR E EDITAR ARTISTA
-================================ */
 async function cadastrarArtista(e){
     e.preventDefault();
     const btn = document.getElementById("btnSalvarArtista");
@@ -420,7 +408,6 @@ async function cadastrarArtista(e){
         if(id){
             let dadosAtualizar = { nome };
             if(foto_url) dadosAtualizar.foto_url = foto_url;
-
             const { error } = await supabaseClient.from("artistas").update(dadosAtualizar).eq("id", id);
             if(error) throw error;
             mostrarToast("Artista atualizado com sucesso!");
@@ -434,7 +421,6 @@ async function cadastrarArtista(e){
         }
         carregarArtistasSelect();
     } catch(err) {
-        console.error(err);
         mostrarToast(err.message, true);
     } finally {
         btn.disabled = false;
@@ -451,9 +437,6 @@ function cancelarEdicaoArtista(){
     document.getElementById("btnCancelarEdicaoArtista").style.display = "none";
 }
 
-/* ================================
-   CADASTRAR E EDITAR GUIA
-================================ */
 async function cadastrarGuia(e){
     e.preventDefault();
     const btn = document.getElementById("btnSalvarGuia");
@@ -464,6 +447,7 @@ async function cadastrarGuia(e){
         const id = document.getElementById("editGuiaId").value;
         const nome = document.getElementById("guiaNome").value.trim();
         const artistaId = document.getElementById("guiaArtista").value;
+        const projetoId = document.getElementById("guiaProjeto").value || null;
         const capaFile = document.getElementById("guiaCapa").files[0];
         const audioFile = document.getElementById("guiaAudio").files[0];
 
@@ -480,7 +464,7 @@ async function cadastrarGuia(e){
         }
 
         if(id){
-            let dadosMusica = { nome };
+            let dadosMusica = { nome, projeto_id: projetoId };
             if(capa_url) dadosMusica.capa_url = capa_url;
             if(audio_url) dadosMusica.audio_url = audio_url;
 
@@ -497,7 +481,7 @@ async function cadastrarGuia(e){
             if(!capa_url || !audio_url) throw new Error("Capa e audio obrigatorios para nova guia.");
             const { data: musicaData, error: musicaError } = await supabaseClient
                 .from("musicas")
-                .insert([{ nome, capa_url, audio_url, plays: 0 }])
+                .insert([{ nome, capa_url, audio_url, projeto_id: projetoId, plays: 0 }])
                 .select()
                 .single();
 
@@ -513,7 +497,6 @@ async function cadastrarGuia(e){
             e.target.reset();
         }
     } catch(err) {
-        console.error(err);
         mostrarToast(err.message, true);
     } finally {
         btn.disabled = false;
@@ -525,6 +508,7 @@ function cancelarEdicaoGuia(){
     document.getElementById("editGuiaId").value = "";
     document.getElementById("guiaNome").value = "";
     document.getElementById("guiaArtista").value = "";
+    document.getElementById("guiaProjeto").value = "";
     document.getElementById("guiaCapa").value = "";
     document.getElementById("guiaAudio").value = "";
     document.getElementById("avisoGuiaCapa").textContent = "";
@@ -533,9 +517,6 @@ function cancelarEdicaoGuia(){
     document.getElementById("btnCancelarEdicaoGuia").style.display = "none";
 }
 
-/* ================================
-   CADASTRAR E EDITAR PROJETO
-================================ */
 async function cadastrarProjeto(e){
     e.preventDefault();
     const btn = document.getElementById("btnSalvarProjeto");
@@ -557,7 +538,6 @@ async function cadastrarProjeto(e){
         if(id){
             let dadosProj = { nome, descricao };
             if(capa_url) dadosProj.capa_url = capa_url;
-
             const { error } = await supabaseClient.from("projetos").update(dadosProj).eq("id", id);
             if(error) throw error;
             mostrarToast("Projeto atualizado com sucesso!");
@@ -569,8 +549,8 @@ async function cadastrarProjeto(e){
             mostrarToast("Projeto cadastrado com sucesso!");
             e.target.reset();
         }
+        carregarProjetosSelect();
     } catch(err) {
-        console.error(err);
         mostrarToast(err.message, true);
     } finally {
         btn.disabled = false;
@@ -588,9 +568,6 @@ function cancelarEdicaoProjeto(){
     document.getElementById("btnCancelarEdicaoProjeto").style.display = "none";
 }
 
-/* ================================
-   GERENCIAR / LISTAR / EXCLUIR
-================================ */
 async function carregarListaGerenciar(tipo){
     const container = document.getElementById("listaGerenciar");
     container.innerHTML = '<p style="color:#777; text-align:center;">Carregando...</p>';
@@ -598,15 +575,8 @@ async function carregarListaGerenciar(tipo){
     let tabela = tipo === 'musicas' ? 'musicas' : tipo === 'artistas' ? 'artistas' : 'projetos';
     const { data, error } = await supabaseClient.from(tabela).select("*").order("id", { ascending: false });
 
-    if(error){
-        container.innerHTML = '<p style="color:#e53935; text-align:center;">Erro ao carregar dados.</p>';
-        return;
-    }
-
-    if(!data || data.length === 0){
-        container.innerHTML = '<p style="color:#777; text-align:center;">Nenhum registro encontrado.</p>';
-        return;
-    }
+    if(error) return container.innerHTML = '<p style="color:#e53935; text-align:center;">Erro ao carregar dados.</p>';
+    if(!data || data.length === 0) return container.innerHTML = '<p style="color:#777; text-align:center;">Nenhum registro encontrado.</p>';
 
     container.innerHTML = data.map(item => {
         let imagem = item.capa_url || item.foto_url || 'https://via.placeholder.com/40';
@@ -628,7 +598,6 @@ async function carregarListaGerenciar(tipo){
 
 async function excluirItem(tipo, id){
     if(!confirm("Tem certeza que deseja excluir este item?")) return;
-
     let tabela = tipo === 'musicas' ? 'musicas' : tipo === 'artistas' ? 'artistas' : 'projetos';
     
     if(tipo === 'musicas'){
@@ -636,47 +605,43 @@ async function excluirItem(tipo, id){
     }
 
     const { error } = await supabaseClient.from(tabela).delete().eq("id", id);
-    if(error){
-        mostrarToast("Erro ao excluir item.", true);
-        return;
-    }
+    if(error) return mostrarToast("Erro ao excluir item.", true);
 
     mostrarToast("Item excluido com sucesso!");
     carregarListaGerenciar(tipo);
     if(tipo === 'artistas') carregarArtistasSelect();
+    if(tipo === 'projetos') carregarProjetosSelect();
 }
 
 async function prepararEdicao(tipo, id){
     if(tipo === 'artistas'){
-        const { data, error } = await supabaseClient.from("artistas").select("*").eq("id", id).single();
-        if(error) return mostrarToast("Erro ao carregar artista.", true);
-
+        const { data } = await supabaseClient.from("artistas").select("*").eq("id", id).single();
+        if(!data) return;
         mudarAba('artista', document.querySelectorAll('.tab-btn')[1]);
         document.getElementById("editArtistaId").value = data.id;
         document.getElementById("artistaNome").value = data.nome;
-        document.getElementById("avisoArtistaFoto").textContent = "Deixe em branco caso nao queira alterar a foto atual.";
+        document.getElementById("avisoArtistaFoto").textContent = "Deixe em branco caso nao queira alterar a foto.";
         document.getElementById("btnSalvarArtista").textContent = "Atualizar Artista";
         document.getElementById("btnCancelarEdicaoArtista").style.display = "block";
     } 
     else if(tipo === 'musicas'){
-        const { data, error } = await supabaseClient.from("musicas").select("*").eq("id", id).single();
-        if(error) return mostrarToast("Erro ao carregar guia.", true);
-
+        const { data } = await supabaseClient.from("musicas").select("*").eq("id", id).single();
+        if(!data) return;
         const { data: relData } = await supabaseClient.from("musica_artistas").select("artista_id").eq("musica_id", id).single();
 
         mudarAba('guia', document.querySelectorAll('.tab-btn')[0]);
         document.getElementById("editGuiaId").value = data.id;
         document.getElementById("guiaNome").value = data.nome;
         if(relData) document.getElementById("guiaArtista").value = relData.artista_id;
+        if(data.projeto_id) document.getElementById("guiaProjeto").value = data.projeto_id;
         document.getElementById("avisoGuiaCapa").textContent = "Deixe em branco caso nao queira alterar a capa.";
         document.getElementById("avisoGuiaAudio").textContent = "Deixe em branco caso nao queira alterar o audio.";
         document.getElementById("btnSalvarGuia").textContent = "Atualizar Guia";
         document.getElementById("btnCancelarEdicaoGuia").style.display = "block";
     }
     else if(tipo === 'projetos'){
-        const { data, error } = await supabaseClient.from("projetos").select("*").eq("id", id).single();
-        if(error) return mostrarToast("Erro ao carregar projeto.", true);
-
+        const { data } = await supabaseClient.from("projetos").select("*").eq("id", id).single();
+        if(!data) return;
         mudarAba('projeto', document.querySelectorAll('.tab-btn')[2]);
         document.getElementById("editProjetoId").value = data.id;
         document.getElementById("projetoNome").value = data.nome;
