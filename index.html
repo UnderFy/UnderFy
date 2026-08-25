@@ -248,23 +248,24 @@ let modoRepeat = false;
 let usuarioLogado = false;
 
 document.addEventListener("DOMContentLoaded", () => {
-    verificarSessaoAdmin();
     iniciarApp();
 });
 
-async function verificarSessaoAdmin() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    usuarioLogado = !!session;
-}
-
 async function iniciarApp() {
     try {
+        // Timeout rígido de 3 segundos para evitar qualquer carregamento infinito
         const fetchComTimeout = (promise) => {
             return Promise.race([
                 promise,
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
             ]);
         };
+
+        // Verifica sessão em segundo plano sem travar o carregamento
+        supabaseClient.auth.getSession().then(({ data: { session } }) => {
+            usuarioLogado = !!session;
+            if (usuarioLogado && musicas.length > 0) renderizarTudo();
+        }).catch(() => {});
 
         const resArtistas = await fetchComTimeout(supabaseClient.from('artistas').select('*').order('nome', { ascending: true }));
         artistasCache = resArtistas.data || [];
@@ -341,14 +342,10 @@ async function removerGuia(id) {
     if (!confirm("Deseja realmente remover esta guia do UnderFy?")) return;
     
     try {
-        // Remove as relações de artistas primeiro para evitar erro de chave estrangeira
         await supabaseClient.from('musica_artistas').delete().eq('musica_id', id);
-        
-        // Remove a música
         const { error } = await supabaseClient.from('musicas').delete().eq('id', id);
         if (error) throw error;
 
-        // Atualiza a lista local e renderiza de novo
         musicas = musicas.filter(m => m.id !== id);
         renderizarTudo();
     } catch (err) {
@@ -468,4 +465,4 @@ function pesquisar() {
     } else {
         container.innerHTML = filtrado.map(m => `
             <div class="card">
-                ${usuarioLogado ? `<button class="delete-card-btn" style="display:flex;" onclick="even
+                ${usuarioLogado ? `<button class="delete-card-btn" style="display:flex;" o
