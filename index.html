@@ -44,7 +44,6 @@ main{width:90%;max-width:1200px;margin:auto;}
 .card p{color:#999;margin-top:5px;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .card-plays{color:#1ed760;font-size:12px;margin-top:4px;font-weight:bold;}
 
-/* BOTÃO DE REMOVER GUIA NO CARD */
 .delete-card-btn{
     position:absolute;top:14px;right:14px;background:rgba(0,0,0,0.7);
     color:#ff5555;border:1px solid #ff5555;width:28px;height:28px;border-radius:50%;
@@ -63,7 +62,6 @@ main{width:90%;max-width:1200px;margin:auto;}
 input{width:100%;padding:13px 13px 13px 40px;margin:0 0 13px;background:#252525;border:1px solid #333;color:#fff;border-radius:9px;outline:none;}
 input:focus{border-color:#1ed760;}
 
-/* MINI PLAYER FIXO */
 .mini-player{
     position:fixed;bottom:65px;left:0;right:0;z-index:30;
     background:#171717;border-top:1px solid #292929;
@@ -75,7 +73,6 @@ input:focus{border-color:#1ed760;}
 .mini-player-info span{color:#999;font-size:13px;margin-top:3px;}
 .mini-player button{background:none;border:0;color:#1ed760;font-size:20px;margin-right:10px;}
 
-/* TELA / MODAL DO PLAYER COMPLETO */
 .player-modal{
     display:none;position:fixed;inset:0;z-index:150;
     background:rgba(0,0,0,0.85);backdrop-filter:blur(20px);
@@ -109,7 +106,6 @@ input:focus{border-color:#1ed760;}
     display:flex;align-items:center;justify-content:center;font-size:24px;
 }
 
-/* NAV INFERIOR */
 nav{
     position:fixed;bottom:0;left:0;right:0;height:65px;
     background:#101010;border-top:1px solid #252525;z-index:40;
@@ -118,7 +114,6 @@ nav{
 nav button{border:0;background:none;color:#aaa;font-size:11px;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:bold;}
 nav button:hover, nav button:active{color:#1ed760;}
 
-/* MODAL LOGIN ADM */
 .modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);align-items:center;justify-content:center;padding:20px;}
 .modal-content{background:#181818;width:100%;max-width:450px;border-radius:20px;padding:25px;position:relative;}
 .close{position:absolute;top:15px;right:15px;border:0;background:#292929;color:#fff;width:30px;height:30px;border-radius:50%;font-weight:bold;}
@@ -165,7 +160,6 @@ nav button:hover, nav button:active{color:#1ed760;}
     </main>
 </div>
 
-<!-- MINI PLAYER FIXO -->
 <div class="mini-player" id="miniPlayer" onclick="abrirInterfacePlayer()">
     <img id="miniCapa" src="">
     <div class="mini-player-info">
@@ -175,7 +169,6 @@ nav button:hover, nav button:active{color:#1ed760;}
     <button id="miniPlayBtn" onclick="event.stopPropagation(); pausarRetomar();">&#10074;&#10074;</button>
 </div>
 
-<!-- TELA / MODAL DO PLAYER COMPLETO -->
 <div class="player-modal" id="playerModal">
     <div class="player-card">
         <div class="player-header">
@@ -215,7 +208,6 @@ nav button:hover, nav button:active{color:#1ed760;}
 
 <audio id="audio" style="display:none;"></audio>
 
-<!-- NAV INFERIOR -->
 <nav>
     <button onclick="irInicio()">INICIO</button>
     <button onclick="mostrarMusicas()">GUIAS</button>
@@ -223,7 +215,6 @@ nav button:hover, nav button:active{color:#1ed760;}
     <button onclick="abrirADM()">ADM</button>
 </nav>
 
-<!-- MODAL LOGIN ADM -->
 <div class="modal" id="modalLogin">
     <div class="modal-content">
         <button class="close" onclick="fecharModal('modalLogin')">&#10005;</button>
@@ -238,7 +229,9 @@ nav button:hover, nav button:active{color:#1ed760;}
 <script>
 const SUPABASE_URL = "https://gnibzbnypirjrcaoibkx.supabase.co";
 const SUPABASE_KEY = "sb_publishable_b9yvSbmWOLVJvq4AB4CLmQ_VRuzpG5T";
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+});
 
 let musicas = [];
 let artistasCache = [];
@@ -252,22 +245,29 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function iniciarApp() {
-    supabaseClient.auth.getSession().then(({ data }) => {
-        if (data && data.session) {
-            usuarioLogado = true;
-            renderizarTudo();
-        }
-    }).catch(() => {});
+    if (sessionStorage.getItem("underfy_admin") === "true") {
+        usuarioLogado = true;
+    }
 
-    const [dadosArtistas, dadosMusicas, dadosRelacao] = await Promise.all([
-        supabaseClient.from('artistas').select('*').order('nome', { ascending: true }),
-        supabaseClient.from('musicas').select('*').order('created_at', { ascending: false }),
-        supabaseClient.from('musica_artistas').select('*')
+    // Busca segura individual para evitar travamentos em rede mobile
+    const safeFetch = async (queryFn) => {
+        try {
+            const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 2500));
+            return await Promise.race([queryFn(), timeout]);
+        } catch (e) {
+            return { data: [], error: e };
+        }
+    };
+
+    const [resArtistas, resMusicas, resRelacao] = await Promise.all([
+        safeFetch(() => supabaseClient.from('artistas').select('*').order('nome', { ascending: true })),
+        safeFetch(() => supabaseClient.from('musicas').select('*').order('created_at', { ascending: false })),
+        safeFetch(() => supabaseClient.from('musica_artistas').select('*'))
     ]);
 
-    artistasCache = dadosArtistas.data || [];
-    const listaMusicasRaw = dadosMusicas.data || [];
-    const dadosRelacaoRaw = dadosRelacao.data || [];
+    artistasCache = resArtistas.data || [];
+    const listaMusicasRaw = resMusicas.data || [];
+    const dadosRelacaoRaw = resRelacao.data || [];
 
     musicas = listaMusicasRaw.map(m => {
         const rels = dadosRelacaoRaw.filter(r => r.musica_id === m.id);
@@ -296,7 +296,7 @@ async function iniciarApp() {
 function renderizarTudo() {
     const container = document.getElementById("listaMusicas");
     if (musicas.length === 0) {
-        container.innerHTML = `<div class="empty">Nenhuma música cadastrada ainda.</div>`;
+        container.innerHTML = `<div class="empty">Nenhuma música cadastrada ou falha temporária ao carregar.</div>`;
     } else {
         container.innerHTML = musicas.map((m, index) => `
             <div class="card">
@@ -466,6 +466,4 @@ function pesquisar() {
 }
 
 function irInicio() { window.scrollTo({ top: 0, behavior: "smooth" }); }
-function mostrarMusicas() { document.getElementById("listaMusicas").scrollIntoView({ behavior: "smooth" }); }
-function mostrarArtistas() { document.getElementById("listaArtistas").scrollIntoView({ behavior: "smooth" }); }
-function abrirADM() { document.getElementById("modalLogin").style.displa
+function mostrarMusicas() { document.getElementById("listaMusicas").scrollIntoView({ behavior: "smoot
