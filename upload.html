@@ -1863,6 +1863,367 @@ document.addEventListener(
     }
 );
 
+/* ================================
+   CARREGAR ARTISTAS DO ADM
+================================ */
+
+async function carregarArtistasADM(){
+
+    const container =
+        document.getElementById(
+            "listaArtistasADM"
+        );
+
+
+    if(!container){
+        return;
+    }
+
+
+    container.innerHTML = `
+
+        <div class="lista-vazia">
+            Carregando artistas...
+        </div>
+
+    `;
+
+
+    try{
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+            .from("artistas")
+            .select("*")
+            .order(
+                "nome",
+                {
+                    ascending:true
+                }
+            );
+
+
+        if(error){
+
+            throw error;
+
+        }
+
+
+        if(!data || data.length === 0){
+
+            container.innerHTML = `
+
+                <div class="lista-vazia">
+                    Nenhum artista cadastrado.
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        container.innerHTML = "";
+
+
+        data.forEach(
+            function(artista){
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                item.className =
+                    "guia-item";
+
+
+                const foto =
+                    document.createElement(
+                        "img"
+                    );
+
+
+                foto.className =
+                    "guia-capa";
+
+
+                foto.src =
+                    artista.foto_url ||
+                    "https://via.placeholder.com/100";
+
+
+                foto.onerror =
+                    function(){
+
+                        this.src =
+                            "https://via.placeholder.com/100";
+
+                    };
+
+
+                const info =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                info.className =
+                    "guia-info";
+
+
+                const nome =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                nome.className =
+                    "guia-nome";
+
+
+                nome.textContent =
+                    artista.nome ||
+                    "Sem nome";
+
+
+                info.appendChild(
+                    nome
+                );
+
+
+                const botao =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                botao.className =
+                    "btn-excluir";
+
+
+                botao.textContent =
+                    "🗑 Excluir";
+
+
+                botao.onclick =
+                    function(){
+
+                        excluirArtista(
+                            artista
+                        );
+
+                    };
+
+
+                item.appendChild(
+                    foto
+                );
+
+                item.appendChild(
+                    info
+                );
+
+                item.appendChild(
+                    botao
+                );
+
+
+                container.appendChild(
+                    item
+                );
+
+            }
+        );
+
+
+    }catch(error){
+
+        console.error(
+            "Erro ao carregar artistas:",
+            error
+        );
+
+
+        container.innerHTML = `
+
+            <div
+                class="lista-vazia"
+                style="color:#ff5555;"
+            >
+                Erro ao carregar artistas.
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* ================================
+   EXCLUIR ARTISTA
+================================ */
+
+async function excluirArtista(
+    artista
+){
+
+    const confirmar =
+        confirm(
+
+            "Excluir este artista?\n\n" +
+
+            artista.nome +
+
+            "\n\n" +
+
+            "As relações dele com as guias " +
+            "também serão removidas."
+
+        );
+
+
+    if(!confirmar){
+
+        return;
+
+    }
+
+
+    try{
+
+        /*
+         * 1.
+         * Buscar as relações do artista
+         */
+
+        const {
+            data: relacoes,
+            error: buscaError
+        } =
+            await supabaseClient
+            .from("musica_artistas")
+            .select("musica_id")
+            .eq(
+                "artista_id",
+                artista.id
+            );
+
+
+        if(buscaError){
+
+            throw buscaError;
+
+        }
+
+
+        /*
+         * 2.
+         * Remover relações
+         */
+
+        const {
+            error: relacaoError
+        } =
+            await supabaseClient
+            .from("musica_artistas")
+            .delete()
+            .eq(
+                "artista_id",
+                artista.id
+            );
+
+
+        if(relacaoError){
+
+            throw relacaoError;
+
+        }
+
+
+        /*
+         * 3.
+         * Remover foto do Storage
+         */
+
+        if(artista.foto_url){
+
+            await excluirArquivoStorage(
+                artista.foto_url,
+                "fotos-artistas"
+            );
+
+        }
+
+
+        /*
+         * 4.
+         * Remover artista da tabela
+         */
+
+        const {
+            error: artistaError
+        } =
+            await supabaseClient
+            .from("artistas")
+            .delete()
+            .eq(
+                "id",
+                artista.id
+            );
+
+
+        if(artistaError){
+
+            throw artistaError;
+
+        }
+
+
+        /*
+         * 5.
+         * Atualizar listas
+         */
+
+        mostrarStatus(
+            "Artista excluído com sucesso!",
+            "success"
+        );
+
+
+        carregarArtistasADM();
+
+        carregarArtistasParaSelecao();
+
+
+    }catch(error){
+
+        console.error(
+            "Erro ao excluir artista:",
+            error
+        );
+
+
+        mostrarStatus(
+
+            "Erro ao excluir artista: " +
+            error.message,
+
+            "error"
+
+        );
+
+    }
+
+}
+
 </script>
 
 </body>
