@@ -213,7 +213,7 @@ nav button:hover, nav button:active{color:#1ed760;}
 
 <audio id="audio" style="display:none;"></audio>
 
-<!-- NAV INFERIOR LIMPA E PROFISSIONAL -->
+<!-- NAV INFERIOR -->
 <nav>
     <button onclick="irInicio()">
         <i data-lucide="home" style="width:20px;height:20px;"></i>
@@ -236,7 +236,7 @@ nav button:hover, nav button:active{color:#1ed760;}
 <!-- MODAL LOGIN ADM -->
 <div class="modal" id="modalLogin">
     <div class="modal-content">
-        <button class="close" onclick="fecharModal('modalLogin')">×</button>
+        <button class="close" onclick="fecharModal('modalLogin')">×️</button>
         <h2>Área administrativa</h2>
         <input type="email" id="emailADM" placeholder="E-mail">
         <input type="password" id="senhaADM" placeholder="Senha">
@@ -255,6 +255,12 @@ let artistasCache = [];
 let musicaAtualIndex = -1;
 let modoShuffle = false;
 let modoRepeat = false;
+
+// Inicializa os ícones estáticos assim que o HTML carregar
+document.addEventListener("DOMContentLoaded", () => {
+    if (window.lucide) lucide.createIcons();
+    iniciarApp();
+});
 
 async function iniciarApp() {
     try {
@@ -293,6 +299,7 @@ async function iniciarApp() {
     } catch (err) {
         console.error("Erro:", err);
         document.getElementById("listaMusicas").innerHTML = `<div class="empty" style="color:#ff5555;">Erro ao carregar dados.</div>`;
+        document.getElementById("listaArtistas").innerHTML = `<div class="empty" style="color:#ff5555;">Erro ao carregar dados.</div>`;
     }
 }
 
@@ -326,8 +333,10 @@ function renderizarTudo() {
         `).join('');
     }
 
-    // Atualiza os ícones gerados via script
-    lucide.createIcons();
+    // Renderiza os ícones inseridos dinamicamente de forma segura
+    if (window.lucide) {
+        try { lucide.createIcons(); } catch(e){}
+    }
 }
 
 async function tocarMusicaPorIndex(index) {
@@ -377,12 +386,12 @@ function atualizarIconePlayPause(pausado) {
     
     if (pausado) {
         modalBtn.innerHTML = `<i data-lucide="play" style="color:#000; width:28px; height:28px; fill:#000; margin-left:3px;"></i>`;
-        miniIcon.setAttribute('data-lucide', 'play');
+        if(miniIcon) miniIcon.setAttribute('data-lucide', 'play');
     } else {
         modalBtn.innerHTML = `<i data-lucide="pause" style="color:#000; width:28px; height:28px; fill:#000;"></i>`;
-        miniIcon.setAttribute('data-lucide', 'pause');
+        if(miniIcon) miniIcon.setAttribute('data-lucide', 'pause');
     }
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons();
 }
 
 function atualizarBarraProgresso() {
@@ -450,12 +459,4 @@ function pesquisar() {
                     <i data-lucide="play" style="width:16px;height:16px;fill:#000;"></i> Ouvir guia
                 </button>
             </div>
-        `).join('');
-    }
-    lucide.createIcons();
-}
-
-function irInicio() { window.scrollTo({ top: 0, behavior: "smooth" }); }
-function mostrarMusicas() { document.getElementById("listaMusicas").scrollIntoView({ behavior: "smooth" }); }
-function mostrarArtistas() { document.getElementById("listaArtistas").scrollIntoView({ behavior: "smooth" }); }
-function abrirADM() { document.getElementById("modalLogin").style.display = "flex
+        `).jo
