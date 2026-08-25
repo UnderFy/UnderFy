@@ -1,0 +1,21 @@
+{
+  "name": "UnderFy",
+  "short_name": "UnderFy",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0A0A0A",
+  "theme_color": "#19D95B",
+  "icons": [
+    {
+      "src": "COLE_O_LINK_DIRETO_DA_SUA_IMAGEM_AQUI.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "COLE_O_LINK_DIRETO_DA_SUA_IMAGEM_AQUI.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+
