@@ -115,11 +115,13 @@ nav{
 nav button{border:0;background:none;color:#aaa;font-size:11px;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:bold;}
 nav button:hover, nav button:active{color:#1ed760;}
 
-/* MODAL LOGIN ADM */
+/* MODAL DE CADASTRO / LOGIN DE ARTISTAS */
 .modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);align-items:center;justify-content:center;padding:20px;}
 .modal-content{background:#181818;width:100%;max-width:450px;border-radius:20px;padding:25px;position:relative;}
 .close{position:absolute;top:15px;right:15px;border:0;background:#292929;color:#fff;width:30px;height:30px;border-radius:50%;font-weight:bold;}
 .form-btn{width:100%;padding:13px;background:#1ed760;color:#000;border:0;border-radius:25px;font-weight:bold;margin-top:10px;}
+.toggle-auth{text-align:center;margin-top:15px;font-size:14px;color:#aaa;cursor:pointer;}
+.toggle-auth span{color:#1ed760;font-weight:bold;}
 
 @media(max-width:700px){
     .grid{grid-template-columns:repeat(2,1fr);gap:12px;}
@@ -131,14 +133,14 @@ nav button:hover, nav button:active{color:#1ed760;}
 <div class="app">
     <header>
         <div class="logo">Under<span class="fy">Fy</span> <span class="by-uta">• UTA</span></div>
-        <button class="header-btn" onclick="abrirADM()">ADM</button>
+        <button class="header-btn" onclick="abrirModalArtista()">Área do Artista</button>
     </header>
 
     <main>
         <section class="hero">
             <small>UNDERFY • STUDIO CAMP</small>
             <h1>As guias da sessão.</h1>
-            <p>Um espaço para ouvir, descobrir e organizar as músicas criadas durante as sessões.</p>
+            <p>Um espaço livre para artistas independentes publicarem, ouvirem e organizarem suas músicas.</p>
         </section>
 
         <div class="search-box">
@@ -217,17 +219,20 @@ nav button:hover, nav button:active{color:#1ed760;}
     <button onclick="irInicio()">INICIO</button>
     <button onclick="mostrarMusicas()">GUIAS</button>
     <button onclick="mostrarArtistas()">ARTISTAS</button>
-    <button onclick="abrirADM()">ADM</button>
+    <button onclick="abrirModalArtista()">PUBLICAR</button>
 </nav>
 
-<!-- MODAL LOGIN ADM -->
-<div class="modal" id="modalLogin">
+<!-- MODAL DE CADASTRO / LOGIN DO ARTISTA -->
+<div class="modal" id="modalAuth">
     <div class="modal-content">
-        <button class="close" onclick="fecharModal('modalLogin')">&#10005;</button>
-        <h2>Área administrativa</h2>
-        <input type="email" id="emailADM" placeholder="E-mail">
-        <input type="password" id="senhaADM" placeholder="Senha">
-        <button class="form-btn" onclick="loginADM()">Entrar</button>
+        <button class="close" onclick="fecharModal('modalAuth')">&#10005;</button>
+        <h2 id="tituloAuth">Entrar como Artista</h2>
+        <input type="email" id="emailArtista" placeholder="E-mail">
+        <input type="password" id="senhaArtista" placeholder="Senha">
+        <button class="form-btn" id="botaoAcaoAuth" onclick="autenticarArtista()">Entrar</button>
+        <div class="toggle-auth" onclick="alternarModoAuth()">
+            Não tem uma conta? <span id="textoAlternar">Cadastre-se grátis</span>
+        </div>
     </div>
 </div>
 
@@ -242,6 +247,7 @@ let artistasCache = [];
 let musicaAtualIndex = -1;
 let modoShuffle = false;
 let modoRepeat = false;
+let modoCadastro = false;
 
 document.addEventListener("DOMContentLoaded", () => {
     iniciarApp();
@@ -249,20 +255,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function iniciarApp() {
     try {
-        const fetchComTimeout = (promise) => {
-            return Promise.race([
-                promise,
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
-            ]);
-        };
-
-        const resArtistas = await fetchComTimeout(supabaseClient.from('artistas').select('*').order('nome', { ascending: true }));
+        const resArtistas = await supabaseClient.from('artistas').select('*').order('nome', { ascending: true });
         artistasCache = resArtistas.data || [];
 
-        const resMusicas = await fetchComTimeout(supabaseClient.from('musicas').select('*').order('created_at', { ascending: false }));
+        const resMusicas = await supabaseClient.from('musicas').select('*').order('created_at', { ascending: false });
         const dadosMusicas = resMusicas.data || [];
 
-        const resRel = await fetchComTimeout(supabaseClient.from('musica_artistas').select('*'));
+        const resRel = await supabaseClient.from('musica_artistas').select('*');
         const dadosRelacao = resRel.data || [];
 
         musicas = dadosMusicas.map(m => {
@@ -290,8 +289,6 @@ async function iniciarApp() {
 
     } catch (err) {
         console.error("Erro ao carregar:", err);
-        document.getElementById("listaMusicas").innerHTML = `<div class="empty" style="color:#ff5555;">Falha ao carregar guias. Verifique a conexão.</div>`;
-        document.getElementById("listaArtistas").innerHTML = `<div class="empty" style="color:#ff5555;">Falha ao carregar artistas.</div>`;
     }
 }
 
@@ -372,10 +369,10 @@ function atualizarIconePlayPause(pausado) {
     const miniBtn = document.getElementById("miniPlayBtn");
     
     if (pausado) {
-        modalBtn.innerHTML = "&#9654;"; // Símbolo de Play
+        modalBtn.innerHTML = "&#9654;";
         if(miniBtn) miniBtn.innerHTML = "&#9654;";
     } else {
-        modalBtn.innerHTML = "&#10074;&#10074;"; // Símbolo de Pause
+        modalBtn.innerHTML = "&#10074;&#10074;";
         if(miniBtn) miniBtn.innerHTML = "&#10074;&#10074;";
     }
 }
@@ -452,15 +449,37 @@ function pesquisar() {
 function irInicio() { window.scrollTo({ top: 0, behavior: "smooth" }); }
 function mostrarMusicas() { document.getElementById("listaMusicas").scrollIntoView({ behavior: "smooth" }); }
 function mostrarArtistas() { document.getElementById("listaArtistas").scrollIntoView({ behavior: "smooth" }); }
-function abrirADM() { document.getElementById("modalLogin").style.display = "flex"; }
+
+function abrirModalArtista() { document.getElementById("modalAuth").style.display = "flex"; }
 function fecharModal(id) { document.getElementById(id).style.display = "none"; }
 
-async function loginADM() {
-    const email = document.getElementById("emailADM").value.trim();
-    const senha = document.getElementById("senhaADM").value.trim();
-    const { error } = await supabaseClient.auth.signInWithPassword({ email, password: senha });
-    if (error) { alert("Dados incorretos."); return; }
-    window.location.href = "upload.html";
+function alternarModoAuth() {
+    modoCadastro = !modoCadastro;
+    document.getElementById("tituloAuth").textContent = modoCadastro ? "Criar Conta de Artista" : "Entrar como Artista";
+    document.getElementById("botaoAcaoAuth").textContent = modoCadastro ? "Cadastrar" : "Entrar";
+    document.getElementById("textoAlternar").textContent = modoCadastro ? "Já tem uma conta? Entre aqui" : "Cadastre-se grátis";
+}
+
+async function autenticarArtista() {
+    const email = document.getElementById("emailArtista").value.trim();
+    const senha = document.getElementById("senhaArtista").value.trim();
+
+    if(!email || !senha) {
+        alert("Preencha todos os campos.");
+        return;
+    }
+
+    if (modoCadastro) {
+        const { data, error } = await supabaseClient.auth.signUp({ email, password: senha });
+        if (error) { alert("Erro ao cadastrar: " + error.message); return; }
+        alert("Conta criada com sucesso! Faça login para continuar.");
+        alternarModoAuth();
+    } else {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: senha });
+        if (error) { alert("E-mail ou senha incorretos."); return; }
+        // Redireciona para a página de upload/painel do artista logado
+        window.location.href = "upload.html";
+    }
 }
 </script>
 </body>
