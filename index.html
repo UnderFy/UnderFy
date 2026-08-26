@@ -54,6 +54,11 @@ main{width:90%;max-width:1200px;margin:auto;}
     margin-top:12px;width:100%;border:0;background:#1ed760;color:#000;padding:10px;
     border-radius:20px;font-weight:bold;display:flex;align-items:center;justify-content:center;gap:6px;
 }
+.btn-delete{
+    margin-top:8px;width:100%;border:0;background:rgba(255,68,68,0.15);color:#ff4444;padding:8px;
+    border-radius:20px;font-weight:bold;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.btn-delete:hover{background:rgba(255,68,68,0.3);}
 
 .empty{color:#888;text-align:center;padding:30px 10px;grid-column:1/-1;}
 .search-box{position:relative;margin-top:25px;}
@@ -268,12 +273,16 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let musicas = [];
 let artistasCache = [];
+let dadosRelacaoCache = [];
 let musicaAtualIndex = -1;
 let modoShuffle = false;
 let modoRepeat = false;
 let modoCadastro = false;
 let usuarioPendenteId = null;
 let sessaoAtual = null;
+
+// Controle da regra dos 30 segundos de play
+let playContabilizadoNessaMusica = false;
 
 document.addEventListener("DOMContentLoaded", async () => {
     await verificarSessaoAtiva();
@@ -302,16 +311,15 @@ async function fazerLogout() {
     await supabaseClient.auth.signOut();
     sessaoAtual = null;
     atualizarBotaoHeader();
+    renderizarTudo(); // Atualiza a tela para sumir com os botões de exclusão
     alert("Você saiu da sua conta.");
 }
 
 async function tratarAcaoArtista() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
-        // Se já estiver logado, vai direto para a página de upload/publicação
         window.location.href = "upload.html";
     } else {
-        // Se não estiver, abre o modal de login
         abrirModalArtista();
     }
 }
@@ -325,10 +333,10 @@ async function iniciarApp() {
         const dadosMusicas = resMusicas.data || [];
 
         const resRel = await supabaseClient.from('musica_artistas').select('*');
-        const dadosRelacao = resRel.data || [];
+        dadosRelacaoCache = resRel.data || [];
 
         musicas = dadosMusicas.map(m => {
-            const rels = dadosRelacao.filter(r => r.musica_id === m.id);
+            const rels = dadosRelacaoCache.filter(r => r.musica_id === m.id);
             const objsArtistas = rels.map(r => artistasCache.find(a => a.id === r.artista_id)).filter(Boolean);
             let artistasNomes = objsArtistas.length > 0 ? objsArtistas.map(a => a.nome) : ['Desconhecido'];
             let textoArtista = artistasNomes[0];
@@ -348,7 +356,7 @@ async function iniciarApp() {
 
         const audio = document.getElementById("audio");
         audio.addEventListener('ended', lidarFimDaMusica);
-        audio.addEventListener('timeupdate', atualizarBarraProgresso);
+        audio.addEventListener('timeupdate', verificarTempoPlay);
 
     } catch (err) {
         console.error("Erro ao carregar:", err);
@@ -356,21 +364,29 @@ async function iniciarApp() {
 }
 
 function renderizarTudo() {
+    const usuarioLogadoId = sessaoAtual ? sessaoAtual.user.id : null;
+
     const container = document.getElementById("listaMusicas");
     if (musicas.length === 0) {
         container.innerHTML = `<div class="empty">Nenhuma música cadastrada ainda.</div>`;
     } else {
-        container.innerHTML = musicas.map((m, index) => `
-            <div class="card">
-                <img class="cover" src="${m.capa}" onerror="this.src='https://via.placeholder.com/500'">
-                <h3>${m.nome}</h3>
-                <p>${m.artistaFormatado}</p>
-                <div class="card-plays">${m.plays} reproduções</div>
-                <button class="play" onclick="tocarMusicaPorIndex(${index})">
-                    &#9654; OUVIR GUIA
-                </button>
-            </div>
-        `).join('');
+        container.innerHTML = musicas.map((m, index) => {
+            // Regra 2: Verifica se o artista logado faz parte desta música
+            const fazParte = usuarioLogadoId && dadosRelacaoCache.some(r => r.musica_id === m.id && r.artista_id === usuarioLogadoId);
+
+            return `
+                <div class="card">
+                    <img class="cover" src="${m.capa}" onerror="this.src='https://via.placeholder.com/500'">
+                    <h3>${m.nome}</h3>
+                    <p>${m.artistaFormatado}</p>
+                    <div class="card-plays">${m.plays} reproduções</div>
+                    <button class="play" onclick="tocarMusicaPorIndex(${index})">
+                        &#9654; OUVIR GUIA
+                    </button>
+                    ${fazParte ? `<button class="btn-delete" onclick="removerMusica('${m.id}')">🗑️ APAGAR GUIA</button>` : ''}
+                </div>
+            `;
+        }).join('');
     }
 
     const containerArtistas = document.getElementById("listaArtistas");
@@ -386,10 +402,36 @@ function renderizarTudo() {
     }
 }
 
+// Regra 2: Função para excluir a música caso o artista faça parte dela
+async function removerMusica(idMusica) {
+    if (!confirm("Tem certeza que deseja apagar esta guia?")) return;
+
+    try {
+        // Deleta as relações primeiro por causa da restrição de chave estrangeira
+        await supabaseClient.from('musica_artistas').delete().eq('musica_id', idMusica);
+        // Deleta a música
+        const { error } = await supabaseClient.from('musicas').delete().eq('id', idMusica);
+
+        if (error) {
+            alert("Erro ao apagar música: " + error.message);
+            return;
+        }
+
+        alert("Guia apagada com sucesso!");
+        // Recarrega o app para atualizar as listas
+        iniciarApp();
+    } catch (err) {
+        console.error("Erro:", err);
+    }
+}
+
 async function tocarMusicaPorIndex(index) {
     if (index < 0 || index >= musicas.length) return;
     musicaAtualIndex = index;
     const m = musicas[index];
+
+    // Reseta o controle de contagem para a nova música tocada
+    playContabilizadoNessaMusica = false;
 
     document.getElementById("miniPlayer").style.display = "flex";
     document.getElementById("miniMusica").textContent = m.nome;
@@ -407,10 +449,25 @@ async function tocarMusicaPorIndex(index) {
     atualizarIconePlayPause(false);
 
     abrirInterfacePlayer();
+}
 
-    m.plays += 1;
-    renderizarTudo();
-    try { await supabaseClient.from('musicas').update({ plays: m.plays }).eq('id', m.id); } catch(e){}
+// Regra 1: Contabilizar o play apenas após 30 segundos
+async function verificarTempoPlay() {
+    const audio = document.getElementById("audio");
+    if (isNaN(audio.duration)) return;
+
+    atualizarBarraProgresso();
+
+    // Se passou de 30 segundos e ainda não contou nesta execução
+    if (audio.currentTime >= 30 && !playContabilizadoNessaMusica && musicaAtualIndex !== -1) {
+        playContabilizadoNessaMusica = true;
+        const m = musicas[musicaAtualIndex];
+        m.plays += 1;
+        renderizarTudo();
+        try { 
+            await supabaseClient.from('musicas').update({ plays: m.plays }).eq('id', m.id); 
+        } catch(e){}
+    }
 }
 
 function abrirInterfacePlayer() { if (musicaAtualIndex !== -1) document.getElementById("playerModal").style.display = "flex"; }
@@ -491,21 +548,27 @@ function toggleRepeat() {
 function pesquisar() {
     const termo = document.getElementById("pesquisa").value.toLowerCase();
     const filtrado = musicas.filter(m => m.nome.toLowerCase().includes(termo) || m.artistaFormatado.toLowerCase().includes(termo));
+    const usuarioLogadoId = sessaoAtual ? sessaoAtual.user.id : null;
     const container = document.getElementById("listaMusicas");
+
     if(filtrado.length === 0) {
         container.innerHTML = `<div class="empty">Nenhuma música encontrada.</div>`;
     } else {
-        container.innerHTML = filtrado.map(m => `
-            <div class="card">
-                <img class="cover" src="${m.capa}">
-                <h3>${m.nome}</h3>
-                <p>${m.artistaFormatado}</p>
-                <div class="card-plays">${m.plays} reproduções</div>
-                <button class="play" onclick="tocarMusicaPorIndex(${musicas.findIndex(x => x.id === m.id)})">
-                    &#9654; OUVIR GUIA
-                </button>
-            </div>
-        `).join('');
+        container.innerHTML = filtrado.map(m => {
+            const fazParte = usuarioLogadoId && dadosRelacaoCache.some(r => r.musica_id === m.id && r.artista_id === usuarioLogadoId);
+            return `
+                <div class="card">
+                    <img class="cover" src="${m.capa}">
+                    <h3>${m.nome}</h3>
+                    <p>${m.artistaFormatado}</p>
+                    <div class="card-plays">${m.plays} reproduções</div>
+                    <button class="play" onclick="tocarMusicaPorIndex(${musicas.findIndex(x => x.id === m.id)})">
+                        &#9654; OUVIR GUIA
+                    </button>
+                    ${fazParte ? `<button class="btn-delete" onclick="removerMusica('${m.id}')">🗑️ APAGAR GUIA</button>` : ''}
+                </div>
+            `;
+        }).join('');
     }
 }
 
