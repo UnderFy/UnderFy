@@ -27,6 +27,7 @@ header{
 .logo .fy{color:#1ed760;}
 .logo .by-uta{color:#ffffff;}
 .header-btn{border:0;background:#1ed760;color:#000;font-weight:bold;padding:10px 16px;border-radius:25px;}
+.header-btn.logout{background:#ff4444;color:#fff;}
 
 main{width:90%;max-width:1200px;margin:auto;}
 .hero{
@@ -137,7 +138,9 @@ nav button:hover, nav button:active{color:#1ed760;}
 <div class="app">
     <header>
         <div class="logo">Under<span class="fy">Fy</span> <span class="by-uta">• UTA</span></div>
-        <button class="header-btn" onclick="abrirModalArtista()">Área do Artista</button>
+        <div id="areaHeaderBtn">
+            <button class="header-btn" onclick="tratarAcaoArtista()">Área do Artista</button>
+        </div>
     </header>
 
     <main>
@@ -223,7 +226,7 @@ nav button:hover, nav button:active{color:#1ed760;}
     <button onclick="irInicio()">INICIO</button>
     <button onclick="mostrarMusicas()">GUIAS</button>
     <button onclick="mostrarArtistas()">ARTISTAS</button>
-    <button onclick="abrirModalArtista()">PUBLICAR</button>
+    <button onclick="tratarAcaoArtista()">PUBLICAR</button>
 </nav>
 
 <!-- MODAL DE CADASTRO / LOGIN DO ARTISTA -->
@@ -270,10 +273,48 @@ let modoShuffle = false;
 let modoRepeat = false;
 let modoCadastro = false;
 let usuarioPendenteId = null;
+let sessaoAtual = null;
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+    await verificarSessaoAtiva();
     iniciarApp();
 });
+
+async function verificarSessaoAtiva() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    sessaoAtual = session;
+    atualizarBotaoHeader();
+}
+
+function atualizarBotaoHeader() {
+    const area = document.getElementById("areaHeaderBtn");
+    if (sessaoAtual) {
+        area.innerHTML = `
+            <button class="header-btn" onclick="window.location.href='upload.html'">Painel</button>
+            <button class="header-btn logout" onclick="fazerLogout()" style="margin-left: 8px;">Sair</button>
+        `;
+    } else {
+        area.innerHTML = `<button class="header-btn" onclick="abrirModalArtista()">Área do Artista</button>`;
+    }
+}
+
+async function fazerLogout() {
+    await supabaseClient.auth.signOut();
+    sessaoAtual = null;
+    atualizarBotaoHeader();
+    alert("Você saiu da sua conta.");
+}
+
+async function tratarAcaoArtista() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+        // Se já estiver logado, vai direto para a página de upload/publicação
+        window.location.href = "upload.html";
+    } else {
+        // Se não estiver, abre o modal de login
+        abrirModalArtista();
+    }
+}
 
 async function iniciarApp() {
     try {
@@ -507,11 +548,13 @@ async function autenticarArtista() {
             document.getElementById("modalPerfil").style.display = "flex";
         }
     } else {
-        const { error } = await supabaseClient.auth.signInWithPassword({ email, password: senha });
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: senha });
         if (error) { 
             alert("E-mail ou senha incorretos."); 
             return; 
         }
+        
+        await verificarSessaoAtiva();
         window.location.href = "upload.html";
     }
 }
@@ -531,8 +574,7 @@ async function salvarPerfilArtista() {
         const arquivo = fileInput.files[0];
         const nomeArquivo = `perfil_${Date.now()}_${Math.random().toString(36).substring(7)}`;
         
-        // Faz upload para o bucket 'capas-musicas' (ou o bucket que você usa para imagens no Supabase)
-        const { data: uploadData, error: uploadError } = await supabaseClient.storage
+        const { error: uploadError } = await supabaseClient.storage
             .from('capas-musicas')
             .upload(nomeArquivo, arquivo);
 
@@ -548,7 +590,6 @@ async function salvarPerfilArtista() {
         fotoUrl = publicUrlData.publicUrl;
     }
 
-    // Salva na tabela 'artistas'
     const { error: erroPerfil } = await supabaseClient.from('artistas').insert([
         { 
             id: usuarioPendenteId, 
@@ -562,10 +603,10 @@ async function salvarPerfilArtista() {
         return;
     }
 
-    alert("Perfil criado com sucesso! Faça login para continuar.");
+    alert("Perfil criado com sucesso! Redirecionando...");
     fecharModal('modalPerfil');
-    alternarModoAuth();
-    abrirModalArtista();
+    await verificarSessaoAtiva();
+    window.location.href = "upload.html";
 }
 </script>
 </body>
