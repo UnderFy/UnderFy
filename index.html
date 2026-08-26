@@ -154,6 +154,19 @@ nav button:hover, nav button:active{color:#1ed760;}
 .toggle-auth span{color:#1ed760;font-weight:bold;}
 .file-upload-label{display:block;background:#252525;border:1px dashed #444;padding:12px;border-radius:9px;text-align:center;cursor:pointer;color:#aaa;margin-bottom:13px;font-size:14px;}
 .file-upload-label:hover{border-color:#1ed760;color:#fff;}
+
+/* SELEÇÃO LIMPA (CHIPS) */
+.chip-group{
+    display:flex;flex-wrap:wrap;gap:8px;max-height:130px;overflow-y:auto;
+    background:#1b1b1b;border:1px solid #333;border-radius:9px;padding:10px;margin-bottom:13px;
+    scrollbar-width:thin;scrollbar-color:#333 transparent;
+}
+.chip-item{
+    background:#252525;color:#aaa;border:1px solid #333;padding:6px 12px;
+    border-radius:15px;font-size:13px;cursor:pointer;transition:.2s;user-select:none;
+}
+.chip-item:hover{border-color:#1ed760;color:#fff;}
+.chip-item.selected{background:#1ed760;color:#000;border-color:#1ed760;font-weight:bold;}
 </style>
 </head>
 <body>
@@ -480,7 +493,6 @@ async function abrirProjeto(projetoId) {
     const projeto = projetosCache.find(p => p.id == projetoId);
     if(!projeto) return;
 
-    // Buscar músicas vinculadas a este projeto
     const { data: relsProj } = await supabaseClient.from('projeto_musicas').select('*').eq('projeto_id', projetoId);
     const idsMusicasProjeto = relsProj ? relsProj.map(r => r.musica_id) : [];
     const musicasDoProjeto = musicas.filter(m => idsMusicasProjeto.includes(m.id));
@@ -531,7 +543,6 @@ async function abrirArtista(nomeArtistaEncoded) {
     const artista = artistasCache.find(a => a.nome === nomeArtista);
     if(!artista) return;
 
-    // Buscar músicas desse artista
     const { data: relsArt } = await supabaseClient.from('musica_artistas').select('*').eq('artista_id', artista.id);
     const idsMusicasArtista = relsArt ? relsArt.map(r => r.musica_id) : [];
     const musicasDoArtista = musicas.filter(m => idsMusicasArtista.includes(m.id));
@@ -595,12 +606,12 @@ async function abrirPainelUpload() {
                 <input type="text" id="upNomeGuia" class="input-padrao" placeholder="Nome da Guia (Ex: Trap Star)">
                 
                 <label style="font-size:13px; color:#888; display:block; margin-bottom:6px;">Artistas participantes</label>
-                <div id="checkboxArtistasContainer" style="max-height:130px; overflow-y:auto; background:#1b1b1b; border:1px solid #333; border-radius:9px; padding:10px; margin-bottom:13px;">
+                <div id="checkboxArtistasContainer" class="chip-group">
                     Carregando artistas...
                 </div>
 
                 <label style="font-size:13px; color:#888; display:block; margin-bottom:6px;">Incluir em Projeto (Opcional)</label>
-                <div id="checkboxProjetosContainer" style="max-height:130px; overflow-y:auto; background:#1b1b1b; border:1px solid #333; border-radius:9px; padding:10px; margin-bottom:13px;">
+                <div id="checkboxProjetosContainer" class="chip-group">
                     Carregando projetos...
                 </div>
 
@@ -660,19 +671,23 @@ function carregarCheckboxesPainel() {
 
     if (contArtistas) {
         contArtistas.innerHTML = artistasCache.map(a => `
-            <label style="display:flex; align-items:center; gap:8px; margin-bottom:6px; cursor:pointer;">
-                <input type="checkbox" name="artistaCheck" value="${a.id}" ${a.id === usuarioLogadoId ? 'checked' : ''}> ${a.nome}
-            </label>
+            <div class="chip-item ${a.id === usuarioLogadoId ? 'selected' : ''}" data-type="artista" data-id="${a.id}" onclick="toggleChip(this)">
+                ${a.nome}
+            </div>
         `).join('') || '<span style="color:#777;">Nenhum artista cadastrado</span>';
     }
 
     if (contProjetos) {
         contProjetos.innerHTML = projetosCache.map(p => `
-            <label style="display:flex; align-items:center; gap:8px; margin-bottom:6px; cursor:pointer;">
-                <input type="checkbox" name="projetoCheck" value="${p.id}"> ${p.nome}
-            </label>
+            <div class="chip-item" data-type="projeto" data-id="${p.id}" onclick="toggleChip(this)">
+                ${p.nome}
+            </div>
         `).join('') || '<span style="color:#777;">Nenhum projeto cadastrado</span>';
     }
+}
+
+function toggleChip(element) {
+    element.classList.toggle('selected');
 }
 
 async function salvarNovaGuia() {
@@ -680,8 +695,8 @@ async function salvarNovaGuia() {
     const fileCapa = document.getElementById("upCapaArquivo").files[0];
     const fileAudio = document.getElementById("upAudioArquivo").files[0];
 
-    const artistasSelecionados = Array.from(document.querySelectorAll('input[name="artistaCheck"]:checked')).map(el => el.value);
-    const projetosSelecionados = Array.from(document.querySelectorAll('input[name="projetoCheck"]:checked')).map(el => el.value);
+    const artistasSelecionados = Array.from(document.querySelectorAll('.chip-item[data-type="artista"].selected')).map(el => el.getAttribute('data-id'));
+    const projetosSelecionados = Array.from(document.querySelectorAll('.chip-item[data-type="projeto"].selected')).map(el => el.getAttribute('data-id'));
 
     if (!nome || !fileCapa || !fileAudio || artistasSelecionados.length === 0) {
         alert("Preencha o nome, selecione pelo menos um artista, uma capa e um arquivo de áudio.");
@@ -691,17 +706,14 @@ async function salvarNovaGuia() {
     alert("Enviando arquivos, por favor aguarde...");
 
     try {
-        // Upload Capa
         const nomeCapaFile = `capa_${Date.now()}_${Math.random().toString(36).substring(7)}`;
         await supabaseClient.storage.from('capas-musicas').upload(nomeCapaFile, fileCapa);
         const { data: pubCapa } = supabaseClient.storage.from('capas-musicas').getPublicUrl(nomeCapaFile);
 
-        // Upload Áudio
         const nomeAudioFile = `audio_${Date.now()}_${Math.random().toString(36).substring(7)}`;
         await supabaseClient.storage.from('capas-musicas').upload(nomeAudioFile, fileAudio);
         const { data: pubAudio } = supabaseClient.storage.from('capas-musicas').getPublicUrl(nomeAudioFile);
 
-        // Inserir Música
         const { data: resMusica, error: errMusica } = await supabaseClient.from('musicas').insert([
             { nome: nome, capa_url: pubCapa.publicUrl, audio_url: pubAudio.publicUrl, plays: 0 }
         ]).select().single();
@@ -709,11 +721,9 @@ async function salvarNovaGuia() {
         if (errMusica) { alert("Erro ao salvar música: " + errMusica.message); return; }
         const musicaId = resMusica.id;
 
-        // Inserir Relação Artistas
         const relArtistasData = artistasSelecionados.map(artId => ({ musica_id: musicaId, artista_id: artId }));
         await supabaseClient.from('musica_artistas').insert(relArtistasData);
 
-        // Inserir Relação Projetos
         if (projetosSelecionados.length > 0) {
             const relProjetosData = projetosSelecionados.map(projId => ({ projeto_id: projId, musica_id: musicaId }));
             await supabaseClient.from('projeto_musicas').insert(relProjetosData);
@@ -812,9 +822,6 @@ async function verificarTempoPlay() {
         const m = musicas[musicaAtualIndex];
         m.plays += 1;
         
-        // Atualiza na view atual caso esteja na home
-        const elPlays = document.querySelectorAll('.card-plays');
-        // Re-renderiza de forma leve se estiver na home
         if(document.getElementById("listaMusicas")) {
             renderizarListasHome();
         }
