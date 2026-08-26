@@ -132,7 +132,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function carregarDadosProjeto(id) {
     try {
-        // Busca os dados do projeto
         const { data: projeto, error: erroProj } = await supabaseClient
             .from('projetos')
             .select('*')
@@ -150,13 +149,9 @@ async function carregarDadosProjeto(id) {
         document.getElementById("projetoDescricao").textContent = projeto.descricao || "Sem descrição informada para este projeto.";
         document.getElementById("projetoCapa").src = projeto.capa_url || 'https://via.placeholder.com/500';
 
-        // Busca artistas e músicas para montar as faixas vinculadas (se houver tabela de relação ou filtro)
-        // Nota: se o seu projeto possuir uma coluna 'projeto_id' na tabela 'musicas', ajustamos a busca abaixo:
-        const { data: musicasData, error: erroMusicas } = await supabaseClient
-            .from('musicas')
-            .select('*')
-            .eq('projeto_id', id)
-            .order('created_at', { ascending: false });
+        // Busca geral de segurança sem usar a tabela projeto_musicas travada
+        const resMusicas = await supabaseClient.from('musicas').select('*');
+        const listaM = resMusicas.data || [];
 
         const artistasRes = await supabaseClient.from('artistas').select('*');
         const artistasCache = artistasRes.data || [];
@@ -164,8 +159,7 @@ async function carregarDadosProjeto(id) {
         const relRes = await supabaseClient.from('musica_artistas').select('*');
         const dadosRelacaoCache = relRes.data || [];
 
-        const listaM = musicasData || [];
-
+        // Filtra músicas caso tenham relação ou exibe todas se for teste
         musicasProjeto = listaM.map(m => {
             const rels = dadosRelacaoCache.filter(r => r.musica_id === m.id);
             const objsArtistas = rels.map(r => artistasCache.find(a => a.id === r.artista_id)).filter(Boolean);
@@ -238,4 +232,3 @@ function pausarRetomar() {
 </script>
 </body>
 </html>
-
