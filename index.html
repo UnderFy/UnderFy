@@ -180,7 +180,7 @@ nav button:hover, nav button:active{color:#1ed760;}
     </header>
 
     <main id="conteudoDinamico">
-        <!-- O CONTEÚDO DA TELA SERÁ INJETADO AQUI DINAMICAMENTE (INÍCIO, PERFIL DE PROJETO, PERFIL DE ARTISTA, UPLOAD) -->
+        <!-- O CONTEÚDO DA TELA SERÁ INJETADO AQUI DINAMICAMENTE -->
     </main>
 </div>
 
@@ -200,7 +200,7 @@ nav button:hover, nav button:active{color:#1ed760;}
         <div class="player-header">
             <button onclick="fecharInterfacePlayer()">&#709;</button>
             <span>SESSÃO</span>
-            <button onclick="alert('Player v2.0')">&#8230;</button>
+            <button onclick="console.log('Player v2.0')">&#8230;</button>
         </div>
 
         <div class="player-cover-container">
@@ -256,7 +256,7 @@ nav button:hover, nav button:active{color:#1ed760;}
     </div>
 </div>
 
-<!-- MODAL DE CRIAÇÃO DE PERFIL (VULGO E FOTO EM ARQUIVO) -->
+<!-- MODAL DE CRIAÇÃO DE PERFIL -->
 <div class="modal" id="modalPerfil">
     <div class="modal-content">
         <h2>Monte seu Perfil</h2>
@@ -325,7 +325,6 @@ async function fazerLogout() {
     sessaoAtual = null;
     atualizarBotaoHeader();
     irInicio();
-    alert("Você saiu da sua conta.");
 }
 
 async function tratarAcaoArtista() {
@@ -372,8 +371,6 @@ async function carregarDadosGlobais() {
     }
 }
 
-/* ================= NAV / TELAS DINÂMICAS (SPA) ================= */
-
 async function irInicio() {
     window.scrollTo({ top: 0, behavior: "smooth" });
     const containerMain = document.getElementById("conteudoDinamico");
@@ -416,7 +413,6 @@ async function irInicio() {
 
 function renderizarListasHome() {
     const usuarioLogadoId = sessaoAtual ? sessaoAtual.user.id : null;
-
     const container = document.getElementById("listaMusicas");
     if (!container) return;
 
@@ -473,21 +469,14 @@ function renderizarListasHome() {
 
 function mostrarMusicas() {
     irInicio();
-    setTimeout(() => {
-        const el = document.getElementById("listaMusicas");
-        if(el) el.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+    setTimeout(() => { const el = document.getElementById("listaMusicas"); if(el) el.scrollIntoView({ behavior: "smooth" }); }, 100);
 }
 
 function mostrarArtistas() {
     irInicio();
-    setTimeout(() => {
-        const el = document.getElementById("listaArtistas");
-        if(el) el.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+    setTimeout(() => { const el = document.getElementById("listaArtistas"); if(el) el.scrollIntoView({ behavior: "smooth" }); }, 100);
 }
 
-/* ================= TELA DE PROJETO ESPECÍFICO ================= */
 async function abrirProjeto(projetoId) {
     window.scrollTo({ top: 0, behavior: "smooth" });
     const projeto = projetosCache.find(p => p.id == projetoId);
@@ -536,7 +525,6 @@ async function abrirProjeto(projetoId) {
     }
 }
 
-/* ================= TELA DE PERFIL DE ARTISTA ================= */
 async function abrirArtista(nomeArtistaEncoded) {
     window.scrollTo({ top: 0, behavior: "smooth" });
     const nomeArtista = decodeURIComponent(nomeArtistaEncoded);
@@ -586,7 +574,6 @@ async function abrirArtista(nomeArtistaEncoded) {
     }
 }
 
-/* ================= PAINEL DE UPLOAD / GERENCIAMENTO ================= */
 async function abrirPainelUpload() {
     window.scrollTo({ top: 0, behavior: "smooth" });
     const containerMain = document.getElementById("conteudoDinamico");
@@ -606,14 +593,10 @@ async function abrirPainelUpload() {
                 <input type="text" id="upNomeGuia" class="input-padrao" placeholder="Nome da Guia (Ex: Trap Star)">
                 
                 <label style="font-size:13px; color:#888; display:block; margin-bottom:6px;">Artistas participantes</label>
-                <div id="checkboxArtistasContainer" class="chip-group">
-                    Carregando artistas...
-                </div>
+                <div id="checkboxArtistasContainer" class="chip-group">Carregando artistas...</div>
 
                 <label style="font-size:13px; color:#888; display:block; margin-bottom:6px;">Incluir em Projeto (Opcional)</label>
-                <div id="checkboxProjetosContainer" class="chip-group">
-                    Carregando projetos...
-                </div>
+                <div id="checkboxProjetosContainer" class="chip-group">Carregando projetos...</div>
 
                 <label class="file-upload-label" for="upCapaArquivo">
                     <span id="labelCapaTexto">Capa da Guia (Imagem)</span>
@@ -625,7 +608,7 @@ async function abrirPainelUpload() {
                 </label>
                 <input type="file" id="upAudioArquivo" accept="audio/*" style="display:none;" onchange="document.getElementById('labelAudioTexto').textContent = this.files[0].name">
 
-                <button class="form-btn" onclick="salvarNovaGuia()">Publicar Guia</button>
+                <button class="form-btn" id="btnPublicarGuia" onclick="salvarNovaGuia()">Publicar Guia</button>
             </div>
 
             <!-- FORMULÁRIO PROJETO -->
@@ -637,7 +620,7 @@ async function abrirPainelUpload() {
                 </label>
                 <input type="file" id="upCapaProjArquivo" accept="image/*" style="display:none;" onchange="document.getElementById('labelCapaProjTexto').textContent = this.files[0].name">
 
-                <button class="form-btn" onclick="salvarNovoProjeto()">Criar Projeto</button>
+                <button class="form-btn" id="btnCriarProjeto" onclick="salvarNovoProjeto()">Criar Projeto</button>
             </div>
         </div>
     `;
@@ -694,16 +677,18 @@ async function salvarNovaGuia() {
     const nome = document.getElementById("upNomeGuia").value.trim();
     const fileCapa = document.getElementById("upCapaArquivo").files[0];
     const fileAudio = document.getElementById("upAudioArquivo").files[0];
+    const btnPublicar = document.getElementById("btnPublicarGuia");
 
     const artistasSelecionados = Array.from(document.querySelectorAll('.chip-item[data-type="artista"].selected')).map(el => el.getAttribute('data-id'));
     const projetosSelecionados = Array.from(document.querySelectorAll('.chip-item[data-type="projeto"].selected')).map(el => el.getAttribute('data-id'));
 
     if (!nome || !fileCapa || !fileAudio || artistasSelecionados.length === 0) {
-        alert("Preencha o nome, selecione pelo menos um artista, uma capa e um arquivo de áudio.");
+        console.warn("Preencha o nome, selecione pelo menos um artista, uma capa e um arquivo de áudio.");
         return;
     }
 
-    alert("Enviando arquivos, por favor aguarde...");
+    btnPublicar.disabled = true;
+    btnPublicar.textContent = "Enviando arquivos...";
 
     try {
         const nomeCapaFile = `capa_${Date.now()}_${Math.random().toString(36).substring(7)}`;
@@ -718,7 +703,12 @@ async function salvarNovaGuia() {
             { nome: nome, capa_url: pubCapa.publicUrl, audio_url: pubAudio.publicUrl, plays: 0 }
         ]).select().single();
 
-        if (errMusica) { alert("Erro ao salvar música: " + errMusica.message); return; }
+        if (errMusica) { 
+            console.error("Erro ao salvar música: " + errMusica.message); 
+            btnPublicar.disabled = false;
+            btnPublicar.textContent = "Publicar Guia";
+            return; 
+        }
         const musicaId = resMusica.id;
 
         const relArtistasData = artistasSelecionados.map(artId => ({ musica_id: musicaId, artista_id: artId }));
@@ -729,24 +719,27 @@ async function salvarNovaGuia() {
             await supabaseClient.from('projeto_musicas').insert(relProjetosData);
         }
 
-        alert("Guia publicada com sucesso!");
         await carregarDadosGlobais();
         irInicio();
     } catch(err) {
-        alert("Erro no processo: " + err.message);
+        console.error("Erro no processo: " + err.message);
+        btnPublicar.disabled = false;
+        btnPublicar.textContent = "Publicar Guia";
     }
 }
 
 async function salvarNovoProjeto() {
     const nome = document.getElementById("upNomeProjeto").value.trim();
     const fileCapa = document.getElementById("upCapaProjArquivo").files[0];
+    const btnCriarProj = document.getElementById("btnCriarProjeto");
 
     if (!nome || !fileCapa) {
-        alert("Preencha o nome do projeto e selecione uma capa.");
+        console.warn("Preencha o nome do projeto e selecione uma capa.");
         return;
     }
 
-    alert("Enviando projeto...");
+    btnCriarProj.disabled = true;
+    btnCriarProj.textContent = "Criando projeto...";
 
     try {
         const nomeCapaFile = `proj_${Date.now()}_${Math.random().toString(36).substring(7)}`;
@@ -757,13 +750,19 @@ async function salvarNovoProjeto() {
             { nome: nome, capa_url: pubCapa.publicUrl }
         ]);
 
-        if (error) { alert("Erro ao criar projeto: " + error.message); return; }
+        if (error) { 
+            console.error("Erro ao criar projeto: " + error.message); 
+            btnCriarProj.disabled = false;
+            btnCriarProj.textContent = "Criar Projeto";
+            return; 
+        }
 
-        alert("Projeto criado com sucesso!");
         await carregarDadosGlobais();
         irInicio();
     } catch(err) {
-        alert("Erro: " + err.message);
+        console.error("Erro: " + err.message);
+        btnCriarProj.disabled = false;
+        btnCriarProj.textContent = "Criar Projeto";
     }
 }
 
@@ -773,14 +772,8 @@ async function removerMusica(idMusica) {
     try {
         await supabaseClient.from('musica_artistas').delete().eq('musica_id', idMusica);
         await supabaseClient.from('projeto_musicas').delete().eq('musica_id', idMusica);
-        const { error } = await supabaseClient.from('musicas').delete().eq('id', idMusica);
+        await supabaseClient.from('musicas').delete().eq('id', idMusica);
 
-        if (error) {
-            alert("Erro ao apagar música: " + error.message);
-            return;
-        }
-
-        alert("Guia apagada com sucesso!");
         await carregarDadosGlobais();
         irInicio();
     } catch (err) {
@@ -805,7 +798,7 @@ async function tocarMusicaPorIndex(index) {
     document.getElementById("modalCapa").src = m.capa;
 
     const audio = document.getElementById("audio");
-    if (!m.audio) { alert("Áudio indisponível."); return; }
+    if (!m.audio) { console.warn("Áudio indisponível."); return; }
     audio.src = m.audio;
     audio.play();
     atualizarIconePlayPause(false);
@@ -964,14 +957,11 @@ async function autenticarArtista() {
     const email = document.getElementById("emailArtista").value.trim();
     const senha = document.getElementById("senhaArtista").value.trim();
 
-    if(!email || !senha) {
-        alert("Preencha todos os campos.");
-        return;
-    }
+    if(!email || !senha) return;
 
     if (modoCadastro) {
         const { data, error } = await supabaseClient.auth.signUp({ email, password: senha });
-        if (error) { alert("Erro ao cadastrar: " + error.message); return; }
+        if (error) { console.error("Erro ao cadastrar: " + error.message); return; }
 
         if (data.user) {
             usuarioPendenteId = data.user.id;
@@ -980,10 +970,7 @@ async function autenticarArtista() {
         }
     } else {
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: senha });
-        if (error) { 
-            alert("E-mail ou senha incorretos."); 
-            return; 
-        }
+        if (error) { console.warn("E-mail ou senha incorretos."); return; }
         
         await verificarSessaoAtiva();
         fecharModal('modalAuth');
@@ -995,10 +982,7 @@ async function salvarPerfilArtista() {
     const vulgo = document.getElementById("inputVulgo").value.trim();
     const fileInput = document.getElementById("inputFotoArquivo");
 
-    if (!vulgo) {
-        alert("Por favor, preencha o seu vulgo.");
-        return;
-    }
+    if (!vulgo) return;
 
     let fotoUrl = 'https://via.placeholder.com/500';
 
@@ -1006,36 +990,14 @@ async function salvarPerfilArtista() {
         const arquivo = fileInput.files[0];
         const nomeArquivo = `perfil_${Date.now()}_${Math.random().toString(36).substring(7)}`;
         
-        const { error: uploadError } = await supabaseClient.storage
-            .from('capas-musicas')
-            .upload(nomeArquivo, arquivo);
-
-        if (uploadError) {
-            alert("Erro ao enviar foto: " + uploadError.message);
-            return;
-        }
-
-        const { data: publicUrlData } = supabaseClient.storage
-            .from('capas-musicas')
-            .getPublicUrl(nomeArquivo);
+        await supabaseClient.storage.from('capas-musicas').upload(nomeArquivo, arquivo);
+        const { data: publicUrlData } = supabaseClient.storage.from('capas-musicas').getPublicUrl(nomeArquivo);
 
         fotoUrl = publicUrlData.publicUrl;
     }
 
-    const { error: erroPerfil } = await supabaseClient.from('artistas').insert([
-        { 
-            id: usuarioPendenteId, 
-            nome: vulgo, 
-            foto_url: fotoUrl 
-        }
-    ]);
+    await supabaseClient.from('artistas').insert([{ id: usuarioPendenteId, nome: vulgo, foto_url: fotoUrl }]);
 
-    if (erroPerfil) {
-        alert("Erro ao salvar perfil no banco: " + erroPerfil.message);
-        return;
-    }
-
-    alert("Perfil criado com sucesso! Redirecionando...");
     fecharModal('modalPerfil');
     await verificarSessaoAtiva();
     await carregarDadosGlobais();
