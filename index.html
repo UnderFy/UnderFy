@@ -59,6 +59,8 @@ main{width:90%;max-width:1200px;margin:auto;}
 .search-box span{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:#777;font-size:14px;font-weight:bold;}
 input{width:100%;padding:13px 13px 13px 40px;margin:0 0 13px;background:#252525;border:1px solid #333;color:#fff;border-radius:9px;outline:none;}
 input:focus{border-color:#1ed760;}
+.input-padrao{width:100%;padding:13px;margin:0 0 13px;background:#252525;border:1px solid #333;color:#fff;border-radius:9px;outline:none;}
+.input-padrao:focus{border-color:#1ed760;}
 
 /* MINI PLAYER FIXO */
 .mini-player{
@@ -115,13 +117,15 @@ nav{
 nav button{border:0;background:none;color:#aaa;font-size:11px;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:bold;}
 nav button:hover, nav button:active{color:#1ed760;}
 
-/* MODAL DE CADASTRO / LOGIN DO ARTISTA */
+/* MODAL DE CADASTRO / LOGIN / PERFIL */
 .modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);align-items:center;justify-content:center;padding:20px;}
-.modal-content{background:#181818;width:100%;max-width:450px;border-radius:20px;padding:25px;position:relative;}
+.modal-content{background:#181818;width:100%;max-width:450px;border-radius:20px;padding:25px;position:relative;max-height:90vh;overflow-y:auto;}
 .close{position:absolute;top:15px;right:15px;border:0;background:#292929;color:#fff;width:30px;height:30px;border-radius:50%;font-weight:bold;}
 .form-btn{width:100%;padding:13px;background:#1ed760;color:#000;border:0;border-radius:25px;font-weight:bold;margin-top:10px;}
 .toggle-auth{text-align:center;margin-top:15px;font-size:14px;color:#aaa;cursor:pointer;}
 .toggle-auth span{color:#1ed760;font-weight:bold;}
+.file-upload-label{display:block;background:#252525;border:1px dashed #444;padding:12px;border-radius:9px;text-align:center;cursor:pointer;color:#aaa;margin-bottom:13px;font-size:14px;}
+.file-upload-label:hover{border-color:#1ed760;color:#fff;}
 
 @media(max-width:700px){
     .grid{grid-template-columns:repeat(2,1fr);gap:12px;}
@@ -236,6 +240,23 @@ nav button:hover, nav button:active{color:#1ed760;}
     </div>
 </div>
 
+<!-- MODAL DE CRIAÇÃO DE PERFIL (VULGO E FOTO EM ARQUIVO) -->
+<div class="modal" id="modalPerfil">
+    <div class="modal-content">
+        <h2>Monte seu Perfil</h2>
+        <p style="color:#888; font-size:13px; margin: 8px 0 15px 0;">Insira seu vulgo e escolha uma foto de perfil do seu dispositivo.</p>
+        
+        <input type="text" id="inputVulgo" class="input-padrao" placeholder="Seu vulgo ou nome artístico">
+        
+        <label class="file-upload-label" for="inputFotoArquivo">
+            📁 <span id="textoLabelFoto">Escolher foto de perfil (Arquivo)</span>
+        </label>
+        <input type="file" id="inputFotoArquivo" accept="image/*" style="display:none;" onchange="atualizarNomeArquivo(this)">
+
+        <button class="form-btn" onclick="salvarPerfilArtista()">Salvar e Acessar Painel</button>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://gnibzbnypirjrcaoibkx.supabase.co";
@@ -248,6 +269,7 @@ let musicaAtualIndex = -1;
 let modoShuffle = false;
 let modoRepeat = false;
 let modoCadastro = false;
+let usuarioPendenteId = null;
 
 document.addEventListener("DOMContentLoaded", () => {
     iniciarApp();
@@ -460,6 +482,12 @@ function alternarModoAuth() {
     document.getElementById("textoAlternar").textContent = modoCadastro ? "Já tem uma conta? Entre aqui" : "Cadastre-se grátis";
 }
 
+function atualizarNomeArquivo(input) {
+    if (input.files && input.files[0]) {
+        document.getElementById("textoLabelFoto").textContent = input.files[0].name;
+    }
+}
+
 async function autenticarArtista() {
     const email = document.getElementById("emailArtista").value.trim();
     const senha = document.getElementById("senhaArtista").value.trim();
@@ -470,30 +498,14 @@ async function autenticarArtista() {
     }
 
     if (modoCadastro) {
-        const vulgo = prompt("Qual é o seu vulgo / nome artístico?");
-        if (!vulgo) return;
-        
-        const fotoUrl = prompt("Cole o link da sua foto de perfil (do Supabase ou link direto):") || 'https://via.placeholder.com/500';
-
         const { data, error } = await supabaseClient.auth.signUp({ email, password: senha });
         if (error) { alert("Erro ao cadastrar: " + error.message); return; }
 
         if (data.user) {
-            const { error: erroPerfil } = await supabaseClient.from('artistas').insert([
-                { 
-                    id: data.user.id, 
-                    nome: vulgo, 
-                    foto_url: fotoUrl 
-                }
-            ]);
-
-            if (erroPerfil) {
-                console.error("Erro ao salvar perfil:", erroPerfil.message);
-            }
+            usuarioPendenteId = data.user.id;
+            fecharModal('modalAuth');
+            document.getElementById("modalPerfil").style.display = "flex";
         }
-
-        alert("Conta criada com sucesso! Agora faça o login.");
-        alternarModoAuth();
     } else {
         const { error } = await supabaseClient.auth.signInWithPassword({ email, password: senha });
         if (error) { 
@@ -502,6 +514,58 @@ async function autenticarArtista() {
         }
         window.location.href = "upload.html";
     }
+}
+
+async function salvarPerfilArtista() {
+    const vulgo = document.getElementById("inputVulgo").value.trim();
+    const fileInput = document.getElementById("inputFotoArquivo");
+
+    if (!vulgo) {
+        alert("Por favor, preencha o seu vulgo.");
+        return;
+    }
+
+    let fotoUrl = 'https://via.placeholder.com/500';
+
+    if (fileInput.files && fileInput.files[0]) {
+        const arquivo = fileInput.files[0];
+        const nomeArquivo = `perfil_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        
+        // Faz upload para o bucket 'capas-musicas' (ou o bucket que você usa para imagens no Supabase)
+        const { data: uploadData, error: uploadError } = await supabaseClient.storage
+            .from('capas-musicas')
+            .upload(nomeArquivo, arquivo);
+
+        if (uploadError) {
+            alert("Erro ao enviar foto: " + uploadError.message);
+            return;
+        }
+
+        const { data: publicUrlData } = supabaseClient.storage
+            .from('capas-musicas')
+            .getPublicUrl(nomeArquivo);
+
+        fotoUrl = publicUrlData.publicUrl;
+    }
+
+    // Salva na tabela 'artistas'
+    const { error: erroPerfil } = await supabaseClient.from('artistas').insert([
+        { 
+            id: usuarioPendenteId, 
+            nome: vulgo, 
+            foto_url: fotoUrl 
+        }
+    ]);
+
+    if (erroPerfil) {
+        alert("Erro ao salvar perfil no banco: " + erroPerfil.message);
+        return;
+    }
+
+    alert("Perfil criado com sucesso! Faça login para continuar.");
+    fecharModal('modalPerfil');
+    alternarModoAuth();
+    abrirModalArtista();
 }
 </script>
 </body>
