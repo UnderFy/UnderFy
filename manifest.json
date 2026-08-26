@@ -10,12 +10,14 @@
     {
       "src": "https://gnibzbnypirjrcaoibkx.supabase.co/storage/v1/object/public/capas-musicas/Picsart_26-08-25_13-30-56-332.jpg",
       "sizes": "192x192",
-      "type": "image/jpeg"
+      "type": "image/jpeg",
+      "purpose": "any maskable"
     },
     {
       "src": "https://gnibzbnypirjrcaoibkx.supabase.co/storage/v1/object/public/capas-musicas/Picsart_26-08-25_13-30-56-332.jpg",
       "sizes": "512x512",
-      "type": "image/jpeg"
+      "type": "image/jpeg",
+      "purpose": "any maskable"
     }
   ]
 }
