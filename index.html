@@ -115,7 +115,7 @@ nav{
 nav button{border:0;background:none;color:#aaa;font-size:11px;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:bold;}
 nav button:hover, nav button:active{color:#1ed760;}
 
-/* MODAL DE CADASTRO / LOGIN DE ARTISTAS */
+/* MODAL DE CADASTRO / LOGIN DO ARTISTA */
 .modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);align-items:center;justify-content:center;padding:20px;}
 .modal-content{background:#181818;width:100%;max-width:450px;border-radius:20px;padding:25px;position:relative;}
 .close{position:absolute;top:15px;right:15px;border:0;background:#292929;color:#fff;width:30px;height:30px;border-radius:50%;font-weight:bold;}
@@ -470,14 +470,36 @@ async function autenticarArtista() {
     }
 
     if (modoCadastro) {
+        const vulgo = prompt("Qual é o seu vulgo / nome artístico?");
+        if (!vulgo) return;
+        
+        const fotoUrl = prompt("Cole o link da sua foto de perfil (do Supabase ou link direto):") || 'https://via.placeholder.com/500';
+
         const { data, error } = await supabaseClient.auth.signUp({ email, password: senha });
         if (error) { alert("Erro ao cadastrar: " + error.message); return; }
-        alert("Conta criada com sucesso! Faça login para continuar.");
+
+        if (data.user) {
+            const { error: erroPerfil } = await supabaseClient.from('artistas').insert([
+                { 
+                    id: data.user.id, 
+                    nome: vulgo, 
+                    foto_url: fotoUrl 
+                }
+            ]);
+
+            if (erroPerfil) {
+                console.error("Erro ao salvar perfil:", erroPerfil.message);
+            }
+        }
+
+        alert("Conta criada com sucesso! Agora faça o login.");
         alternarModoAuth();
     } else {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: senha });
-        if (error) { alert("E-mail ou senha incorretos."); return; }
-        // Redireciona para a página de upload/painel do artista logado
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password: senha });
+        if (error) { 
+            alert("E-mail ou senha incorretos."); 
+            return; 
+        }
         window.location.href = "upload.html";
     }
 }
