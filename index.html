@@ -23,7 +23,7 @@ header{
     padding:18px 5%;display:flex;align-items:center;justify-content:space-between;
     border-bottom:1px solid #202020;
 }
-.logo{font-size:27px;font-weight:900;letter-spacing:-1px;display:flex;align-items:center;gap:12px;}
+.logo{font-size:27px;font-weight:900;letter-spacing:-1px;display:flex;align-items:center;gap:12px;cursor:pointer;}
 .logo .fy{color:#1ed760;}
 .logo .by-uta{color:#ffffff;}
 .header-btn{border:0;background:#1ed760;color:#000;font-weight:bold;padding:10px 16px;border-radius:25px;}
@@ -65,6 +65,7 @@ main{width:90%;max-width:1200px;margin:auto;}
     min-width:180px;
     max-width:180px;
     flex-shrink:0;
+    cursor:pointer;
 }
 .card:hover{background:#202020;transform:translateY(-3px);}
 .cover{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:#252525;}
@@ -159,43 +160,14 @@ nav button:hover, nav button:active{color:#1ed760;}
 
 <div class="app">
     <header>
-        <div class="logo">Under<span class="fy">Fy</span> <span class="by-uta">• UTA</span></div>
+        <div class="logo" onclick="irInicio()">Under<span class="fy">Fy</span> <span class="by-uta">• UTA</span></div>
         <div id="areaHeaderBtn">
             <button class="header-btn" onclick="tratarAcaoArtista()">Área do Artista</button>
         </div>
     </header>
 
-    <main>
-        <section class="hero">
-            <small>UNDERFY . STUDIO CAMP</small>
-            <h1>As guias da sessão.</h1>
-            <p>Um espaço livre para artistas independentes publicarem, ouvirem e organizarem suas músicas.</p>
-        </section>
-
-        <div class="search-box">
-            <input id="pesquisa" placeholder="Pesquisar música ou artista..." oninput="pesquisar()">
-        </div>
-
-        <section class="section">
-            <div class="section-title">
-                <h2>Guias recentes</h2>
-            </div>
-            <div class="carousel" id="listaMusicas"><div class="empty">Carregando músicas...</div></div>
-        </section>
-
-        <section class="section">
-            <div class="section-title">
-                <h2>Projetos</h2>
-            </div>
-            <div class="carousel" id="listaProjetos"><div class="empty">Carregando projetos...</div></div>
-        </section>
-
-        <section class="section">
-            <div class="section-title">
-                <h2>Artistas</h2>
-            </div>
-            <div class="carousel" id="listaArtistas"><div class="empty">Carregando artistas...</div></div>
-        </section>
+    <main id="conteudoDinamico">
+        <!-- O CONTEÚDO DA TELA SERÁ INJETADO AQUI DINAMICAMENTE (INÍCIO, PERFIL DE PROJETO, PERFIL DE ARTISTA, UPLOAD) -->
     </main>
 </div>
 
@@ -309,7 +281,12 @@ let playContabilizadoNessaMusica = false;
 
 document.addEventListener("DOMContentLoaded", async () => {
     await verificarSessaoAtiva();
-    iniciarApp();
+    await carregarDadosGlobais();
+    irInicio();
+
+    const audio = document.getElementById("audio");
+    audio.addEventListener('ended', lidarFimDaMusica);
+    audio.addEventListener('timeupdate', verificarTempoPlay);
 });
 
 async function verificarSessaoAtiva() {
@@ -322,7 +299,7 @@ function atualizarBotaoHeader() {
     const area = document.getElementById("areaHeaderBtn");
     if (sessaoAtual) {
         area.innerHTML = `
-            <button class="header-btn" onclick="tratarAcaoArtista()">Painel</button>
+            <button class="header-btn" onclick="abrirPainelUpload()">Painel</button>
             <button class="header-btn logout" onclick="fazerLogout()" style="margin-left: 8px;">Sair</button>
         `;
     } else {
@@ -334,20 +311,20 @@ async function fazerLogout() {
     await supabaseClient.auth.signOut();
     sessaoAtual = null;
     atualizarBotaoHeader();
-    renderizarTudo();
+    irInicio();
     alert("Você saiu da sua conta.");
 }
 
 async function tratarAcaoArtista() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
-        window.location.href = "upload.html";
+        abrirPainelUpload();
     } else {
         abrirModalArtista();
     }
 }
 
-async function iniciarApp() {
+async function carregarDadosGlobais() {
     try {
         const resArtistas = await supabaseClient.from('artistas').select('*').order('nome', { ascending: true });
         artistasCache = resArtistas.data || [];
@@ -377,22 +354,59 @@ async function iniciarApp() {
                 plays: m.plays || 0
             };
         });
-
-        renderizarTudo();
-
-        const audio = document.getElementById("audio");
-        audio.addEventListener('ended', lidarFimDaMusica);
-        audio.addEventListener('timeupdate', verificarTempoPlay);
-
     } catch (err) {
-        console.error("Erro ao carregar:", err);
+        console.error("Erro ao carregar dados globais:", err);
     }
 }
 
-function renderizarTudo() {
+/* ================= NAV / TELAS DINÂMICAS (SPA) ================= */
+
+async function irInicio() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    const containerMain = document.getElementById("conteudoDinamico");
+    
+    containerMain.innerHTML = `
+        <section class="hero">
+            <small>UNDERFY . STUDIO CAMP</small>
+            <h1>As guias da sessão.</h1>
+            <p>Um espaço livre para artistas independentes publicarem, ouvirem e organizarem suas músicas.</p>
+        </section>
+
+        <div class="search-box">
+            <input id="pesquisa" placeholder="Pesquisar música ou artista..." oninput="pesquisar()">
+        </div>
+
+        <section class="section">
+            <div class="section-title">
+                <h2>Guias recentes</h2>
+            </div>
+            <div class="carousel" id="listaMusicas"><div class="empty">Carregando músicas...</div></div>
+        </section>
+
+        <section class="section">
+            <div class="section-title">
+                <h2>Projetos</h2>
+            </div>
+            <div class="carousel" id="listaProjetos"><div class="empty">Carregando projetos...</div></div>
+        </section>
+
+        <section class="section">
+            <div class="section-title">
+                <h2>Artistas</h2>
+            </div>
+            <div class="carousel" id="listaArtistas"><div class="empty">Carregando artistas...</div></div>
+        </section>
+    `;
+
+    renderizarListasHome();
+}
+
+function renderizarListasHome() {
     const usuarioLogadoId = sessaoAtual ? sessaoAtual.user.id : null;
 
     const container = document.getElementById("listaMusicas");
+    if (!container) return;
+
     if (musicas.length === 0) {
         container.innerHTML = `<div class="empty">Nenhuma música cadastrada ainda.</div>`;
     } else {
@@ -415,28 +429,331 @@ function renderizarTudo() {
     }
 
     const containerProjetos = document.getElementById("listaProjetos");
-    if (projetosCache.length === 0) {
-        containerProjetos.innerHTML = `<div class="empty">Nenhum projeto cadastrado.</div>`;
-    } else {
-        containerProjetos.innerHTML = projetosCache.map(p => `
-            <div class="card" onclick="window.location.href='projeto.html?id=${p.id}'">
-                <img class="cover" src="${p.capa_url || 'https://via.placeholder.com/500'}" onerror="this.src='https://via.placeholder.com/500'">
-                <h3>${p.nome}</h3>
-                <p>Projeto</p>
-            </div>
-        `).join('');
+    if (containerProjetos) {
+        if (projetosCache.length === 0) {
+            containerProjetos.innerHTML = `<div class="empty">Nenhum projeto cadastrado.</div>`;
+        } else {
+            containerProjetos.innerHTML = projetosCache.map(p => `
+                <div class="card" onclick="abrirProjeto('${p.id}')">
+                    <img class="cover" src="${p.capa_url || 'https://via.placeholder.com/500'}" onerror="this.src='https://via.placeholder.com/500'">
+                    <h3>${p.nome}</h3>
+                    <p>Projeto</p>
+                </div>
+            `).join('');
+        }
     }
 
     const containerArtistas = document.getElementById("listaArtistas");
-    if (artistasCache.length === 0) {
-        containerArtistas.innerHTML = `<div class="empty">Nenhum artista cadastrado.</div>`;
-    } else {
-        containerArtistas.innerHTML = artistasCache.map(a => `
-            <div class="card" onclick="window.location.href='artista.html?nome=${encodeURIComponent(a.nome)}'">
-                <img class="cover" src="${a.foto_url || 'https://via.placeholder.com/500'}" onerror="this.src='https://via.placeholder.com/500'">
-                <h3>${a.nome}</h3>
+    if (containerArtistas) {
+        if (artistasCache.length === 0) {
+            containerArtistas.innerHTML = `<div class="empty">Nenhum artista cadastrado.</div>`;
+        } else {
+            containerArtistas.innerHTML = artistasCache.map(a => `
+                <div class="card" onclick="abrirArtista('${encodeURIComponent(a.nome)}')">
+                    <img class="cover" src="${a.foto_url || 'https://via.placeholder.com/500'}" onerror="this.src='https://via.placeholder.com/500'">
+                    <h3>${a.nome}</h3>
+                </div>
+            `).join('');
+        }
+    }
+}
+
+function mostrarMusicas() {
+    irInicio();
+    setTimeout(() => {
+        const el = document.getElementById("listaMusicas");
+        if(el) el.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+}
+
+function mostrarArtistas() {
+    irInicio();
+    setTimeout(() => {
+        const el = document.getElementById("listaArtistas");
+        if(el) el.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+}
+
+/* ================= TELA DE PROJETO ESPECÍFICO ================= */
+async function abrirProjeto(projetoId) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    const projeto = projetosCache.find(p => p.id == projetoId);
+    if(!projeto) return;
+
+    // Buscar músicas vinculadas a este projeto
+    const { data: relsProj } = await supabaseClient.from('projeto_musicas').select('*').eq('projeto_id', projetoId);
+    const idsMusicasProjeto = relsProj ? relsProj.map(r => r.musica_id) : [];
+    const musicasDoProjeto = musicas.filter(m => idsMusicasProjeto.includes(m.id));
+
+    const containerMain = document.getElementById("conteudoDinamico");
+    containerMain.innerHTML = `
+        <div style="margin-top:25px; display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
+            <img src="${projeto.capa_url || 'https://via.placeholder.com/500'}" style="width:160px; height:160px; object-fit:cover; border-radius:15px;">
+            <div>
+                <small style="color:#1ed760; font-weight:bold;">PROJETO</small>
+                <h1 style="font-size:36px; margin:5px 0;">${projeto.nome}</h1>
+                <p style="color:#888;">${musicasDoProjeto.length} guias cadastradas</p>
             </div>
-        `).join('');
+        </div>
+        <div class="section" style="margin-top:40px;">
+            <div class="section-title"><h2>Músicas do Projeto</h2></div>
+            <div id="listaMusicasProjeto" style="display:flex; flex-direction:column; gap:12px;"></div>
+        </div>
+        <button class="header-btn" style="margin-top:25px;" onclick="irInicio()">&#8592; Voltar ao Início</button>
+    `;
+
+    const containerMusicasProj = document.getElementById("listaMusicasProjeto");
+    if(musicasDoProjeto.length === 0) {
+        containerMusicasProj.innerHTML = `<div class="empty">Nenhuma música vinculada a este projeto.</div>`;
+    } else {
+        containerMusicasProj.innerHTML = musicasDoProjeto.map(m => {
+            const indexGlobal = musicas.findIndex(x => x.id === m.id);
+            return `
+                <div style="background:#151515; padding:15px; border-radius:12px; display:flex; align-items:center; justify-content:space-between; gap:15px;">
+                    <div style="display:flex; align-items:center; gap:15px; min-width:0;">
+                        <img src="${m.capa}" style="width:50px; height:50px; object-fit:cover; border-radius:8px;">
+                        <div style="min-width:0;">
+                            <strong style="display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.nome}</strong>
+                            <span style="color:#888; font-size:13px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.artistaFormatado}</span>
+                        </div>
+                    </div>
+                    <button class="play" style="width:auto; padding:10px 20px; margin:0;" onclick="tocarMusicaPorIndex(${indexGlobal})">&#9654; Ouvir</button>
+                </div>
+            `;
+        }).join('');
+    }
+}
+
+/* ================= TELA DE PERFIL DE ARTISTA ================= */
+async function abrirArtista(nomeArtistaEncoded) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    const nomeArtista = decodeURIComponent(nomeArtistaEncoded);
+    const artista = artistasCache.find(a => a.nome === nomeArtista);
+    if(!artista) return;
+
+    // Buscar músicas desse artista
+    const { data: relsArt } = await supabaseClient.from('musica_artistas').select('*').eq('artista_id', artista.id);
+    const idsMusicasArtista = relsArt ? relsArt.map(r => r.musica_id) : [];
+    const musicasDoArtista = musicas.filter(m => idsMusicasArtista.includes(m.id));
+
+    const containerMain = document.getElementById("conteudoDinamico");
+    containerMain.innerHTML = `
+        <div style="margin-top:25px; display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
+            <img src="${artista.foto_url || 'https://via.placeholder.com/500'}" style="width:160px; height:160px; object-fit:cover; border-radius:50%;">
+            <div>
+                <small style="color:#1ed760; font-weight:bold;">ARTISTA</small>
+                <h1 style="font-size:36px; margin:5px 0;">${artista.nome}</h1>
+                <p style="color:#888;">${musicasDoArtista.length} guias publicadas</p>
+            </div>
+        </div>
+        <div class="section" style="margin-top:40px;">
+            <div class="section-title"><h2>Guias do Artista</h2></div>
+            <div id="listaMusicasArtista" style="display:flex; flex-direction:column; gap:12px;"></div>
+        </div>
+        <button class="header-btn" style="margin-top:25px;" onclick="irInicio()">&#8592; Voltar ao Início</button>
+    `;
+
+    const containerMusicasArt = document.getElementById("listaMusicasArtista");
+    if(musicasDoArtista.length === 0) {
+        containerMusicasArt.innerHTML = `<div class="empty">Nenhuma música cadastrada por este artista.</div>`;
+    } else {
+        containerMusicasArt.innerHTML = musicasDoArtista.map(m => {
+            const indexGlobal = musicas.findIndex(x => x.id === m.id);
+            return `
+                <div style="background:#151515; padding:15px; border-radius:12px; display:flex; align-items:center; justify-content:space-between; gap:15px;">
+                    <div style="display:flex; align-items:center; gap:15px; min-width:0;">
+                        <img src="${m.capa}" style="width:50px; height:50px; object-fit:cover; border-radius:8px;">
+                        <div style="min-width:0;">
+                            <strong style="display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.nome}</strong>
+                            <span style="color:#888; font-size:13px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.artistaFormatado}</span>
+                        </div>
+                    </div>
+                    <button class="play" style="width:auto; padding:10px 20px; margin:0;" onclick="tocarMusicaPorIndex(${indexGlobal})">&#9654; Ouvir</button>
+                </div>
+            `;
+        }).join('');
+    }
+}
+
+/* ================= PAINEL DE UPLOAD / GERENCIAMENTO ================= */
+async function abrirPainelUpload() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    const containerMain = document.getElementById("conteudoDinamico");
+
+    containerMain.innerHTML = `
+        <div style="margin-top:25px; background:#141414; border:1px solid #222; border-radius:20px; padding:30px; max-width:650px; margin-left:auto; margin-right:auto;">
+            <h2 style="margin-bottom:8px;">Painel do Artista</h2>
+            <p style="color:#888; font-size:14px; margin-bottom:25px;">Adicione novas guias, gerencie seus lançamentos ou crie novos projetos.</p>
+            
+            <div style="display:flex; gap:10px; margin-bottom:25px; border-bottom:1px solid #222; padding-bottom:15px;">
+                <button class="header-btn" id="abaGuiaBtn" onclick="mudarAbaPainel('guia')" style="background:#1ed760;">Nova Guia</button>
+                <button class="header-btn" id="abaProjetoBtn" onclick="mudarAbaPainel('projeto')" style="background:#252525; color:#fff;">Novo Projeto</button>
+            </div>
+
+            <!-- FORMULÁRIO GUIA -->
+            <div id="formGuiaContainer">
+                <input type="text" id="upNomeGuia" class="input-padrao" placeholder="Nome da Guia (Ex: Trap Star)">
+                
+                <label style="font-size:13px; color:#888; display:block; margin-bottom:6px;">Artistas participantes</label>
+                <div id="checkboxArtistasContainer" style="max-height:130px; overflow-y:auto; background:#1b1b1b; border:1px solid #333; border-radius:9px; padding:10px; margin-bottom:13px;">
+                    Carregando artistas...
+                </div>
+
+                <label style="font-size:13px; color:#888; display:block; margin-bottom:6px;">Incluir em Projeto (Opcional)</label>
+                <div id="checkboxProjetosContainer" style="max-height:130px; overflow-y:auto; background:#1b1b1b; border:1px solid #333; border-radius:9px; padding:10px; margin-bottom:13px;">
+                    Carregando projetos...
+                </div>
+
+                <label class="file-upload-label" for="upCapaArquivo">
+                    <span id="labelCapaTexto">Capa da Guia (Imagem)</span>
+                </label>
+                <input type="file" id="upCapaArquivo" accept="image/*" style="display:none;" onchange="document.getElementById('labelCapaTexto').textContent = this.files[0].name">
+
+                <label class="file-upload-label" for="upAudioArquivo">
+                    <span id="labelAudioTexto">Arquivo de Áudio (.mp3 / .wav)</span>
+                </label>
+                <input type="file" id="upAudioArquivo" accept="audio/*" style="display:none;" onchange="document.getElementById('labelAudioTexto').textContent = this.files[0].name">
+
+                <button class="form-btn" onclick="salvarNovaGuia()">Publicar Guia</button>
+            </div>
+
+            <!-- FORMULÁRIO PROJETO -->
+            <div id="formProjetoContainer" style="display:none;">
+                <input type="text" id="upNomeProjeto" class="input-padrao" placeholder="Nome do Projeto / Álbum / Mixtape">
+                
+                <label class="file-upload-label" for="upCapaProjArquivo">
+                    <span id="labelCapaProjTexto">Capa do Projeto (Imagem)</span>
+                </label>
+                <input type="file" id="upCapaProjArquivo" accept="image/*" style="display:none;" onchange="document.getElementById('labelCapaProjTexto').textContent = this.files[0].name">
+
+                <button class="form-btn" onclick="salvarNovoProjeto()">Criar Projeto</button>
+            </div>
+        </div>
+    `;
+
+    carregarCheckboxesPainel();
+}
+
+function mudarAbaPainel(tipo) {
+    const btnGuia = document.getElementById("abaGuiaBtn");
+    const btnProj = document.getElementById("abaProjetoBtn");
+    const formGuia = document.getElementById("formGuiaContainer");
+    const formProj = document.getElementById("formProjetoContainer");
+
+    if (tipo === 'guia') {
+        btnGuia.style.background = "#1ed760"; btnGuia.style.color = "#000";
+        btnProj.style.background = "#252525"; btnProj.style.color = "#fff";
+        formGuia.style.display = "block";
+        formProj.style.display = "none";
+    } else {
+        btnProj.style.background = "#1ed760"; btnProj.style.color = "#000";
+        btnGuia.style.background = "#252525"; btnGuia.style.color = "#fff";
+        formProj.style.display = "block";
+        formGuia.style.display = "none";
+    }
+}
+
+function carregarCheckboxesPainel() {
+    const contArtistas = document.getElementById("checkboxArtistasContainer");
+    const contProjetos = document.getElementById("checkboxProjetosContainer");
+    const usuarioLogadoId = sessaoAtual ? sessaoAtual.user.id : null;
+
+    if (contArtistas) {
+        contArtistas.innerHTML = artistasCache.map(a => `
+            <label style="display:flex; align-items:center; gap:8px; margin-bottom:6px; cursor:pointer;">
+                <input type="checkbox" name="artistaCheck" value="${a.id}" ${a.id === usuarioLogadoId ? 'checked' : ''}> ${a.nome}
+            </label>
+        `).join('') || '<span style="color:#777;">Nenhum artista cadastrado</span>';
+    }
+
+    if (contProjetos) {
+        contProjetos.innerHTML = projetosCache.map(p => `
+            <label style="display:flex; align-items:center; gap:8px; margin-bottom:6px; cursor:pointer;">
+                <input type="checkbox" name="projetoCheck" value="${p.id}"> ${p.nome}
+            </label>
+        `).join('') || '<span style="color:#777;">Nenhum projeto cadastrado</span>';
+    }
+}
+
+async function salvarNovaGuia() {
+    const nome = document.getElementById("upNomeGuia").value.trim();
+    const fileCapa = document.getElementById("upCapaArquivo").files[0];
+    const fileAudio = document.getElementById("upAudioArquivo").files[0];
+
+    const artistasSelecionados = Array.from(document.querySelectorAll('input[name="artistaCheck"]:checked')).map(el => el.value);
+    const projetosSelecionados = Array.from(document.querySelectorAll('input[name="projetoCheck"]:checked')).map(el => el.value);
+
+    if (!nome || !fileCapa || !fileAudio || artistasSelecionados.length === 0) {
+        alert("Preencha o nome, selecione pelo menos um artista, uma capa e um arquivo de áudio.");
+        return;
+    }
+
+    alert("Enviando arquivos, por favor aguarde...");
+
+    try {
+        // Upload Capa
+        const nomeCapaFile = `capa_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        await supabaseClient.storage.from('capas-musicas').upload(nomeCapaFile, fileCapa);
+        const { data: pubCapa } = supabaseClient.storage.from('capas-musicas').getPublicUrl(nomeCapaFile);
+
+        // Upload Áudio
+        const nomeAudioFile = `audio_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        await supabaseClient.storage.from('capas-musicas').upload(nomeAudioFile, fileAudio);
+        const { data: pubAudio } = supabaseClient.storage.from('capas-musicas').getPublicUrl(nomeAudioFile);
+
+        // Inserir Música
+        const { data: resMusica, error: errMusica } = await supabaseClient.from('musicas').insert([
+            { nome: nome, capa_url: pubCapa.publicUrl, audio_url: pubAudio.publicUrl, plays: 0 }
+        ]).select().single();
+
+        if (errMusica) { alert("Erro ao salvar música: " + errMusica.message); return; }
+        const musicaId = resMusica.id;
+
+        // Inserir Relação Artistas
+        const relArtistasData = artistasSelecionados.map(artId => ({ musica_id: musicaId, artista_id: artId }));
+        await supabaseClient.from('musica_artistas').insert(relArtistasData);
+
+        // Inserir Relação Projetos
+        if (projetosSelecionados.length > 0) {
+            const relProjetosData = projetosSelecionados.map(projId => ({ projeto_id: projId, musica_id: musicaId }));
+            await supabaseClient.from('projeto_musicas').insert(relProjetosData);
+        }
+
+        alert("Guia publicada com sucesso!");
+        await carregarDadosGlobais();
+        irInicio();
+    } catch(err) {
+        alert("Erro no processo: " + err.message);
+    }
+}
+
+async function salvarNovoProjeto() {
+    const nome = document.getElementById("upNomeProjeto").value.trim();
+    const fileCapa = document.getElementById("upCapaProjArquivo").files[0];
+
+    if (!nome || !fileCapa) {
+        alert("Preencha o nome do projeto e selecione uma capa.");
+        return;
+    }
+
+    alert("Enviando projeto...");
+
+    try {
+        const nomeCapaFile = `proj_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        await supabaseClient.storage.from('capas-musicas').upload(nomeCapaFile, fileCapa);
+        const { data: pubCapa } = supabaseClient.storage.from('capas-musicas').getPublicUrl(nomeCapaFile);
+
+        const { error } = await supabaseClient.from('projetos').insert([
+            { nome: nome, capa_url: pubCapa.publicUrl }
+        ]);
+
+        if (error) { alert("Erro ao criar projeto: " + error.message); return; }
+
+        alert("Projeto criado com sucesso!");
+        await carregarDadosGlobais();
+        irInicio();
+    } catch(err) {
+        alert("Erro: " + err.message);
     }
 }
 
@@ -445,6 +762,7 @@ async function removerMusica(idMusica) {
 
     try {
         await supabaseClient.from('musica_artistas').delete().eq('musica_id', idMusica);
+        await supabaseClient.from('projeto_musicas').delete().eq('musica_id', idMusica);
         const { error } = await supabaseClient.from('musicas').delete().eq('id', idMusica);
 
         if (error) {
@@ -453,7 +771,8 @@ async function removerMusica(idMusica) {
         }
 
         alert("Guia apagada com sucesso!");
-        iniciarApp();
+        await carregarDadosGlobais();
+        irInicio();
     } catch (err) {
         console.error("Erro:", err);
     }
@@ -492,7 +811,14 @@ async function verificarTempoPlay() {
         playContabilizadoNessaMusica = true;
         const m = musicas[musicaAtualIndex];
         m.plays += 1;
-        renderizarTudo();
+        
+        // Atualiza na view atual caso esteja na home
+        const elPlays = document.querySelectorAll('.card-plays');
+        // Re-renderiza de forma leve se estiver na home
+        if(document.getElementById("listaMusicas")) {
+            renderizarListasHome();
+        }
+
         try { 
             await supabaseClient.from('musicas').update({ plays: m.plays }).eq('id', m.id); 
         } catch(e){}
@@ -518,10 +844,10 @@ function atualizarIconePlayPause(pausado) {
     const miniBtn = document.getElementById("miniPlayBtn");
     
     if (pausado) {
-        modalBtn.innerHTML = "&#9654;";
+        if(modalBtn) modalBtn.innerHTML = "&#9654;";
         if(miniBtn) miniBtn.innerHTML = "&#9654;";
     } else {
-        modalBtn.innerHTML = "&#10074;&#10074;";
+        if(modalBtn) modalBtn.innerHTML = "&#10074;&#10074;";
         if(miniBtn) miniBtn.innerHTML = "&#10074;&#10074;";
     }
 }
@@ -529,9 +855,13 @@ function atualizarIconePlayPause(pausado) {
 function atualizarBarraProgresso() {
     const audio = document.getElementById("audio");
     if (isNaN(audio.duration)) return;
-    document.getElementById("progressBarFill").style.width = (audio.currentTime / audio.duration) * 100 + "%";
-    document.getElementById("currentTime").textContent = formatarTempo(audio.currentTime);
-    document.getElementById("durationTime").textContent = formatarTempo(audio.duration);
+    const fill = document.getElementById("progressBarFill");
+    const cur = document.getElementById("currentTime");
+    const dur = document.getElementById("durationTime");
+
+    if (fill) fill.style.width = (audio.currentTime / audio.duration) * 100 + "%";
+    if (cur) cur.textContent = formatarTempo(audio.currentTime);
+    if (dur) dur.textContent = formatarTempo(audio.duration);
 }
 
 function mudarProgresso(event) {
@@ -566,19 +896,25 @@ function lidarFimDaMusica() {
 
 function toggleShuffle() { 
     modoShuffle = !modoShuffle; 
-    document.getElementById("btnShuffle").classList.toggle("active", modoShuffle); 
+    const btn = document.getElementById("btnShuffle");
+    if(btn) btn.classList.toggle("active", modoShuffle); 
 }
 
 function toggleRepeat() { 
     modoRepeat = !modoRepeat; 
-    document.getElementById("btnRepeat").classList.toggle("active", modoRepeat); 
+    const btn = document.getElementById("btnRepeat");
+    if(btn) btn.classList.toggle("active", modoRepeat); 
 }
 
 function pesquisar() {
-    const termo = document.getElementById("pesquisa").value.toLowerCase();
+    const inputPesquisa = document.getElementById("pesquisa");
+    if(!inputPesquisa) return;
+    const termo = inputPesquisa.value.toLowerCase();
     const filtrado = musicas.filter(m => m.nome.toLowerCase().includes(termo) || m.artistaFormatado.toLowerCase().includes(termo));
     const usuarioLogadoId = sessaoAtual ? sessaoAtual.user.id : null;
     const container = document.getElementById("listaMusicas");
+
+    if(!container) return;
 
     if(filtrado.length === 0) {
         container.innerHTML = `<div class="empty">Nenhuma música encontrada.</div>`;
@@ -600,10 +936,6 @@ function pesquisar() {
         }).join('');
     }
 }
-
-function irInicio() { window.scrollTo({ top: 0, behavior: "smooth" }); }
-function mostrarMusicas() { document.getElementById("listaMusicas").scrollIntoView({ behavior: "smooth" }); }
-function mostrarArtistas() { document.getElementById("listaArtistas").scrollIntoView({ behavior: "smooth" }); }
 
 function abrirModalArtista() { document.getElementById("modalAuth").style.display = "flex"; }
 function fecharModal(id) { document.getElementById(id).style.display = "none"; }
@@ -647,7 +979,8 @@ async function autenticarArtista() {
         }
         
         await verificarSessaoAtiva();
-        window.location.href = "upload.html";
+        fecharModal('modalAuth');
+        abrirPainelUpload();
     }
 }
 
@@ -698,7 +1031,8 @@ async function salvarPerfilArtista() {
     alert("Perfil criado com sucesso! Redirecionando...");
     fecharModal('modalPerfil');
     await verificarSessaoAtiva();
-    window.location.href = "upload.html";
+    await carregarDadosGlobais();
+    abrirPainelUpload();
 }
 </script>
 </body>
