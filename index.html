@@ -101,23 +101,33 @@ input:focus{border-color:#1ed760;}
 .stories-container::-webkit-scrollbar { display: none; }
 .story-ring {
     width: 76px; height: 76px; border-radius: 50%;
-    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
     padding: 3px; cursor: pointer; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
+    transition: 0.2s;
 }
-.story-ring.add-story {
-    background: #333;
-    border: 2px dashed #1ed760;
+/* Cinza quando lido / sem novidades */
+.story-ring.seen {
+    background: #444;
+}
+/* Verde quando tem stories novos */
+.story-ring.unseen {
+    background: #1ed760;
 }
 .story-avatar {
     width: 100%; height: 100%; border-radius: 50%;
     object-fit: cover; border: 3px solid #0b0b0b;
 }
 .story-item-wrapper {
-    display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; position: relative;
 }
 .story-item-wrapper span {
     font-size: 12px; color: #ccc; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.story-add-badge {
+    position: absolute; bottom: 18px; right: 2px;
+    width: 22px; height: 22px; background: #1ed760; color: #000;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: bold; border: 2px solid #0b0b0b;
 }
 
 /* MODAL DE VISUALIZAÇÃO DE STORIES */
@@ -155,7 +165,7 @@ input:focus{border-color:#1ed760;}
 }
 .camera-preview { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; z-index: 1; }
 .camera-controls {
-    position: absolute; bottom: 40px; z-index: 10; display: flex; align-items: center; gap: 30px;
+    position: absolute; bottom: 40px; z-index: 10; display: flex; align-items: center; gap: 40px; width: 100%; justify-content: center;
 }
 .capture-btn {
     width: 75px; height: 75px; border-radius: 50%; background: #fff; border: 4px solid rgba(255,255,255,0.5);
@@ -164,6 +174,11 @@ input:focus{border-color:#1ed760;}
 .capture-btn:active { transform: scale(0.9); }
 .capture-btn.recording { background: #ff4444; animation: pulse 1.2s infinite; }
 @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
+.switch-cam-btn {
+    background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.3); color: #fff;
+    width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 20px; cursor: pointer;
+}
 
 /* MINI PLAYER FIXO */
 .mini-player{
@@ -331,7 +346,9 @@ nav button:hover, nav button:active{color:#1ed760;}
         <button class="story-close-btn" onclick="fecharCameraModal()">&times;</button>
     </div>
     <div class="camera-controls">
+        <button class="switch-cam-btn" onclick="alternarCamera()" title="Trocar Câmera">&#8634;</button>
         <button class="capture-btn" id="captureBtn" ontouchstart="iniciarGravacaoStory()" ontouchend="pararGravacaoStory()" onmousedown="iniciarGravacaoStory()" onmouseup="pararGravacaoStory()" title="Toque para foto, segure para vídeo"></button>
+        <div style="width: 45px;"></div> <!-- Espaçamento para centralizar o botão de captura -->
     </div>
 </div>
 
@@ -402,11 +419,13 @@ let mediaRecorder = null;
 let recordedChunks = [];
 let pressTimer = null;
 let isRecordingVideo = false;
+let usarCameraFrontal = true; // Controla se a câmera é frontal ou traseira
 
-// Variáveis para o visualizador de Stories
+// Variáveis para o visualizador de Stories e Histórico local de vistos
 let currentStoriesList = [];
 let currentStoryIndex = 0;
 let storyTimer = null;
+let storiesVistos = JSON.parse(localStorage.getItem('underfy_stories_vistos') || '{}');
 
 document.addEventListener("DOMContentLoaded", async () => {
     await verificarSessaoAtiva();
@@ -538,6 +557,14 @@ async function irInicio() {
     renderizarStoriesBar();
 }
 
+function temStoriesNaoVistos(artistaId) {
+    const storiesDoArtista = storiesCache.filter(s => s.artist_id === artistaId);
+    if (storiesDoArtista.length === 0) return false;
+    
+    // Verifica se existe algum story do artista cujo ID não está na lista de vistos
+    return storiesDoArtista.some(s => !storiesVistos[s.id]);
+}
+
 function renderizarStoriesBar() {
     const container = document.getElementById("listaStories");
     if (!container) return;
@@ -546,25 +573,36 @@ function renderizarStoriesBar() {
     const usuarioLogadoId = sessaoAtual ? sessaoAtual.user.id : null;
     const artistaLogado = artistasCache.find(a => a.id === usuarioLogadoId);
 
-    // Botão de adicionar story (se logado)
+    // Se o usuário está logado como artista, renderiza o "Seu Story" com o ícone de "+"
     if (sessaoAtual && artistaLogado) {
+        const temNovosEu = temStoriesNaoVistos(artistaLogado.id);
+        const classeRingEu = temNovosEu ? 'unseen' : 'seen';
+
         html += `
-            <div class="story-item-wrapper" onclick="abrirCameraModal()">
-                <div class="story-ring add-story">
+            <div class="story-item-wrapper">
+                <div class="story-ring ${classeRingEu}" onclick="assistirStoriesArtista('${artistaLogado.id}')">
                     <img class="story-avatar" src="${artistaLogado.foto_url || 'https://via.placeholder.com/500'}">
                 </div>
+                <div class="story-add-badge" onclick="abrirCameraModal()">+</div>
                 <span>Seu Story</span>
             </div>
         `;
     }
 
-    // Agrupar stories por artista
-    const artistasComStories = artistasCache.filter(a => storiesCache.some(s => s.artist_id === a.id));
+    // Outros artistas com stories
+    const artistasComStories = artistasCache.filter(a => {
+        const tem = storiesCache.some(s => s.artist_id === a.id);
+        if (usuarioLogadoId && a.id === usuarioLogadoId) return false; // Já exibido acima
+        return tem;
+    });
 
     artistasComStories.forEach(art => {
+        const temNovos = temStoriesNaoVistos(art.id);
+        const classeRing = temNovos ? 'unseen' : 'seen';
+
         html += `
             <div class="story-item-wrapper" onclick="assistirStoriesArtista('${art.id}')">
-                <div class="story-ring">
+                <div class="story-ring ${classeRing}">
                     <img class="story-avatar" src="${art.foto_url || 'https://via.placeholder.com/500'}">
                 </div>
                 <span>${art.nome}</span>
@@ -583,8 +621,19 @@ function renderizarStoriesBar() {
 async function abrirCameraModal() {
     const modal = document.getElementById("cameraModal");
     modal.style.display = "flex";
+    await iniciarStreamCamera();
+}
+
+async function iniciarStreamCamera() {
+    if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+    }
     try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
+        const constraints = {
+            video: { facingMode: usarCameraFrontal ? "user" : "environment" },
+            audio: true
+        };
+        mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
         const videoElement = document.getElementById("cameraPreview");
         videoElement.srcObject = mediaStream;
     } catch (err) {
@@ -592,6 +641,11 @@ async function abrirCameraModal() {
         alert("Não foi possível acessar a câmera do dispositivo.");
         fecharCameraModal();
     }
+}
+
+async function alternarCamera() {
+    usarCameraFrontal = !usarCameraFrontal;
+    await iniciarStreamCamera();
 }
 
 function fecharCameraModal() {
@@ -611,7 +665,6 @@ function iniciarGravacaoStory() {
     isRecordingVideo = false;
     const captureBtn = document.getElementById("captureBtn");
 
-    // Prepara para verificar se segurou o botão (Vídeo de até 30s) ou apenas clicou (Foto)
     pressTimer = setTimeout(() => {
         isRecordingVideo = true;
         captureBtn.classList.add("recording");
@@ -628,7 +681,7 @@ function iniciarGravacaoStory() {
             mediaRecorder.onstop = () => salvarMidiaStory('video');
             mediaRecorder.start();
         }
-    }, 400); // 400ms segurando vira gravação de vídeo
+    }, 400); 
 }
 
 function pararGravacaoStory() {
@@ -641,7 +694,6 @@ function pararGravacaoStory() {
             mediaRecorder.stop();
         }
     } else {
-        // Foi apenas um clique rápido -> Tirar Foto
         tirarFotoStory();
     }
 }
@@ -652,6 +704,13 @@ async function tirarFotoStory() {
     canvas.width = videoElement.videoWidth || 720;
     canvas.height = videoElement.videoHeight || 1280;
     const ctx = canvas.getContext("2d");
+    
+    // Se for frontal, inverte horizontalmente para o espelhamento ficar correto
+    if (usarCameraFrontal) {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+    }
+    
     ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
     canvas.toBlob(async (blob) => {
@@ -706,6 +765,13 @@ function renderizarStoryAtual() {
     }
 
     const story = currentStoriesList[currentStoryIndex];
+    
+    // Marca o story atual como visto e salva no localStorage
+    if (story && story.id) {
+        storiesVistos[story.id] = true;
+        localStorage.setItem('underfy_stories_vistos', JSON.stringify(storiesVistos));
+    }
+
     const artista = artistasCache.find(a => a.id === story.artist_id) || { nome: 'Artista', foto_url: '' };
 
     document.getElementById("storyUserName").textContent = artista.nome;
@@ -723,7 +789,6 @@ function renderizarStoryAtual() {
     } else {
         mediaContainer.innerHTML = `<img class="story-media-content" src="${story.media_url}">`;
         
-        // Animação da barra para imagem (5 segundos)
         clearTimeout(storyTimer);
         const fillElement = document.getElementById(`progFill_${currentStoryIndex}`);
         if(fillElement) {
@@ -746,6 +811,7 @@ function proximoStory() {
 function fecharStoryViewer() {
     clearTimeout(storyTimer);
     document.getElementById("storyViewerModal").style.display = "none";
+    renderizarStoriesBar(); // Atualiza as bordas para cinza caso todos tenham sido vistos
 }
 
 function renderizarListasHome() {
