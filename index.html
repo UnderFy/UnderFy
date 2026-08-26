@@ -813,7 +813,6 @@ async function publicarMidiaPreview() {
 function assistirStoriesArtista(artistaId) {
     currentStoriesList = storiesCache.filter(s => s.artist_id === artistaId);
     if (currentStoriesList.length === 0) {
-        alert("Nenhum story ativo encontrado.");
         return;
     }
     currentStoryIndex = 0;
