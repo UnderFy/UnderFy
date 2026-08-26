@@ -43,8 +43,29 @@ main{width:90%;max-width:1200px;margin:auto;}
 .section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
 .section-title h2{font-size:22px;}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:18px;}
-.card{background:#151515;padding:14px;border-radius:15px;position:relative;transition:.2s;}
+/* CARROSSEL HORIZONTAL */
+.carousel{
+    display:flex;
+    gap:18px;
+    overflow-x:auto;
+    padding-bottom:10px;
+    scrollbar-width:thin;
+    scrollbar-color:#333 transparent;
+}
+.carousel::-webkit-scrollbar{height:6px;}
+.carousel::-webkit-scrollbar-track{background:transparent;}
+.carousel::-webkit-scrollbar-thumb{background:#333;border-radius:3px;}
+
+.card{
+    background:#151515;
+    padding:14px;
+    border-radius:15px;
+    position:relative;
+    transition:.2s;
+    min-width:180px;
+    max-width:180px;
+    flex-shrink:0;
+}
 .card:hover{background:#202020;transform:translateY(-3px);}
 .cover{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:#252525;}
 .card h3{margin-top:12px;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -53,6 +74,7 @@ main{width:90%;max-width:1200px;margin:auto;}
 .play{
     margin-top:12px;width:100%;border:0;background:#1ed760;color:#000;padding:10px;
     border-radius:20px;font-weight:bold;display:flex;align-items:center;justify-content:center;gap:6px;
+    font-size:13px;
 }
 .btn-delete{
     margin-top:8px;width:100%;border:0;background:rgba(255,68,68,0.15);color:#ff4444;padding:8px;
@@ -60,10 +82,9 @@ main{width:90%;max-width:1200px;margin:auto;}
 }
 .btn-delete:hover{background:rgba(255,68,68,0.3);}
 
-.empty{color:#888;text-align:center;padding:30px 10px;grid-column:1/-1;}
-.search-box{position:relative;margin-top:25px;}
-.search-box span{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:#777;font-size:14px;font-weight:bold;}
-input{width:100%;padding:13px 13px 13px 40px;margin:0 0 13px;background:#252525;border:1px solid #333;color:#fff;border-radius:9px;outline:none;}
+.empty{color:#888;text-align:center;padding:30px 10px;width:100%;}
+.search-box{margin-top:25px;}
+input{width:100%;padding:13px;background:#252525;border:1px solid #333;color:#fff;border-radius:9px;outline:none;}
 input:focus{border-color:#1ed760;}
 .input-padrao{width:100%;padding:13px;margin:0 0 13px;background:#252525;border:1px solid #333;color:#fff;border-radius:9px;outline:none;}
 .input-padrao:focus{border-color:#1ed760;}
@@ -132,17 +153,13 @@ nav button:hover, nav button:active{color:#1ed760;}
 .toggle-auth span{color:#1ed760;font-weight:bold;}
 .file-upload-label{display:block;background:#252525;border:1px dashed #444;padding:12px;border-radius:9px;text-align:center;cursor:pointer;color:#aaa;margin-bottom:13px;font-size:14px;}
 .file-upload-label:hover{border-color:#1ed760;color:#fff;}
-
-@media(max-width:700px){
-    .grid{grid-template-columns:repeat(2,1fr);gap:12px;}
-}
 </style>
 </head>
 <body>
 
 <div class="app">
     <header>
-        <div class="logo">Under<span class="fy">Fy</span> <span class="by-uta">. UTA</span></div>
+        <div class="logo">Under<span class="fy">Fy</span> <span class="by-uta">• UTA</span></div>
         <div id="areaHeaderBtn">
             <button class="header-btn" onclick="tratarAcaoArtista()">Área do Artista</button>
         </div>
@@ -156,7 +173,6 @@ nav button:hover, nav button:active{color:#1ed760;}
         </section>
 
         <div class="search-box">
-            <span>BUSCA</span>
             <input id="pesquisa" placeholder="Pesquisar música ou artista..." oninput="pesquisar()">
         </div>
 
@@ -164,14 +180,21 @@ nav button:hover, nav button:active{color:#1ed760;}
             <div class="section-title">
                 <h2>Guias recentes</h2>
             </div>
-            <div class="grid" id="listaMusicas"><div class="empty">Carregando músicas...</div></div>
+            <div class="carousel" id="listaMusicas"><div class="empty">Carregando músicas...</div></div>
+        </section>
+
+        <section class="section">
+            <div class="section-title">
+                <h2>Projetos</h2>
+            </div>
+            <div class="carousel" id="listaProjetos"><div class="empty">Carregando projetos...</div></div>
         </section>
 
         <section class="section">
             <div class="section-title">
                 <h2>Artistas</h2>
             </div>
-            <div class="grid" id="listaArtistas"><div class="empty">Carregando artistas...</div></div>
+            <div class="carousel" id="listaArtistas"><div class="empty">Carregando artistas...</div></div>
         </section>
     </main>
 </div>
@@ -273,6 +296,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let musicas = [];
 let artistasCache = [];
+let projetosCache = [];
 let dadosRelacaoCache = [];
 let musicaAtualIndex = -1;
 let modoShuffle = false;
@@ -281,7 +305,6 @@ let modoCadastro = false;
 let usuarioPendenteId = null;
 let sessaoAtual = null;
 
-// Controle da regra dos 30 segundos de play
 let playContabilizadoNessaMusica = false;
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -318,7 +341,6 @@ async function fazerLogout() {
 async function tratarAcaoArtista() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
-        // Mantém na mesma página em segundo plano (ou redireciona sem perder o contexto se necessário, mas mantendo a aba ativa)
         window.location.href = "upload.html";
     } else {
         abrirModalArtista();
@@ -329,6 +351,9 @@ async function iniciarApp() {
     try {
         const resArtistas = await supabaseClient.from('artistas').select('*').order('nome', { ascending: true });
         artistasCache = resArtistas.data || [];
+
+        const resProjetos = await supabaseClient.from('projetos').select('*').order('created_at', { ascending: false });
+        projetosCache = resProjetos.data || [];
 
         const resMusicas = await supabaseClient.from('musicas').select('*').order('created_at', { ascending: false });
         const dadosMusicas = resMusicas.data || [];
@@ -387,6 +412,19 @@ function renderizarTudo() {
                 </div>
             `;
         }).join('');
+    }
+
+    const containerProjetos = document.getElementById("listaProjetos");
+    if (projetosCache.length === 0) {
+        containerProjetos.innerHTML = `<div class="empty">Nenhum projeto cadastrado.</div>`;
+    } else {
+        containerProjetos.innerHTML = projetosCache.map(p => `
+            <div class="card" onclick="window.location.href='projeto.html?id=${p.id}'">
+                <img class="cover" src="${p.capa_url || 'https://via.placeholder.com/500'}" onerror="this.src='https://via.placeholder.com/500'">
+                <h3>${p.nome}</h3>
+                <p>Projeto</p>
+            </div>
+        `).join('');
     }
 
     const containerArtistas = document.getElementById("listaArtistas");
