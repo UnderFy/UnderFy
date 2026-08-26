@@ -151,13 +151,20 @@ input:focus{border-color:#1ed760;}
 .story-user-meta span { font-size: 14px; font-weight: bold; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
 .story-media-content { width: 100%; height: 100%; object-fit: cover; background: #000; }
 .story-close-btn { background: none; border: 0; color: #fff; font-size: 24px; font-weight: bold; cursor: pointer; }
+.story-delete-btn {
+    position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); z-index: 20;
+    background: rgba(255, 68, 68, 0.9); color: #fff; border: 0; padding: 10px 20px;
+    border-radius: 20px; font-weight: bold; font-size: 14px; cursor: pointer; display: none;
+}
 
 /* MODAL DA CÂMERA EM TEMPO REAL */
 .camera-modal {
     display: none; position: fixed; inset: 0; z-index: 350;
-    background: #000; align-items: center; justify-content: center; flex-direction: column;
+    background: #000; align-items: center; justify-content: center; flex-direction: column; overflow: hidden;
 }
-.camera-preview { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; z-index: 1; }
+.camera-preview {
+    width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; z-index: 1;
+}
 .camera-controls {
     position: absolute; bottom: 40px; z-index: 10; display: flex; align-items: center; gap: 40px; width: 100%; justify-content: center;
 }
@@ -345,6 +352,7 @@ nav button:hover, nav button:active{color:#1ed760;}
         <div style="flex:1; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;" id="storyMediaContainer">
             <!-- Inserido dinamicamente (img ou video) -->
         </div>
+        <button class="story-delete-btn" id="storyDeleteBtn" onclick="apagarStoryAtual()">Apagar Story</button>
     </div>
 </div>
 
@@ -433,7 +441,6 @@ let sessaoAtual = null;
 
 let playContabilizadoNessaMusica = false;
 
-// Variáveis para gravação de Story em tempo real e preview
 let mediaStream = null;
 let mediaRecorder = null;
 let recordedChunks = [];
@@ -441,9 +448,8 @@ let pressTimer = null;
 let isRecordingVideo = false;
 let usarCameraFrontal = true;
 let blobCapturadoPendente = null;
-let tipoMidiaPendente = null; // 'image' ou 'video'
+let tipoMidiaPendente = null;
 
-// Variáveis para o visualizador de Stories e Histórico local de vistos
 let currentStoriesList = [];
 let currentStoryIndex = 0;
 let storyTimer = null;
@@ -635,7 +641,6 @@ function renderizarStoriesBar() {
     }
 }
 
-// Funções da Câmera em Tempo Real para Stories
 async function abrirCameraModal() {
     const modal = document.getElementById("cameraModal");
     modal.style.display = "flex";
@@ -804,7 +809,6 @@ async function publicarMidiaPreview() {
     }
 }
 
-// Visualizador de Stories
 function assistirStoriesArtista(artistaId) {
     currentStoriesList = storiesCache.filter(s => s.artist_id === artistaId);
     if (currentStoriesList.length === 0) return;
@@ -832,6 +836,15 @@ function renderizarStoryAtual() {
     document.getElementById("storyUserName").textContent = artista.nome;
     document.getElementById("storyUserAvatar").src = artista.foto_url || 'https://via.placeholder.com/500';
 
+    // Mostrar botão de apagar apenas se o story for do usuário logado atualmente
+    const usuarioLogadoId = sessaoAtual ? sessaoAtual.user.id : null;
+    const btnDelete = document.getElementById("storyDeleteBtn");
+    if (usuarioLogadoId && story.artist_id === usuarioLogadoId) {
+        btnDelete.style.display = "block";
+    } else {
+        btnDelete.style.display = "none";
+    }
+
     const barsContainer = document.getElementById("storyProgressBars");
     barsContainer.innerHTML = currentStoriesList.map((_, i) => `
         <div class="story-prog-track"><div class="story-prog-fill" id="progFill_${i}" style="width: ${i < currentStoryIndex ? '100%' : '0%'}"></div></div>
@@ -853,6 +866,24 @@ function renderizarStoryAtual() {
             currentStoryIndex++;
             renderizarStoryAtual();
         }, 5000);
+    }
+}
+
+async function apagarStoryAtual() {
+    const story = currentStoriesList[currentStoryIndex];
+    if (!story) return;
+
+    if (!confirm("Deseja realmente apagar este story?")) return;
+
+    try {
+        await supabaseClient.from('stories').delete().eq('id', story.id);
+        
+        await carregarDadosGlobais();
+        fecharStoryViewer();
+        renderizarStoriesBar();
+    } catch (err) {
+        console.error("Erro ao apagar story:", err);
+        alert("Erro ao apagar o story.");
     }
 }
 
@@ -1461,7 +1492,5 @@ async function salvarPerfilArtista() {
     abrirPainelUpload();
 }
 </script>
-
-<!-- Forçar novo deploy - Atualizado em 2026 -->
 </body>
 </html>
