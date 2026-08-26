@@ -149,7 +149,7 @@ async function carregarDadosProjeto(id) {
         document.getElementById("projetoDescricao").textContent = projeto.descricao || "Sem descrição informada para este projeto.";
         document.getElementById("projetoCapa").src = projeto.capa_url || 'https://via.placeholder.com/500';
 
-        // Busca geral de segurança sem usar a tabela projeto_musicas travada
+        // Busca apenas as músicas e artistas padrão sem tocar na tabela restrita
         const resMusicas = await supabaseClient.from('musicas').select('*');
         const listaM = resMusicas.data || [];
 
@@ -159,7 +159,6 @@ async function carregarDadosProjeto(id) {
         const relRes = await supabaseClient.from('musica_artistas').select('*');
         const dadosRelacaoCache = relRes.data || [];
 
-        // Filtra músicas caso tenham relação ou exibe todas se for teste
         musicasProjeto = listaM.map(m => {
             const rels = dadosRelacaoCache.filter(r => r.musica_id === m.id);
             const objsArtistas = rels.map(r => artistasCache.find(a => a.id === r.artista_id)).filter(Boolean);
