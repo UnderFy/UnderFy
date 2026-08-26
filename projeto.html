@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projeto - UnderFy</title>
+<link rel="icon" type="image/png" href="https://gnibzbnypirjrcaoibkx.supabase.co/storage/v1/object/public/capas-musicas/Picsart_26-08-25_13-30-56-332.jpg">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#0b0b0b;color:#fff;font-family:Arial,Helvetica,sans-serif;}
+button,input{font:inherit;}
+button{cursor:pointer;}
+.app{min-height:100vh;padding-bottom:130px;}
+
+header{
+    position:sticky;top:0;z-index:20;
+    background:rgba(11,11,11,.95);backdrop-filter:blur(15px);
+    padding:18px 5%;display:flex;align-items:center;justify-content:space-between;
+    border-bottom:1px solid #202020;
+}
+.logo{font-size:27px;font-weight:900;letter-spacing:-1px;display:flex;align-items:center;gap:12px;cursor:pointer;}
+.logo .fy{color:#1ed760;}
+.logo .by-uta{color:#ffffff;}
+.header-btn{border:0;background:#252525;color:#fff;font-weight:bold;padding:10px 16px;border-radius:25px;}
+
+main{width:90%;max-width:1000px;margin:auto;}
+
+.projeto-header{
+    margin-top:35px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:20px;
+}
+@media(min-width: 768px){
+    .projeto-header{flex-direction:row;text-align:left;}
+}
+.projeto-capa{
+    width:200px;height:200px;border-radius:20px;object-fit:cover;background:#252525;flex-shrink:0;
+}
+.projeto-info h1{font-size:32px;margin-bottom:8px;}
+.projeto-info p{color:#888;font-size:15px;line-height:1.5;}
+
+.section{margin-top:40px;}
+.section-title{margin-bottom:18px;}
+.section-title h2{font-size:22px;}
+
+.list{display:flex;flex-direction:column;gap:12px;}
+.track-item{
+    background:#151515;padding:14px 18px;border-radius:12px;display:flex;align-items:center;gap:15px;transition:.2s;
+}
+.track-item:hover{background:#202020;}
+.track-cover{width:50px;height:50px;border-radius:8px;object-fit:cover;background:#252525;}
+.track-info{flex:1;min-width:0;}
+.track-info h3{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.track-info p{color:#999;font-size:14px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.track-play{background:#1ed760;color:#000;border:0;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;}
+
+.empty{color:#888;text-align:center;padding:30px 10px;width:100%;}
+
+/* MINI PLAYER FIXO */
+.mini-player{
+    position:fixed;bottom:0;left:0;right:0;z-index:30;
+    background:#171717;border-top:1px solid #292929;
+    padding:10px 5%;display:none;align-items:center;gap:15px;cursor:pointer;
+}
+.mini-player img{width:45px;height:45px;object-fit:cover;border-radius:7px;}
+.mini-player-info{flex:1;min-width:0;}
+.mini-player-info strong, .mini-player-info span{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.mini-player-info span{color:#999;font-size:13px;margin-top:3px;}
+.mini-player button{background:none;border:0;color:#1ed760;font-size:20px;margin-right:10px;}
+</style>
+</head>
+<body>
+
+<div class="app">
+    <header>
+        <div class="logo" onclick="window.location.href='index.html'">Under<span class="fy">Fy</span> <span class="by-uta">• UTA</span></div>
+        <button class="header-btn" onclick="window.location.href='index.html'">Voltar ao Início</button>
+    </header>
+
+    <main>
+        <div class="projeto-header">
+            <img id="projetoCapa" class="projeto-capa" src="" onerror="this.src='https://via.placeholder.com/500'">
+            <div class="projeto-info">
+                <small style="color:#1ed760;font-weight:bold;letter-spacing:1px;display:block;margin-bottom:6px;">PROJETO</small>
+                <h1 id="projetoNome">Carregando...</h1>
+                <p id="projetoDescricao">Aguarde enquanto carregamos as informações do projeto.</p>
+            </div>
+        </div>
+
+        <section class="section">
+            <div class="section-title">
+                <h2>Músicas do Projeto</h2>
+            </div>
+            <div class="list" id="listaMusicasProjeto">
+                <div class="empty">Carregando músicas...</div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- MINI PLAYER FIXO -->
+<div class="mini-player" id="miniPlayer">
+    <img id="miniCapa" src="">
+    <div class="mini-player-info">
+        <strong id="miniMusica">Música</strong>
+        <span id="miniArtista">Artista</span>
+    </div>
+    <button id="miniPlayBtn" onclick="event.stopPropagation(); pausarRetomar();">&#10074;&#10074;</button>
+</div>
+
+<audio id="audio" style="display:none;"></audio>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://gnibzbnypirjrcaoibkx.supabase.co";
+const SUPABASE_KEY = "sb_publishable_b9yvSbmWOLVJvq4AB4CLmQ_VRuzpG5T";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let musicasProjeto = [];
+let musicaAtualIndex = -1;
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const params = new URLSearchParams(window.location.search);
+    const projetoId = params.get("id");
+
+    if (!projetoId) {
+        alert("Projeto não especificado.");
+        window.location.href = "index.html";
+        return;
+    }
+
+    await carregarDadosProjeto(projetoId);
+});
+
+async function carregarDadosProjeto(id) {
+    try {
+        // Busca os dados do projeto
+        const { data: projeto, error: erroProj } = await supabaseClient
+            .from('projetos')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (erroProj || !projeto) {
+            document.getElementById("projetoNome").textContent = "Projeto não encontrado";
+            document.getElementById("projetoDescricao").textContent = "Este projeto pode ter sido removido.";
+            document.getElementById("listaMusicasProjeto").innerHTML = "";
+            return;
+        }
+
+        document.getElementById("projetoNome").textContent = projeto.nome;
+        document.getElementById("projetoDescricao").textContent = projeto.descricao || "Sem descrição informada para este projeto.";
+        document.getElementById("projetoCapa").src = projeto.capa_url || 'https://via.placeholder.com/500';
+
+        // Busca artistas e músicas para montar as faixas vinculadas (se houver tabela de relação ou filtro)
+        // Nota: se o seu projeto possuir uma coluna 'projeto_id' na tabela 'musicas', ajustamos a busca abaixo:
+        const { data: musicasData, error: erroMusicas } = await supabaseClient
+            .from('musicas')
+            .select('*')
+            .eq('projeto_id', id)
+            .order('created_at', { ascending: false });
+
+        const artistasRes = await supabaseClient.from('artistas').select('*');
+        const artistasCache = artistasRes.data || [];
+
+        const relRes = await supabaseClient.from('musica_artistas').select('*');
+        const dadosRelacaoCache = relRes.data || [];
+
+        const listaM = musicasData || [];
+
+        musicasProjeto = listaM.map(m => {
+            const rels = dadosRelacaoCache.filter(r => r.musica_id === m.id);
+            const objsArtistas = rels.map(r => artistasCache.find(a => a.id === r.artista_id)).filter(Boolean);
+            let artistasNomes = objsArtistas.length > 0 ? objsArtistas.map(a => a.nome) : ['Desconhecido'];
+            let textoArtista = artistasNomes[0];
+            if (artistasNomes.length > 1) textoArtista += ` feat. ${artistasNomes.slice(1).join(', ')}`;
+
+            return {
+                id: m.id,
+                nome: m.nome,
+                artistaFormatado: textoArtista,
+                capa: m.capa_url || projeto.capa_url || 'https://via.placeholder.com/500',
+                audio: m.audio_url || ''
+            };
+        });
+
+        renderizarMusicasProjeto();
+
+    } catch (err) {
+        console.error("Erro ao carregar projeto:", err);
+    }
+}
+
+function renderizarMusicasProjeto() {
+    const container = document.getElementById("listaMusicasProjeto");
+    if (musicasProjeto.length === 0) {
+        container.innerHTML = `<div class="empty">Nenhuma música vinculada a este projeto ainda.</div>`;
+        return;
+    }
+
+    container.innerHTML = musicasProjeto.map((m, index) => `
+        <div class="track-item">
+            <img class="track-cover" src="${m.capa}" onerror="this.src='https://via.placeholder.com/500'">
+            <div class="track-info">
+                <h3>${m.nome}</h3>
+                <p>${m.artistaFormatado}</p>
+            </div>
+            <button class="track-play" onclick="tocarMusica(${index})">&#9654;</button>
+        </div>
+    `).join('');
+}
+
+function tocarMusica(index) {
+    if (index < 0 || index >= musicasProjeto.length) return;
+    musicaAtualIndex = index;
+    const m = musicasProjeto[index];
+
+    document.getElementById("miniPlayer").style.display = "flex";
+    document.getElementById("miniMusica").textContent = m.nome;
+    document.getElementById("miniArtista").textContent = m.artistaFormatado;
+    document.getElementById("miniCapa").src = m.capa;
+
+    const audio = document.getElementById("audio");
+    if (!m.audio) { alert("Áudio indisponível."); return; }
+    audio.src = m.audio;
+    audio.play();
+}
+
+function pausarRetomar() {
+    const audio = document.getElementById("audio");
+    const miniBtn = document.getElementById("miniPlayBtn");
+    if (audio.paused) {
+        audio.play();
+        miniBtn.innerHTML = "&#10074;&#10074;";
+    } else {
+        audio.pause();
+        miniBtn.innerHTML = "&#9654;";
+    }
+}
+</script>
+</body>
+</html>
+
