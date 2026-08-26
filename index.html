@@ -142,7 +142,7 @@ nav button:hover, nav button:active{color:#1ed760;}
 
 <div class="app">
     <header>
-        <div class="logo">Under<span class="fy">Fy</span> <span class="by-uta">• UTA</span></div>
+        <div class="logo">Under<span class="fy">Fy</span> <span class="by-uta">. UTA</span></div>
         <div id="areaHeaderBtn">
             <button class="header-btn" onclick="tratarAcaoArtista()">Área do Artista</button>
         </div>
@@ -150,7 +150,7 @@ nav button:hover, nav button:active{color:#1ed760;}
 
     <main>
         <section class="hero">
-            <small>UNDERFY • STUDIO CAMP</small>
+            <small>UNDERFY . STUDIO CAMP</small>
             <h1>As guias da sessão.</h1>
             <p>Um espaço livre para artistas independentes publicarem, ouvirem e organizarem suas músicas.</p>
         </section>
@@ -257,7 +257,7 @@ nav button:hover, nav button:active{color:#1ed760;}
         <input type="text" id="inputVulgo" class="input-padrao" placeholder="Seu vulgo ou nome artístico">
         
         <label class="file-upload-label" for="inputFotoArquivo">
-            📁 <span id="textoLabelFoto">Escolher foto de perfil (Arquivo)</span>
+            <span id="textoLabelFoto">Escolher foto de perfil (Arquivo)</span>
         </label>
         <input type="file" id="inputFotoArquivo" accept="image/*" style="display:none;" onchange="atualizarNomeArquivo(this)">
 
@@ -383,7 +383,7 @@ function renderizarTudo() {
                     <button class="play" onclick="tocarMusicaPorIndex(${index})">
                         &#9654; OUVIR GUIA
                     </button>
-                    ${fazParte ? `<button class="btn-delete" onclick="removerMusica('${m.id}')">🗑️ APAGAR GUIA</button>` : ''}
+                    ${fazParte ? `<button class="btn-delete" onclick="removerMusica('${m.id}')">APAGAR GUIA</button>` : ''}
                 </div>
             `;
         }).join('');
@@ -565,7 +565,7 @@ function pesquisar() {
                     <button class="play" onclick="tocarMusicaPorIndex(${musicas.findIndex(x => x.id === m.id)})">
                         &#9654; OUVIR GUIA
                     </button>
-                    ${fazParte ? `<button class="btn-delete" onclick="removerMusica('${m.id}')">🗑️ APAGAR GUIA</button>` : ''}
+                    ${fazParte ? `<button class="btn-delete" onclick="removerMusica('${m.id}')">APAGAR GUIA</button>` : ''}
                 </div>
             `;
         }).join('');
