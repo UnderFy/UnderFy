@@ -1,21 +1,21 @@
 {
   "name": "UnderFy",
   "short_name": "UnderFy",
+  "description": "Plataforma de música para artistas independentes.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0A0A0A",
   "theme_color": "#19D95B",
   "icons": [
     {
-      "src": "COLE_O_LINK_DIRETO_DA_SUA_IMAGEM_AQUI.png",
+      "src": "https://gnibzbnypirjrcaoibkx.supabase.co/storage/v1/object/public/capas-musicas/Picsart_26-08-25_13-30-56-332.jpg",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/jpeg"
     },
     {
-      "src": "COLE_O_LINK_DIRETO_DA_SUA_IMAGEM_AQUI.png",
+      "src": "https://gnibzbnypirjrcaoibkx.supabase.co/storage/v1/object/public/capas-musicas/Picsart_26-08-25_13-30-56-332.jpg",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/jpeg"
     }
   ]
 }
-
