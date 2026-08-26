@@ -105,14 +105,8 @@ input:focus{border-color:#1ed760;}
     display: flex; align-items: center; justify-content: center;
     transition: 0.2s;
 }
-/* Cinza quando lido / sem novidades */
-.story-ring.seen {
-    background: #444;
-}
-/* Verde quando tem stories novos */
-.story-ring.unseen {
-    background: #1ed760;
-}
+.story-ring.seen { background: #444; }
+.story-ring.unseen { background: #1ed760; }
 .story-avatar {
     width: 100%; height: 100%; border-radius: 50%;
     object-fit: cover; border: 3px solid #0b0b0b;
@@ -179,6 +173,21 @@ input:focus{border-color:#1ed760;}
     width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
     font-size: 20px; cursor: pointer;
 }
+
+/* PREVIEW DA MÍDIA CAPTURADA ANTES DE PUBLICAR */
+.preview-action-modal {
+    display: none; position: fixed; inset: 0; z-index: 360;
+    background: #000; align-items: center; justify-content: center; flex-direction: column;
+}
+.preview-media-element { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; z-index: 1; }
+.preview-action-buttons {
+    position: absolute; bottom: 40px; z-index: 10; display: flex; gap: 20px; width: 90%; max-width: 400px; justify-content: center;
+}
+.preview-btn {
+    flex: 1; padding: 14px; border-radius: 25px; border: 0; font-weight: bold; font-size: 15px; cursor: pointer;
+}
+.preview-btn.publish { background: #1ed760; color: #000; }
+.preview-btn.discard { background: rgba(255,68,68,0.85); color: #fff; }
 
 /* MINI PLAYER FIXO */
 .mini-player{
@@ -348,7 +357,18 @@ nav button:hover, nav button:active{color:#1ed760;}
     <div class="camera-controls">
         <button class="switch-cam-btn" onclick="alternarCamera()" title="Trocar Câmera">&#8634;</button>
         <button class="capture-btn" id="captureBtn" ontouchstart="iniciarGravacaoStory()" ontouchend="pararGravacaoStory()" onmousedown="iniciarGravacaoStory()" onmouseup="pararGravacaoStory()" title="Toque para foto, segure para vídeo"></button>
-        <div style="width: 45px;"></div> <!-- Espaçamento para centralizar o botão de captura -->
+        <div style="width: 45px;"></div>
+    </div>
+</div>
+
+<!-- MODAL DE PRÉ-VISUALIZAÇÃO DA MÍDIA CAPTURADA -->
+<div class="preview-action-modal" id="previewActionModal">
+    <div id="previewContainerWrapper" style="width:100%; height:100%; position:relative; display:flex; align-items:center; justify-content:center;">
+        <!-- Inserido dinamicamente a foto ou vídeo capturados -->
+    </div>
+    <div class="preview-action-buttons">
+        <button class="preview-btn discard" onclick="descartarMidiaPreview()">Excluir</button>
+        <button class="preview-btn publish" onclick="publicarMidiaPreview()">Publicar</button>
     </div>
 </div>
 
@@ -413,13 +433,15 @@ let sessaoAtual = null;
 
 let playContabilizadoNessaMusica = false;
 
-// Variáveis para gravação de Story em tempo real
+// Variáveis para gravação de Story em tempo real e preview
 let mediaStream = null;
 let mediaRecorder = null;
 let recordedChunks = [];
 let pressTimer = null;
 let isRecordingVideo = false;
-let usarCameraFrontal = true; // Controla se a câmera é frontal ou traseira
+let usarCameraFrontal = true;
+let blobCapturadoPendente = null;
+let tipoMidiaPendente = null; // 'image' ou 'video'
 
 // Variáveis para o visualizador de Stories e Histórico local de vistos
 let currentStoriesList = [];
@@ -560,8 +582,6 @@ async function irInicio() {
 function temStoriesNaoVistos(artistaId) {
     const storiesDoArtista = storiesCache.filter(s => s.artist_id === artistaId);
     if (storiesDoArtista.length === 0) return false;
-    
-    // Verifica se existe algum story do artista cujo ID não está na lista de vistos
     return storiesDoArtista.some(s => !storiesVistos[s.id]);
 }
 
@@ -573,7 +593,6 @@ function renderizarStoriesBar() {
     const usuarioLogadoId = sessaoAtual ? sessaoAtual.user.id : null;
     const artistaLogado = artistasCache.find(a => a.id === usuarioLogadoId);
 
-    // Se o usuário está logado como artista, renderiza o "Seu Story" com o ícone de "+"
     if (sessaoAtual && artistaLogado) {
         const temNovosEu = temStoriesNaoVistos(artistaLogado.id);
         const classeRingEu = temNovosEu ? 'unseen' : 'seen';
@@ -589,10 +608,9 @@ function renderizarStoriesBar() {
         `;
     }
 
-    // Outros artistas com stories
     const artistasComStories = artistasCache.filter(a => {
         const tem = storiesCache.some(s => s.artist_id === a.id);
-        if (usuarioLogadoId && a.id === usuarioLogadoId) return false; // Já exibido acima
+        if (usuarioLogadoId && a.id === usuarioLogadoId) return false;
         return tem;
     });
 
@@ -678,7 +696,7 @@ function iniciarGravacaoStory() {
             mediaRecorder.ondataavailable = (event) => {
                 if (event.data && event.data.size > 0) recordedChunks.push(event.data);
             };
-            mediaRecorder.onstop = () => salvarMidiaStory('video');
+            mediaRecorder.onstop = () => prepararPreviewMidia('video');
             mediaRecorder.start();
         }
     }, 400); 
@@ -705,7 +723,6 @@ async function tirarFotoStory() {
     canvas.height = videoElement.videoHeight || 1280;
     const ctx = canvas.getContext("2d");
     
-    // Se for frontal, inverte horizontalmente para o espelhamento ficar correto
     if (usarCameraFrontal) {
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
@@ -713,38 +730,77 @@ async function tirarFotoStory() {
     
     ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
-    canvas.toBlob(async (blob) => {
-        await enviarArquivoStorageESalvarDB(blob, 'image');
+    canvas.toBlob((blob) => {
+        blobCapturadoPendente = blob;
+        tipoMidiaPendente = 'image';
+        abrirPreviewMidiaModal();
     }, 'image/jpeg', 0.85);
 }
 
-async function salvarMidiaStory(tipo) {
+function prepararPreviewMidia(tipo) {
     if (tipo === 'video') {
-        const blob = new Blob(recordedChunks, { type: 'video/webm' });
-        await enviarArquivoStorageESalvarDB(blob, 'video');
+        blobCapturadoPendente = new Blob(recordedChunks, { type: 'video/webm' });
+        tipoMidiaPendente = 'video';
+        abrirPreviewMidiaModal();
     }
 }
 
-async function enviarArquivoStorageESalvarDB(blobArquivo, tipo) {
+function abrirPreviewMidiaModal() {
     fecharCameraModal();
+    const previewModal = document.getElementById("previewActionModal");
+    const wrapper = document.getElementById("previewContainerWrapper");
+    const urlMidia = URL.createObjectURL(blobCapturadoPendente);
+
+    if (tipoMidiaPendente === 'image') {
+        wrapper.innerHTML = `<img class="preview-media-element" src="${urlMidia}">`;
+    } else {
+        wrapper.innerHTML = `<video class="preview-media-element" src="${urlMidia}" autoplay playsinline controls></video>`;
+    }
+
+    previewModal.style.display = "flex";
+}
+
+function descartarMidiaPreview() {
+    document.getElementById("previewActionModal").style.display = "none";
+    blobCapturadoPendente = null;
+    tipoMidiaPendente = null;
+    abrirCameraModal();
+}
+
+async function publicarMidiaPreview() {
+    if (!blobCapturadoPendente || !tipoMidiaPendente) return;
+
+    const previewModal = document.getElementById("previewActionModal");
+    const btnPublicar = previewModal.querySelector('.preview-btn.publish');
+    btnPublicar.disabled = true;
+    btnPublicar.textContent = "Publicando...";
+
     const artistaId = sessaoAtual.user.id;
-    const extensao = tipo === 'image' ? 'jpg' : 'webm';
+    const extensao = tipoMidiaPendente === 'image' ? 'jpg' : 'webm';
     const nomeArquivo = `story_${Date.now()}_${Math.random().toString(36).substring(7)}.${extensao}`;
 
     try {
-        await supabaseClient.storage.from('capas-musicas').upload(nomeArquivo, blobArquivo);
+        await supabaseClient.storage.from('capas-musicas').upload(nomeArquivo, blobCapturadoPendente);
         const { data: publicUrlData } = supabaseClient.storage.from('capas-musicas').getPublicUrl(nomeArquivo);
 
         await supabaseClient.from('stories').insert([{
             artist_id: artistaId,
             media_url: publicUrlData.publicUrl,
-            media_type: tipo
+            media_type: tipoMidiaPendente
         }]);
+
+        previewModal.style.display = "none";
+        btnPublicar.disabled = false;
+        btnPublicar.textContent = "Publicar";
+        blobCapturadoPendente = null;
+        tipoMidiaPendente = null;
 
         await carregarDadosGlobais();
         renderizarStoriesBar();
     } catch (err) {
         console.error("Erro ao publicar story:", err);
+        btnPublicar.disabled = false;
+        btnPublicar.textContent = "Publicar";
     }
 }
 
@@ -766,7 +822,6 @@ function renderizarStoryAtual() {
 
     const story = currentStoriesList[currentStoryIndex];
     
-    // Marca o story atual como visto e salva no localStorage
     if (story && story.id) {
         storiesVistos[story.id] = true;
         localStorage.setItem('underfy_stories_vistos', JSON.stringify(storiesVistos));
@@ -777,7 +832,6 @@ function renderizarStoryAtual() {
     document.getElementById("storyUserName").textContent = artista.nome;
     document.getElementById("storyUserAvatar").src = artista.foto_url || 'https://via.placeholder.com/500';
 
-    // Barras de progresso
     const barsContainer = document.getElementById("storyProgressBars");
     barsContainer.innerHTML = currentStoriesList.map((_, i) => `
         <div class="story-prog-track"><div class="story-prog-fill" id="progFill_${i}" style="width: ${i < currentStoryIndex ? '100%' : '0%'}"></div></div>
@@ -811,7 +865,7 @@ function proximoStory() {
 function fecharStoryViewer() {
     clearTimeout(storyTimer);
     document.getElementById("storyViewerModal").style.display = "none";
-    renderizarStoriesBar(); // Atualiza as bordas para cinza caso todos tenham sido vistos
+    renderizarStoriesBar();
 }
 
 function renderizarListasHome() {
