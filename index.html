@@ -517,7 +517,7 @@ let storiesVistos = JSON.parse(localStorage.getItem('underfy_stories_vistos') ||
 document.addEventListener("DOMContentLoaded", async () => {
     await verificarSessaoAtiva();
     await carregarDadosGlobais();
-    irInicio();
+    getSessionAndRender();
 
     const audio = document.getElementById("audio");
     audio.addEventListener('ended', lidarFimDaMusica);
@@ -602,6 +602,10 @@ async function carregarDadosGlobais() {
     } catch (err) {
         console.error("Erro ao carregar dados globais:", err);
     }
+}
+
+function getSessionAndRender() {
+    irInicio();
 }
 
 async function irInicio() {
