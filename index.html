@@ -122,6 +122,7 @@ input:focus{border-color:#1ed760;}
     width: 22px; height: 22px; background: #1ed760; color: #000;
     border-radius: 50%; display: flex; align-items: center; justify-content: center;
     font-size: 14px; font-weight: bold; border: 2px solid #0b0b0b;
+    z-index: 5;
 }
 
 /* MODAL DE VISUALIZAÇÃO DE STORIES */
@@ -811,7 +812,10 @@ async function publicarMidiaPreview() {
 
 function assistirStoriesArtista(artistaId) {
     currentStoriesList = storiesCache.filter(s => s.artist_id === artistaId);
-    if (currentStoriesList.length === 0) return;
+    if (currentStoriesList.length === 0) {
+        alert("Nenhum story ativo encontrado.");
+        return;
+    }
     currentStoryIndex = 0;
     
     document.getElementById("storyViewerModal").style.display = "flex";
@@ -836,7 +840,6 @@ function renderizarStoryAtual() {
     document.getElementById("storyUserName").textContent = artista.nome;
     document.getElementById("storyUserAvatar").src = artista.foto_url || 'https://via.placeholder.com/500';
 
-    // Mostrar botão de apagar apenas se o story for do usuário logado atualmente
     const usuarioLogadoId = sessaoAtual ? sessaoAtual.user.id : null;
     const btnDelete = document.getElementById("storyDeleteBtn");
     if (usuarioLogadoId && story.artist_id === usuarioLogadoId) {
