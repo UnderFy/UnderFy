@@ -299,7 +299,7 @@ function atualizarBotaoHeader() {
     const area = document.getElementById("areaHeaderBtn");
     if (sessaoAtual) {
         area.innerHTML = `
-            <button class="header-btn" onclick="window.location.href='upload.html'">Painel</button>
+            <button class="header-btn" onclick="tratarAcaoArtista()">Painel</button>
             <button class="header-btn logout" onclick="fazerLogout()" style="margin-left: 8px;">Sair</button>
         `;
     } else {
@@ -311,13 +311,14 @@ async function fazerLogout() {
     await supabaseClient.auth.signOut();
     sessaoAtual = null;
     atualizarBotaoHeader();
-    renderizarTudo(); // Atualiza a tela para sumir com os botões de exclusão
+    renderizarTudo();
     alert("Você saiu da sua conta.");
 }
 
 async function tratarAcaoArtista() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
+        // Mantém na mesma página em segundo plano (ou redireciona sem perder o contexto se necessário, mas mantendo a aba ativa)
         window.location.href = "upload.html";
     } else {
         abrirModalArtista();
@@ -371,7 +372,6 @@ function renderizarTudo() {
         container.innerHTML = `<div class="empty">Nenhuma música cadastrada ainda.</div>`;
     } else {
         container.innerHTML = musicas.map((m, index) => {
-            // Regra 2: Verifica se o artista logado faz parte desta música
             const fazParte = usuarioLogadoId && dadosRelacaoCache.some(r => r.musica_id === m.id && r.artista_id === usuarioLogadoId);
 
             return `
@@ -402,14 +402,11 @@ function renderizarTudo() {
     }
 }
 
-// Regra 2: Função para excluir a música caso o artista faça parte dela
 async function removerMusica(idMusica) {
     if (!confirm("Tem certeza que deseja apagar esta guia?")) return;
 
     try {
-        // Deleta as relações primeiro por causa da restrição de chave estrangeira
         await supabaseClient.from('musica_artistas').delete().eq('musica_id', idMusica);
-        // Deleta a música
         const { error } = await supabaseClient.from('musicas').delete().eq('id', idMusica);
 
         if (error) {
@@ -418,7 +415,6 @@ async function removerMusica(idMusica) {
         }
 
         alert("Guia apagada com sucesso!");
-        // Recarrega o app para atualizar as listas
         iniciarApp();
     } catch (err) {
         console.error("Erro:", err);
@@ -430,7 +426,6 @@ async function tocarMusicaPorIndex(index) {
     musicaAtualIndex = index;
     const m = musicas[index];
 
-    // Reseta o controle de contagem para a nova música tocada
     playContabilizadoNessaMusica = false;
 
     document.getElementById("miniPlayer").style.display = "flex";
@@ -447,18 +442,14 @@ async function tocarMusicaPorIndex(index) {
     audio.src = m.audio;
     audio.play();
     atualizarIconePlayPause(false);
-
-    abrirInterfacePlayer();
 }
 
-// Regra 1: Contabilizar o play apenas após 30 segundos
 async function verificarTempoPlay() {
     const audio = document.getElementById("audio");
     if (isNaN(audio.duration)) return;
 
     atualizarBarraProgresso();
 
-    // Se passou de 30 segundos e ainda não contou nesta execução
     if (audio.currentTime >= 30 && !playContabilizadoNessaMusica && musicaAtualIndex !== -1) {
         playContabilizadoNessaMusica = true;
         const m = musicas[musicaAtualIndex];
