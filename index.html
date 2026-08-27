@@ -90,23 +90,24 @@ input:focus{border-color:#1ed760;}
 .input-padrao{width:100%;padding:13px;margin:0 0 13px;background:#252525;border:1px solid #333;color:#fff;border-radius:9px;outline:none;}
 .input-padrao:focus{border-color:#1ed760;}
 
-/* STORIES BAR */
+/* STORIES BAR - ATUALIZADO */
 .stories-container {
     display: flex;
-    gap: 15px;
+    gap: 16px;
     overflow-x: auto;
     padding: 10px 0;
     scrollbar-width: none;
 }
 .stories-container::-webkit-scrollbar { display: none; }
 .story-ring {
-    width: 76px; height: 76px; border-radius: 50%;
+    width: 78px; height: 78px; border-radius: 50%;
     padding: 3px; cursor: pointer; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    transition: 0.2s;
+    transition: transform 0.2s ease, background 0.3s ease;
 }
-.story-ring.seen { background: #444; }
-.story-ring.unseen { background: #1ed760; }
+.story-ring:hover { transform: scale(1.04); }
+.story-ring.seen { background: #333; }
+.story-ring.unseen { background: linear-gradient(135deg, #1ed760 0%, #00f2fe 100%); }
 .story-avatar {
     width: 100%; height: 100%; border-radius: 50%;
     object-fit: cover; border: 3px solid #0b0b0b;
@@ -115,20 +116,22 @@ input:focus{border-color:#1ed760;}
     display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; position: relative;
 }
 .story-item-wrapper span {
-    font-size: 12px; color: #ccc; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-size: 12px; color: #ccc; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500;
 }
 .story-add-badge {
-    position: absolute; bottom: 18px; right: 2px;
-    width: 22px; height: 22px; background: #1ed760; color: #000;
+    position: absolute; bottom: 22px; right: 2px;
+    width: 24px; height: 24px; background: #1ed760; color: #000;
     border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: bold; border: 2px solid #0b0b0b;
-    z-index: 5;
+    font-size: 15px; font-weight: bold; border: 2.5px solid #0b0b0b;
+    z-index: 5; transition: transform 0.2s ease;
 }
+.story-add-badge:hover { transform: scale(1.15); }
 
-/* MODAL DE VISUALIZAÇÃO DE STORIES */
+/* MODAL DE VISUALIZAÇÃO DE STORIES - ATUALIZADO */
 .story-viewer-modal {
     display: none; position: fixed; inset: 0; z-index: 300;
     background: rgba(0,0,0,0.96); align-items: center; justify-content: center;
+    user-select: none; -webkit-user-select: none;
 }
 .story-card-box {
     width: 100%; max-width: 420px; height: 90vh; max-height: 780px;
@@ -136,6 +139,11 @@ input:focus{border-color:#1ed760;}
     display: flex; flex-direction: column; justify-content: space-between;
     box-shadow: 0 10px 30px rgba(0,0,0,0.8);
 }
+.story-touch-left, .story-touch-right {
+    position: absolute; top: 60px; bottom: 70px; width: 35%; z-index: 15;
+}
+.story-touch-left { left: 0; }
+.story-touch-right { right: 0; }
 .story-progress-bars {
     position: absolute; top: 12px; left: 12px; right: 12px; z-index: 20;
     display: flex; gap: 4px;
@@ -147,33 +155,36 @@ input:focus{border-color:#1ed760;}
 .story-header-info {
     position: absolute; top: 22px; left: 15px; right: 15px; z-index: 20;
     display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
+    padding: 10px 5px; border-radius: 10px;
 }
 .story-user-meta { display: flex; align-items: center; gap: 10px; }
-.story-user-meta img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.2); }
-.story-user-meta span { font-size: 14px; font-weight: bold; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+.story-user-meta img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(255,255,255,0.4); }
+.story-user-meta span { font-size: 14px; font-weight: bold; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.8); }
 .story-media-content { width: 100%; height: 100%; object-fit: cover; background: #000; }
 .story-close-btn { background: none; border: 0; color: #fff; font-size: 26px; font-weight: bold; cursor: pointer; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
 
 .story-delete-btn {
-    position: absolute; top: 28px; right: 55px; z-index: 20;
-    background: rgba(0,0,0,0.4); color: #ff4444; border: 1px solid rgba(255,68,68,0.4); 
+    background: rgba(0,0,0,0.5); color: #ff4444; border: 1px solid rgba(255,68,68,0.4); 
     width: 32px; height: 32px; border-radius: 50%; font-size: 14px; cursor: pointer; 
     display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px);
     transition: 0.2s;
 }
-.story-delete-btn:hover { background: rgba(255,68,68,0.2); }
+.story-delete-btn:hover { background: rgba(255,68,68,0.3); }
 
 .story-footer-actions {
     position: absolute; bottom: 0; left: 0; right: 0; z-index: 20;
-    padding: 15px 20px; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    padding: 20px; background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
     display: flex; align-items: center; justify-content: space-between;
 }
 .story-viewers-pill {
-    background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
-    padding: 8px 14px; border-radius: 20px; display: flex; align-items: center; gap: 8px;
-    font-size: 13px; color: #fff; cursor: pointer; border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.18); backdrop-filter: blur(12px);
+    padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: #fff; cursor: pointer; border: 1px solid rgba(255,255,255,0.15);
+    transition: background 0.2s;
 }
-.story-viewers-pill img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; }
+.story-viewers-pill:hover { background: rgba(255,255,255,0.28); }
+.story-viewers-pill img { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; }
 
 /* MODAL DA LISTA DE VISUALIZADORES */
 .viewers-modal {
@@ -371,24 +382,25 @@ nav button:hover, nav button:active{color:#1ed760;}
     </div>
 </div>
 
-<!-- MODAL VISUALIZADOR DE STORIES -->
+<!-- MODAL VISUALIZADOR DE STORIES - ATUALIZADO -->
 <div class="story-viewer-modal" id="storyViewerModal">
-    <div class="story-card-box">
+    <div class="story-card-box" id="storyCardBox">
+        <div class="story-touch-left" onclick="storyAnterior()"></div>
+        <div class="story-touch-right" onclick="proximoStory()"></div>
+        
         <div class="story-progress-bars" id="storyProgressBars"></div>
         <div class="story-header-info">
             <div class="story-user-meta">
-                <img id="storyUserAvatar" src="https://via.placeholder.com/500">
+                <img id="storyUserAvatar" src="">
                 <span id="storyUserName">Artista</span>
             </div>
-            <div style="display:flex; align-items:center; gap:8px;">
+            <div style="display:flex; align-items:center; gap:10px;">
                 <button class="story-delete-btn" id="storyDeleteBtn" onclick="apagarStoryAtual()" title="Apagar Story">&#128465;</button>
                 <button class="story-close-btn" onclick="fecharStoryViewer()">&times;</button>
             </div>
         </div>
-        
-        <!-- ÁREA CENTRAL DE MÍDIA DO STORY -->
-        <div id="storyMediaContainer" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;">
-            <!-- Vídeo ou Imagem renderizados dinamicamente -->
+        <div style="flex:1; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;" id="storyMediaContainer">
+            <!-- Inserido dinamicamente (img ou video) -->
         </div>
 
         <!-- BARRA INFERIOR DE VISUALIZADORES -->
@@ -405,7 +417,7 @@ nav button:hover, nav button:active{color:#1ed760;}
 <div class="viewers-modal" id="viewersModal" onclick="fecharListaVisualizadores(event)">
     <div class="viewers-card" onclick="event.stopPropagation()">
         <div class="viewers-header">
-            <h3>Visualizastes</h3>
+            <h3>Visualizações</h3>
             <button class="story-close-btn" onclick="document.getElementById('viewersModal').style.display='none'">&times;</button>
         </div>
         <div id="listaVisualizadoresConteudo">
@@ -512,6 +524,7 @@ let tipoMidiaPendente = null;
 let currentStoriesList = [];
 let currentStoryIndex = 0;
 let storyTimer = null;
+let storyPaused = false;
 let storiesVistos = JSON.parse(localStorage.getItem('underfy_stories_vistos') || '{}');
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -522,6 +535,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const audio = document.getElementById("audio");
     audio.addEventListener('ended', lidarFimDaMusica);
     audio.addEventListener('timeupdate', verificarTempoPlay);
+    
+    configurarEventosHoldStory();
 });
 
 async function verificarSessaoAtiva() {
@@ -654,6 +669,10 @@ async function irInicio() {
     renderizarListasHome();
     renderizarStoriesBar();
 }
+
+/* =========================================================
+   MÓDULO DE STORIES ATUALIZADO
+   ========================================================= */
 
 function temStoriesNaoVistos(artistaId) {
     const storiesDoArtista = storiesCache.filter(s => s.artist_id === artistaId);
@@ -917,6 +936,7 @@ function assistirStoriesArtista(artistaId) {
 function resetMediaState() {
     clearTimeout(storyTimer);
     storyTimer = null;
+    storyPaused = false;
     const container = document.getElementById("storyMediaContainer");
     if (container) {
         const existingVid = container.querySelector("video");
@@ -975,7 +995,6 @@ function renderizarStoryAtual() {
         footerActions.style.display = "none";
     }
 
-    // Renderiza barras de progresso
     const barsContainer = document.getElementById("storyProgressBars");
     barsContainer.innerHTML = currentStoriesList.map((_, i) => `
         <div class="story-prog-track"><div class="story-prog-fill" id="progFill_${i}" style="width: ${i < currentStoryIndex ? '100%' : '0%'}"></div></div>
@@ -1003,10 +1022,7 @@ function renderizarStoryAtual() {
         };
 
         mediaContainer.appendChild(vid);
-        vid.play().catch(() => {
-            vid.muted = true;
-            vid.play();
-        });
+        vid.play().catch(e => console.warn("Autoplay impedido pelo navegador:", e));
     } else {
         const img = document.createElement("img");
         img.className = "story-media-content";
@@ -1023,6 +1039,66 @@ function renderizarStoryAtual() {
         storyTimer = setTimeout(() => {
             proximoStory();
         }, 5000);
+    }
+}
+
+function configurarEventosHoldStory() {
+    const card = document.getElementById("storyCardBox");
+    if(!card) return;
+
+    const pausar = () => {
+        storyPaused = true;
+        const container = document.getElementById("storyMediaContainer");
+        const vid = container ? container.querySelector("video") : null;
+        if(vid) vid.pause();
+        
+        const fill = document.getElementById(`progFill_${currentStoryIndex}`);
+        if(fill) {
+            const computedWidth = window.getComputedStyle(fill).width;
+            fill.style.transition = 'none';
+            fill.style.width = computedWidth;
+        }
+        if(storyTimer) clearTimeout(storyTimer);
+    };
+
+    const retomar = () => {
+        if(!storyPaused) return;
+        storyPaused = false;
+        const container = document.getElementById("storyMediaContainer");
+        const vid = container ? container.querySelector("video") : null;
+        if(vid) {
+            vid.play();
+            const fill = document.getElementById(`progFill_${currentStoryIndex}`);
+            if(fill && vid.duration) {
+                const restante = vid.duration - vid.currentTime;
+                fill.style.transition = `width ${restante}s linear`;
+                fill.style.width = '100%';
+            }
+        } else {
+            const fill = document.getElementById(`progFill_${currentStoryIndex}`);
+            if(fill) {
+                fill.style.transition = 'width 5s linear';
+                fill.style.width = '100%';
+            }
+            storyTimer = setTimeout(() => {
+                proximoStory();
+            }, 5000);
+        }
+    };
+
+    card.addEventListener('touchstart', pausar, {passive: true});
+    card.addEventListener('touchend', retomar, {passive: true});
+    card.addEventListener('mousedown', pausar);
+    card.addEventListener('mouseup', retomar);
+}
+
+function storyAnterior() {
+    resetMediaState();
+    if (currentStoryIndex > 0) {
+        currentStoryIndex--;
+        renderizarStoryAtual();
+    } else {
+        renderizarStoryAtual();
     }
 }
 
@@ -1088,6 +1164,10 @@ function fecharStoryViewer() {
     document.getElementById("viewersModal").style.display = "none";
     renderizarStoriesBar();
 }
+
+/* =========================================================
+   FIM DO MÓDULO DE STORIES
+   ========================================================= */
 
 function renderizarListasHome() {
     const usuarioLogadoId = sessaoAtual ? sessaoAtual.user.id : null;
