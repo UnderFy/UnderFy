@@ -3702,68 +3702,90 @@ function abrirListaVisualizadores() {
         );  
   
   
-    const viewsDoStory =  
-        visualizacoesCache.filter(  
-            v =>  
-                v.story_id ===  
-                story.id  
-        );  
+    /*  
+       Atualiza as visualizações diretamente do Supabase ao abrir a lista.  
+       Isso evita que o cache antigo da página esconda visualizações  
+       feitas por outros artistas enquanto o Story estava aberto.  
+    */  
+    supabaseClient  
+        .from('story_views')  
+        .select('*')  
+        .eq('story_id', story.id)  
+        .then(({ data, error }) => {  
+  
+            if (!error && data) {  
+                visualizacoesCache = visualizacoesCache.filter(  
+                    v => v.story_id !== story.id  
+                );  
+  
+                visualizacoesCache.push(...data);  
+            }  
+  
+            const viewsDoStory =  
+                visualizacoesCache.filter(  
+                    v =>  
+                        v.story_id ===  
+                        story.id  
+                );  
   
   
-    if (  
-        viewsDoStory.length === 0  
-    ) {  
+            if (  
+                viewsDoStory.length === 0  
+            ) {  
   
-        container.innerHTML = `  
+                container.innerHTML = `  
+                    <div class="empty">  
+                        Nenhuma visualização ainda.  
+                    </div>  
+                `;  
   
-            <div class="empty">  
-                Nenhuma visualização ainda.  
-            </div>  
+            } else {  
   
-        `;  
+                container.innerHTML =  
+                    viewsDoStory  
+                        .map(v => {  
   
-    } else {  
-  
-        container.innerHTML =  
-            viewsDoStory  
-                .map(v => {  
-  
-                    const art =  
-                        artistasCache.find(  
-                            a =>  
-                                a.id ===  
-                                v.viewer_id  
-                        ) ||  
-                        {  
-                            nome:'Usuário',  
-                            foto_url:  
-                                'https://via.placeholder.com/500'  
-                        };  
+                            const art =  
+                                artistasCache.find(  
+                                    a =>  
+                                        a.id ===  
+                                        v.viewer_id  
+                                ) ||  
+                                {  
+                                    nome:'Usuário',  
+                                    foto_url:  
+                                        'https://via.placeholder.com/500'  
+                                };  
   
   
-                    return `  
+                            return `  
+                                <div class="viewer-item">  
+                                    <img  
+                                        src="${art.foto_url}">  
+                                    <span>  
+                                        ${art.nome}  
+                                    </span>  
+                                </div>  
+                            `;  
   
-                        <div class="viewer-item">  
+                        })  
+                        .join('');  
   
-                            <img  
-                                src="${art.foto_url}">  
-  
-                            <span>  
-                                ${art.nome}  
-                            </span>  
-  
-                        </div>  
-  
-                    `;  
-  
-                })  
-                .join('');  
-  
-    }  
+            }  
   
   
-    modalViewers.style.display =  
-        "flex";  
+            document.getElementById(  
+                "viewerCountText"  
+            ).textContent =  
+                `${viewsDoStory.length} ${  
+                    viewsDoStory.length === 1  
+                    ? 'visualização'  
+                    : 'visualizações'  
+                }`;  
+  
+            modalViewers.style.display =  
+                "flex";  
+        });  
   
 }  
   
