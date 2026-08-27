@@ -2905,14 +2905,20 @@ async function publicarMidiaPreview() {
     } catch(err) {
 
         console.error(
-            "Erro ao publicar story:",
+            "ERRO COMPLETO AO PUBLICAR STORY:",
             err
         );
 
-        alert(
-            "Não foi possível publicar o Story."
-        );
+        const mensagemErro =
+            err?.message ||
+            err?.error_description ||
+            err?.details ||
+            "Erro desconhecido.";
 
+        alert(
+            "Erro ao publicar Story:\n\n" +
+            mensagemErro
+        );
 
         btnPublicar.disabled =
             false;
