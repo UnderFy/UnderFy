@@ -122,7 +122,7 @@ input:focus{border-color:#1ed760;}
     z-index: 5;
 }
 
-/* MODAL DE VISUALIZAÇÃO DE STORIES (ESTILO INSTAGRAM REFINADO) */
+/* MODAL DE VISUALIZAﾃ�ﾃグ DE STORIES (ESTILO INSTAGRAM REFINADO) */
 .story-viewer-modal {
     display: none; position: fixed; inset: 0; z-index: 300;
     background: rgba(0,0,0,0.96); align-items: center; justify-content: center;
@@ -151,7 +151,7 @@ input:focus{border-color:#1ed760;}
 .story-media-content { width: 100%; height: 100%; object-fit: cover; background: #000; }
 .story-close-btn { background: none; border: 0; color: #fff; font-size: 26px; font-weight: bold; cursor: pointer; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
 
-/* BOTÃO DE EXCLUIR MAIS DISCRETO */
+/* BOTﾃグ DE EXCLUIR MAIS DISCRETO */
 .story-delete-btn {
     position: absolute; top: 28px; right: 55px; z-index: 20;
     background: rgba(0,0,0,0.4); color: #ff4444; border: 1px solid rgba(255,68,68,0.4); 
@@ -189,7 +189,7 @@ input:focus{border-color:#1ed760;}
 .viewer-item img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
 .viewer-item span { font-size: 14px; font-weight: bold; color: #ddd; }
 
-/* MODAL DA CÂMERA EM TEMPO REAL */
+/* MODAL DA Cﾃ�MERA EM TEMPO REAL */
 .camera-modal {
     display: none; position: fixed; inset: 0; z-index: 350;
     background: #000; align-items: center; justify-content: center; flex-direction: column; overflow: hidden;
@@ -213,7 +213,7 @@ input:focus{border-color:#1ed760;}
     font-size: 20px; cursor: pointer;
 }
 
-/* PREVIEW DA MÍDIA CAPTURADA ANTES DE PUBLICAR */
+/* PREVIEW DA Mﾃ好IA CAPTURADA ANTES DE PUBLICAR */
 .preview-action-modal {
     display: none; position: fixed; inset: 0; z-index: 360;
     background: #000; align-items: center; justify-content: center; flex-direction: column;
@@ -293,7 +293,7 @@ nav button:hover, nav button:active{color:#1ed760;}
 .file-upload-label{display:block;background:#252525;border:1px dashed #444;padding:12px;border-radius:9px;text-align:center;cursor:pointer;color:#aaa;margin-bottom:13px;font-size:14px;}
 .file-upload-label:hover{border-color:#1ed760;color:#fff;}
 
-/* SELEÇÃO LIMPA (CHIPS) */
+/* SELEﾃ�ﾃグ LIMPA (CHIPS) */
 .chip-group{
     display:flex;flex-wrap:wrap;gap:8px;max-height:130px;overflow-y:auto;
     background:#1b1b1b;border:1px solid #333;border-radius:9px;padding:10px;margin-bottom:13px;
@@ -311,9 +311,9 @@ nav button:hover, nav button:active{color:#1ed760;}
 
 <div class="app">
     <header>
-        <div class="logo" onclick="irInicio()">Under<span class="fy">Fy</span> <span class="by-uta">• UTA</span></div>
+        <div class="logo" onclick="irInicio()">Under<span class="fy">Fy</span> <span class="by-uta">窶｢ UTA</span></div>
         <div id="areaHeaderBtn">
-            <button class="header-btn" onclick="tratarAcaoArtista()">Área do Artista</button>
+            <button class="header-btn" onclick="tratarAcaoArtista()">ﾃ〉ea do Artista</button>
         </div>
     </header>
 
@@ -324,7 +324,7 @@ nav button:hover, nav button:active{color:#1ed760;}
 <div class="mini-player" id="miniPlayer" onclick="abrirInterfacePlayer()">
     <img id="miniCapa" src="">
     <div class="mini-player-info">
-        <strong id="miniMusica">Música</strong>
+        <strong id="miniMusica">Mﾃｺsica</strong>
         <span id="miniArtista">Artista</span>
     </div>
     <button id="miniPlayBtn" onclick="event.stopPropagation(); pausarRetomar();">&#10074;&#10074;</button>
@@ -334,7 +334,7 @@ nav button:hover, nav button:active{color:#1ed760;}
     <div class="player-card">
         <div class="player-header">
             <button onclick="fecharInterfacePlayer()">&#709;</button>
-            <span>SESSÃO</span>
+            <span>SESSﾃグ</span>
             <button onclick="console.log('Player v2.0')">&#8230;</button>
         </div>
 
@@ -361,7 +361,7 @@ nav button:hover, nav button:active{color:#1ed760;}
             <button class="action-btn" id="btnShuffle" onclick="toggleShuffle()" title="Shuffle">&#8644;</button>
             <button class="action-btn" onclick="tocarAnterior()" title="Anterior">&#9664;&#9664;</button>
             <button class="main-play-btn" id="btnPlayPauseModal" onclick="pausarRetomar()" title="Play/Pause">&#10074;&#10074;</button>
-            <button class="action-btn" onclick="tocarProxima()" title="Próximo">&#9654;&#9654;</button>
+            <button class="action-btn" onclick="tocarProxima()" title="Prﾃｳximo">&#9654;&#9654;</button>
             <button class="action-btn" id="btnRepeat" onclick="toggleRepeat()" title="Repeat">&#8635;</button>
         </div>
     </div>
@@ -386,7 +386,7 @@ nav button:hover, nav button:active{color:#1ed760;}
         <div class="story-footer-actions" id="storyFooterActions" style="display:none;">
             <div class="story-viewers-pill" onclick="abrirListaVisualizadores()">
                 <img src="https://via.placeholder.com/500" id="viewerPillIcon">
-                <span id="viewerCountText">0 visualizações</span>
+                <span id="viewerCountText">0 visualizaﾃｧﾃｵes</span>
             </div>
         </div>
     </div>
@@ -399,7 +399,7 @@ nav button:hover, nav button:active{color:#1ed760;}
             <button class="story-close-btn" onclick="document.getElementById('viewersModal').style.display='none'">&times;</button>
         </div>
         <div id="listaVisualizadoresConteudo">
-            <div class="empty">Nenhuma visualização ainda.</div>
+            <div class="empty">Nenhuma visualizaﾃｧﾃ｣o ainda.</div>
         </div>
     </div>
 </div>
@@ -410,8 +410,8 @@ nav button:hover, nav button:active{color:#1ed760;}
         <button class="story-close-btn" onclick="fecharCameraModal()">&times;</button>
     </div>
     <div class="camera-controls">
-        <button class="switch-cam-btn" onclick="alternarCamera()" title="Trocar Câmera">&#8634;</button>
-        <button class="capture-btn" id="captureBtn" ontouchstart="iniciarGravacaoStory()" ontouchend="pararGravacaoStory()" onmousedown="iniciarGravacaoStory()" onmouseup="pararGravacaoStory()" title="Toque para foto, segure para vídeo"></button>
+        <button class="switch-cam-btn" onclick="alternarCamera()" title="Trocar Cﾃ｢mera">&#8634;</button>
+        <button class="capture-btn" id="captureBtn" ontouchstart="iniciarGravacaoStory()" ontouchend="pararGravacaoStory()" onmousedown="iniciarGravacaoStory()" onmouseup="pararGravacaoStory()" title="Toque para foto, segure para vﾃｭdeo"></button>
         <div style="width: 45px;"></div>
     </div>
 </div>
@@ -428,7 +428,7 @@ nav button:hover, nav button:active{color:#1ed760;}
 <div class="player-modal" id="playerMp4Modal">
     <div class="player-card" style="padding: 20px;">
         <div class="player-header">
-            <span style="font-size:16px;">Player de Mídia do Artista</span>
+            <span style="font-size:16px;">Player de Mﾃｭdia do Artista</span>
             <button onclick="fecharPlayerMp4Modal()" style="font-size:22px;">&times;</button>
         </div>
         <div style="width:100%; aspect-ratio:9/16; max-height: 60vh; background:#000; border-radius:15px; overflow:hidden; display:flex; align-items:center; justify-content:center; margin-bottom:15px;">
@@ -455,7 +455,7 @@ nav button:hover, nav button:active{color:#1ed760;}
         <input type="password" id="senhaArtista" placeholder="Senha">
         <button class="form-btn" id="botaoAcaoAuth" onclick="autenticarArtista()">Entrar</button>
         <div class="toggle-auth" onclick="alternarModoAuth()">
-            Não tem uma conta? <span id="textoAlternar">Cadastre-se grátis</span>
+            Nﾃ｣o tem uma conta? <span id="textoAlternar">Cadastre-se grﾃ｡tis</span>
         </div>
     </div>
 </div>
@@ -465,7 +465,7 @@ nav button:hover, nav button:active{color:#1ed760;}
         <h2>Monte seu Perfil</h2>
         <p style="color:#888; font-size:13px; margin: 8px 0 15px 0;">Insira seu vulgo e escolha uma foto de perfil do seu dispositivo.</p>
         
-        <input type="text" id="inputVulgo" class="input-padrao" placeholder="Seu vulgo ou nome artístico">
+        <input type="text" id="inputVulgo" class="input-padrao" placeholder="Seu vulgo ou nome artﾃｭstico">
         
         <label class="file-upload-label" for="inputFotoArquivo">
             <span id="textoLabelFoto">Escolher foto de perfil (Arquivo)</span>
@@ -535,7 +535,7 @@ function atualizarBotaoHeader() {
             <button class="header-btn logout" onclick="fazerLogout()" style="margin-left: 8px;">Sair</button>
         `;
     } else {
-        area.innerHTML = `<button class="header-btn" onclick="abrirModalArtista()">Área do Artista</button>`;
+        area.innerHTML = `<button class="header-btn" onclick="abrirModalArtista()">ﾃ〉ea do Artista</button>`;
     }
 }
 
@@ -611,8 +611,8 @@ async function irInicio() {
     containerMain.innerHTML = `
         <section class="hero">
             <small>UNDERFY . STUDIO CAMP</small>
-            <h1>As guias da sessão.</h1>
-            <p>Um espaço livre para artistas independentes publicarem, ouvirem e organizarem suas músicas.</p>
+            <h1>As guias da sessﾃ｣o.</h1>
+            <p>Um espaﾃｧo livre para artistas independentes publicarem, ouvirem e organizarem suas mﾃｺsicas.</p>
         </section>
 
         <section class="section" style="margin-top:25px;">
@@ -621,14 +621,14 @@ async function irInicio() {
         </section>
 
         <div class="search-box">
-            <input id="pesquisa" placeholder="Pesquisar música ou artista..." oninput="pesquisar()">
+            <input id="pesquisa" placeholder="Pesquisar mﾃｺsica ou artista..." oninput="pesquisar()">
         </div>
 
         <section class="section">
             <div class="section-title">
                 <h2>Guias recentes</h2>
             </div>
-            <div class="carousel" id="listaMusicas"><div class="empty">Carregando músicas...</div></div>
+            <div class="carousel" id="listaMusicas"><div class="empty">Carregando mﾃｺsicas...</div></div>
         </section>
 
         <section class="section">
@@ -664,7 +664,7 @@ function renderizarStoriesBar() {
     const usuarioLogadoId = sessaoAtual ? sessaoAtual.user.id : null;
     const artistaLogado = artistasCache.find(a => a.id === usuarioLogadoId);
 
-    // 1. Sempre exibe o item "Seu Story" se houver sessão ativa
+    // 1. Sempre exibe o item "Seu Story" se houver sessﾃ｣o ativa
     if (sessaoAtual && artistaLogado) {
         const temNovosEu = temStoriesNaoVistos(artistaLogado.id);
         const classeRingEu = temNovosEu ? 'unseen' : 'seen';
@@ -680,9 +680,9 @@ function renderizarStoriesBar() {
         `;
     }
 
-    // 2. Exibe TODOS os artistas cadastrados na fila horizontal de stories (com anel se tiver stories, ou padrão se não tiver)
+    // 2. Exibe TODOS os artistas cadastrados na fila horizontal de stories (com anel se tiver stories, ou padrﾃ｣o se nﾃ｣o tiver)
     artistasCache.forEach(art => {
-        if (usuarioLogadoId && art.id === usuarioLogadoId) return; // O usuário logado já tem seu item próprio acima
+        if (usuarioLogadoId && art.id === usuarioLogadoId) return; // O usuﾃ｡rio logado jﾃ｡ tem seu item prﾃｳprio acima
 
         const temStories = storiesCache.some(s => s.artist_id === art.id);
         const temNovos = temStoriesNaoVistos(art.id);
@@ -724,8 +724,8 @@ async function iniciarStreamCamera() {
         const videoElement = document.getElementById("cameraPreview");
         videoElement.srcObject = mediaStream;
     } catch (err) {
-        console.error("Erro ao acessar a câmera:", err);
-        alert("Não foi possível acessar a câmera do dispositivo.");
+        console.error("Erro ao acessar a cﾃ｢mera:", err);
+        alert("Nﾃ｣o foi possﾃｭvel acessar a cﾃ｢mera do dispositivo.");
         fecharCameraModal();
     }
 }
@@ -891,12 +891,8 @@ async function registrarVisualizacaoStory(storyId) {
 function assistirStoriesArtista(artistaId) {
     currentStoriesList = storiesCache.filter(s => s.artist_id === artistaId);
     
-    // Se o artista não tiver stories publicados, abra o player mp4 direto com a foto de perfil/avatar dele para cumprir a regra 2
+    // Regra 2: Se o story nﾃ｣o tem nada publicado, nﾃ｣o precisa acontecer nada ao clicar no story
     if (currentStoriesList.length === 0) {
-        const artista = artistasCache.find(a => a.id === artistaId);
-        if (artista) {
-            abrirPlayerMp4ComArtista(artista);
-        }
         return;
     }
 
@@ -920,13 +916,11 @@ function abrirPlayerMp4ComArtista(artista) {
     const videoEl = document.getElementById("mp4PlayerVideo");
     const infoEl = document.getElementById("mp4PlayerInfo");
 
-    // Procura por um story em vídeo do artista para usar no player mp4, ou usa a foto como fallback de mídia
     const storyVideo = storiesCache.find(s => s.artist_id === artista.id && s.media_type === 'video');
     
     if (storyVideo) {
         videoEl.src = storyVideo.media_url;
     } else {
-        // Se não houver vídeo de story, criamos um elemento de imagem ou usamos o avatar (caso queira reproduzir arquivo de áudio ou vídeo do artista)
         videoEl.src = artista.foto_url || 'https://via.placeholder.com/500';
     }
 
@@ -971,7 +965,7 @@ function renderizarStoryAtual() {
         
         const viewsDoStory = visualizacoesCache.filter(v => v.story_id === story.id);
         const qtdViews = viewsDoStory.length;
-        document.getElementById("viewerCountText").textContent = `${qtdViews} ${qtdViews === 1 ? 'visualização' : 'visualizações'}`;
+        document.getElementById("viewerCountText").textContent = `${qtdViews} ${qtdViews === 1 ? 'visualizaﾃｧﾃ｣o' : 'visualizaﾃｧﾃｵes'}`;
         
         if (qtdViews > 0) {
             const ultimoViewerId = viewsDoStory[viewsDoStory.length - 1].viewer_id;
@@ -995,21 +989,41 @@ function renderizarStoryAtual() {
     `).join('');
 
     const mediaContainer = document.getElementById("storyMediaContainer");
+    clearTimeout(storyTimer);
+
+    // Regra 1: Retirar player (sem controls nativos) e adicionar barras que duram 30 segundos (vﾃｭdeos tempo mﾃ｡ximo tambﾃｩm sﾃ｣o 30 segundos)
     if (story.media_type === 'video') {
-        mediaContainer.innerHTML = `<video class="story-media-content" src="${story.media_url}" autoplay playsinline onended="proximoStory()"></video>`;
+        mediaContainer.innerHTML = `<video class="story-media-content" id="activeStoryVideo" src="${story.media_url}" autoplay playsinline></video>`;
+        const vidEl = document.getElementById("activeStoryVideo");
+        
+        const fillElement = document.getElementById(`progFill_${currentStoryIndex}`);
+        if(fillElement) {
+            fillElement.style.transition = "width 30s linear";
+            setTimeout(() => fillElement.style.width = "100%", 50);
+        }
+
+        storyTimer = setTimeout(() => {
+            currentStoryIndex++;
+            renderizarStoryAtual();
+        }, 30000);
+
+        vidEl.onended = () => {
+            clearTimeout(storyTimer);
+            currentStoryIndex++;
+            renderizarStoryAtual();
+        };
     } else {
         mediaContainer.innerHTML = `<img class="story-media-content" src="${story.media_url}">`;
         
-        clearTimeout(storyTimer);
         const fillElement = document.getElementById(`progFill_${currentStoryIndex}`);
         if(fillElement) {
-            fillElement.style.transition = "width 5s linear";
+            fillElement.style.transition = "width 30s linear";
             setTimeout(() => fillElement.style.width = "100%", 50);
         }
         storyTimer = setTimeout(() => {
             currentStoryIndex++;
             renderizarStoryAtual();
-        }, 5000);
+        }, 30000);
     }
 }
 
@@ -1023,10 +1037,10 @@ function abrirListaVisualizadores() {
     const viewsDoStory = visualizacoesCache.filter(v => v.story_id === story.id);
 
     if (viewsDoStory.length === 0) {
-        container.innerHTML = `<div class="empty">Nenhuma visualização ainda.</div>`;
+        container.innerHTML = `<div class="empty">Nenhuma visualizaﾃｧﾃ｣o ainda.</div>`;
     } else {
         container.innerHTML = viewsDoStory.map(v => {
-            const art = artistasCache.find(a => a.id === v.viewer_id) || { nome: 'Usuário', foto_url: 'https://via.placeholder.com/500' };
+            const art = artistasCache.find(a => a.id === v.viewer_id) || { nome: 'Usuﾃ｡rio', foto_url: 'https://via.placeholder.com/500' };
             return `
                 <div class="viewer-item">
                     <img src="${art.foto_url}">
@@ -1082,7 +1096,7 @@ function renderizarListasHome() {
     if (!container) return;
 
     if (musicas.length === 0) {
-        container.innerHTML = `<div class="empty">Nenhuma música cadastrada ainda.</div>`;
+        container.innerHTML = `<div class="empty">Nenhuma mﾃｺsica cadastrada ainda.</div>`;
     } else {
         container.innerHTML = musicas.map((m, index) => {
             const fazParte = usuarioLogadoId && dadosRelacaoCache.some(r => r.musica_id === m.id && r.artista_id === usuarioLogadoId);
@@ -1092,7 +1106,7 @@ function renderizarListasHome() {
                     <img class="cover" src="${m.capa}" onerror="this.src='https://via.placeholder.com/500'">
                     <h3>${m.nome}</h3>
                     <p>${m.artistaFormatado}</p>
-                    <div class="card-plays">${m.plays} reproduções</div>
+                    <div class="card-plays">${m.plays} reproduﾃｧﾃｵes</div>
                     <button class="play" onclick="tocarMusicaPorIndex(${index})">
                         &#9654; OUVIR GUIA
                     </button>
@@ -1162,15 +1176,15 @@ async function abrirProjeto(projetoId) {
             </div>
         </div>
         <div class="section" style="margin-top:40px;">
-            <div class="section-title"><h2>Músicas do Projeto</h2></div>
+            <div class="section-title"><h2>Mﾃｺsicas do Projeto</h2></div>
             <div id="listaMusicasProjeto" style="display:flex; flex-direction:column; gap:12px;"></div>
         </div>
-        <button class="header-btn" style="margin-top:25px;" onclick="irInicio()">&#8592; Voltar ao Início</button>
+        <button class="header-btn" style="margin-top:25px;" onclick="irInicio()">&#8592; Voltar ao Inﾃｭcio</button>
     `;
 
     const containerMusicasProj = document.getElementById("listaMusicasProjeto");
     if(musicasDoProjeto.length === 0) {
-        containerMusicasProj.innerHTML = `<div class="empty">Nenhuma música vinculada a este projeto.</div>`;
+        containerMusicasProj.innerHTML = `<div class="empty">Nenhuma mﾃｺsica vinculada a este projeto.</div>`;
     } else {
         containerMusicasProj.innerHTML = musicasDoProjeto.map(m => {
             const indexGlobal = musicas.findIndex(x => x.id === m.id);
@@ -1214,12 +1228,12 @@ async function abrirArtista(nomeArtistaEncoded) {
             <div class="section-title"><h2>Guias do Artista</h2></div>
             <div id="listaMusicasArtista" style="display:flex; flex-direction:column; gap:12px;"></div>
         </div>
-        <button class="header-btn" style="margin-top:25px;" onclick="irInicio()">&#8592; Voltar ao Início</button>
+        <button class="header-btn" style="margin-top:25px;" onclick="irInicio()">&#8592; Voltar ao Inﾃｭcio</button>
     `;
 
     const containerMusicasArt = document.getElementById("listaMusicasArtista");
     if(musicasDoArtista.length === 0) {
-        containerMusicasArt.innerHTML = `<div class="empty">Nenhuma música cadastrada por este artista.</div>`;
+        containerMusicasArt.innerHTML = `<div class="empty">Nenhuma mﾃｺsica cadastrada por este artista.</div>`;
     } else {
         containerMusicasArt.innerHTML = musicasDoArtista.map(m => {
             const indexGlobal = musicas.findIndex(x => x.id === m.id);
@@ -1246,7 +1260,7 @@ async function abrirPainelUpload() {
     containerMain.innerHTML = `
         <div style="margin-top:25px; background:#141414; border:1px solid #222; border-radius:20px; padding:30px; max-width:650px; margin-left:auto; margin-right:auto;">
             <h2 style="margin-bottom:8px;">Painel do Artista</h2>
-            <p style="color:#888; font-size:14px; margin-bottom:25px;">Adicione novas guias, gerencie seus lançamentos ou crie novos projetos.</p>
+            <p style="color:#888; font-size:14px; margin-bottom:25px;">Adicione novas guias, gerencie seus lanﾃｧamentos ou crie novos projetos.</p>
             
             <div style="display:flex; gap:10px; margin-bottom:25px; border-bottom:1px solid #222; padding-bottom:15px;">
                 <button class="header-btn" id="abaGuiaBtn" onclick="mudarAbaPainel('guia')" style="background:#1ed760;">Nova Guia</button>
@@ -1268,7 +1282,7 @@ async function abrirPainelUpload() {
                 <input type="file" id="upCapaArquivo" accept="image/*" style="display:none;" onchange="document.getElementById('labelCapaTexto').textContent = this.files[0].name">
 
                 <label class="file-upload-label" for="upAudioArquivo">
-                    <span id="labelAudioTexto">Arquivo de Áudio (.mp3 / .wav)</span>
+                    <span id="labelAudioTexto">Arquivo de ﾃ「dio (.mp3 / .wav)</span>
                 </label>
                 <input type="file" id="upAudioArquivo" accept="audio/*" style="display:none;" onchange="document.getElementById('labelAudioTexto').textContent = this.files[0].name">
 
@@ -1276,7 +1290,7 @@ async function abrirPainelUpload() {
             </div>
 
             <div id="formProjetoContainer" style="display:none;">
-                <input type="text" id="upNomeProjeto" class="input-padrao" placeholder="Nome do Projeto / Álbum / Mixtape">
+                <input type="text" id="upNomeProjeto" class="input-padrao" placeholder="Nome do Projeto / ﾃ〕bum / Mixtape">
                 
                 <label class="file-upload-label" for="upCapaProjArquivo">
                     <span id="labelCapaProjTexto">Capa do Projeto (Imagem)</span>
@@ -1346,7 +1360,7 @@ async function salvarNovaGuia() {
     const projetosSelecionados = Array.from(document.querySelectorAll('.chip-item[data-type="projeto"].selected')).map(el => el.getAttribute('data-id'));
 
     if (!nome || !fileCapa || !fileAudio || artistasSelecionados.length === 0) {
-        console.warn("Preencha o nome, selecione pelo menos um artista, uma capa e um arquivo de áudio.");
+        console.warn("Preencha o nome, selecione pelo menos um artista, uma capa e um arquivo de ﾃ｡udio.");
         return;
     }
 
@@ -1367,7 +1381,7 @@ async function salvarNovaGuia() {
         ]).select().single();
 
         if (errMusica) { 
-            console.error("Erro ao salvar música: " + errMusica.message); 
+            console.error("Erro ao salvar mﾃｺsica: " + errMusica.message); 
             btnPublicar.disabled = false;
             btnPublicar.textContent = "Publicar Guia";
             return; 
@@ -1461,7 +1475,7 @@ async function tocarMusicaPorIndex(index) {
     document.getElementById("modalCapa").src = m.capa;
 
     const audio = document.getElementById("audio");
-    if (!m.audio) { console.warn("Áudio indisponível."); return; }
+    if (!m.audio) { console.warn("ﾃ「dio indisponﾃｭvel."); return; }
     audio.src = m.audio;
     audio.play();
     atualizarIconePlayPause(false);
@@ -1580,7 +1594,7 @@ function pesquisar() {
     if(!container) return;
 
     if(filtrado.length === 0) {
-        container.innerHTML = `<div class="empty">Nenhuma música encontrada.</div>`;
+        container.innerHTML = `<div class="empty">Nenhuma mﾃｺsica encontrada.</div>`;
     } else {
         container.innerHTML = filtrado.map(m => {
             const fazParte = usuarioLogadoId && dadosRelacaoCache.some(r => r.musica_id === m.id && r.artista_id === usuarioLogadoId);
@@ -1589,7 +1603,7 @@ function pesquisar() {
                     <img class="cover" src="${m.capa}">
                     <h3>${m.nome}</h3>
                     <p>${m.artistaFormatado}</p>
-                    <div class="card-plays">${m.plays} reproduções</div>
+                    <div class="card-plays">${m.plays} reproduﾃｧﾃｵes</div>
                     <button class="play" onclick="tocarMusicaPorIndex(${musicas.findIndex(x => x.id === m.id)})">
                         &#9654; OUVIR GUIA
                     </button>
@@ -1607,7 +1621,7 @@ function alternarModoAuth() {
     modoCadastro = !modoCadastro;
     document.getElementById("tituloAuth").textContent = modoCadastro ? "Criar Conta de Artista" : "Entrar como Artista";
     document.getElementById("botaoAcaoAuth").textContent = modoCadastro ? "Cadastrar" : "Entrar";
-    document.getElementById("textoAlternar").textContent = modoCadastro ? "Já tem uma conta? Entre aqui" : "Cadastre-se grátis";
+    document.getElementById("textoAlternar").textContent = modoCadastro ? "Jﾃ｡ tem uma conta? Entre aqui" : "Cadastre-se grﾃ｡tis";
 }
 
 function atualizarNomeArquivo(input) {
@@ -1669,3 +1683,4 @@ async function salvarPerfilArtista() {
 </script>
 </body>
 </html>
+
