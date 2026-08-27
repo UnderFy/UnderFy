@@ -4,11 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UnderFy</title>
-<!-- Ícone padrão do navegador -->
 <link rel="icon" type="image/png" href="https://gnibzbnypirjrcaoibkx.supabase.co/storage/v1/object/public/capas-musicas/Picsart_26-08-25_13-30-56-332.jpg">
-<!-- Ícone para quando o usuário adicionar à tela inicial do celular -->
 <link rel="apple-touch-icon" href="https://gnibzbnypirjrcaoibkx.supabase.co/storage/v1/object/public/capas-musicas/Picsart_26-08-25_13-30-56-332.jpg">
-<!-- Manifesto do App -->
 <link rel="manifest" href="manifest.json">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -321,11 +318,9 @@ nav button:hover, nav button:active{color:#1ed760;}
     </header>
 
     <main id="conteudoDinamico">
-        <!-- O CONTEÚDO DA TELA SERÁ INJETADO AQUI DINAMICAMENTE -->
-    </main>
+        </main>
 </div>
 
-<!-- MINI PLAYER FIXO -->
 <div class="mini-player" id="miniPlayer" onclick="abrirInterfacePlayer()">
     <img id="miniCapa" src="">
     <div class="mini-player-info">
@@ -335,7 +330,6 @@ nav button:hover, nav button:active{color:#1ed760;}
     <button id="miniPlayBtn" onclick="event.stopPropagation(); pausarRetomar();">&#10074;&#10074;</button>
 </div>
 
-<!-- TELA / MODAL DO PLAYER COMPLETO -->
 <div class="player-modal" id="playerModal">
     <div class="player-card">
         <div class="player-header">
@@ -373,14 +367,13 @@ nav button:hover, nav button:active{color:#1ed760;}
     </div>
 </div>
 
-<!-- MODAL VISUALIZADOR DE STORIES (ESTILO INSTAGRAM) -->
 <div class="story-viewer-modal" id="storyViewerModal">
     <div class="story-card-box">
         <div class="story-progress-bars" id="storyProgressBars"></div>
         <div class="story-header-info">
             <div class="story-user-meta">
-                <img id="storyUserAvatar" src="">
-                <span id="storyUserName">Artista</span>
+                <img id="storyUserAvatar" src="" style="cursor: pointer;" onclick="abrirPlayerPerfilStory()" title="Ver Player/Perfil">
+                <span id="storyUserName" style="cursor: pointer;" onclick="abrirPlayerPerfilStory()" title="Ver Player/Perfil">Artista</span>
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
                 <button class="story-delete-btn" id="storyDeleteBtn" onclick="apagarStoryAtual()" title="Apagar Story">&#128465;</button>
@@ -388,10 +381,8 @@ nav button:hover, nav button:active{color:#1ed760;}
             </div>
         </div>
         <div style="flex:1; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;" id="storyMediaContainer">
-            <!-- Inserido dinamicamente (img ou video) -->
-        </div>
+            </div>
 
-        <!-- BARRA INFERIOR DE VISUALIZADORES (ESTILO INSTAGRAM) -->
         <div class="story-footer-actions" id="storyFooterActions" style="display:none;">
             <div class="story-viewers-pill" onclick="abrirListaVisualizadores()">
                 <img src="https://via.placeholder.com/500" id="viewerPillIcon">
@@ -401,7 +392,6 @@ nav button:hover, nav button:active{color:#1ed760;}
     </div>
 </div>
 
-<!-- MODAL DA LISTA DE VISUALIZADORES -->
 <div class="viewers-modal" id="viewersModal" onclick="fecharListaVisualizadores(event)">
     <div class="viewers-card" onclick="event.stopPropagation()">
         <div class="viewers-header">
@@ -414,7 +404,6 @@ nav button:hover, nav button:active{color:#1ed760;}
     </div>
 </div>
 
-<!-- MODAL CÂMERA EM TEMPO REAL -->
 <div class="camera-modal" id="cameraModal">
     <video id="cameraPreview" class="camera-preview" autoplay playsinline muted></video>
     <div style="position:absolute; top:20px; right:20px; z-index:10;">
@@ -427,20 +416,30 @@ nav button:hover, nav button:active{color:#1ed760;}
     </div>
 </div>
 
-<!-- MODAL DE PRÉ-VISUALIZAÇÃO DA MÍDIA CAPTURADA -->
 <div class="preview-action-modal" id="previewActionModal">
     <div id="previewContainerWrapper" style="width:100%; height:100%; position:relative; display:flex; align-items:center; justify-content:center;">
-        <!-- Inserido dinamicamente a foto ou vídeo capturados -->
-    </div>
+        </div>
     <div class="preview-action-buttons">
         <button class="preview-btn discard" onclick="descartarMidiaPreview()">Excluir</button>
         <button class="preview-btn publish" onclick="publicarMidiaPreview()">Publicar</button>
     </div>
 </div>
 
+<div class="player-modal" id="playerMp4Modal">
+    <div class="player-card" style="padding: 20px;">
+        <div class="player-header">
+            <span style="font-size:16px;">Player de Mídia do Artista</span>
+            <button onclick="fecharPlayerMp4Modal()" style="font-size:22px;">&times;</button>
+        </div>
+        <div style="width:100%; aspect-ratio:9/16; max-height: 60vh; background:#000; border-radius:15px; overflow:hidden; display:flex; align-items:center; justify-content:center; margin-bottom:15px;">
+            <video id="mp4PlayerVideo" src="" style="width:100%; height:100%; object-fit:contain;" controls autoplay playsinline></video>
+        </div>
+        <div id="mp4PlayerInfo" style="text-align:center; color:#ccc; font-size:14px; margin-bottom:10px;"></div>
+    </div>
+</div>
+
 <audio id="audio" style="display:none;"></audio>
 
-<!-- NAV INFERIOR -->
 <nav>
     <button onclick="irInicio()">INICIO</button>
     <button onclick="mostrarMusicas()">GUIAS</button>
@@ -448,7 +447,6 @@ nav button:hover, nav button:active{color:#1ed760;}
     <button onclick="tratarAcaoArtista()">PUBLICAR</button>
 </nav>
 
-<!-- MODAL DE CADASTRO / LOGIN / PERFIL -->
 <div class="modal" id="modalAuth">
     <div class="modal-content">
         <button class="close" onclick="fecharModal('modalAuth')">&#10005;</button>
@@ -462,7 +460,6 @@ nav button:hover, nav button:active{color:#1ed760;}
     </div>
 </div>
 
-<!-- MODAL DE CRIAÇÃO DE PERFIL -->
 <div class="modal" id="modalPerfil">
     <div class="modal-content">
         <h2>Monte seu Perfil</h2>
@@ -618,11 +615,9 @@ async function irInicio() {
             <p>Um espaço livre para artistas independentes publicarem, ouvirem e organizarem suas músicas.</p>
         </section>
 
-        <!-- SEÇÃO DE STORIES -->
         <section class="section" style="margin-top:25px;">
             <div class="stories-container" id="listaStories">
-                <!-- Inserido dinamicamente -->
-            </div>
+                </div>
         </section>
 
         <div class="search-box">
@@ -685,18 +680,13 @@ function renderizarStoriesBar() {
         `;
     }
 
-    // 2. Coleta TODOS os IDs de artistas que possuem stories publicados
-    const idsArtistasComStories = [...new Set(storiesCache.map(s => s.artist_id))];
+    // 2. Exibe TODOS os artistas cadastrados na fila horizontal de stories (com anel se tiver stories, ou padrão se não tiver)
+    artistasCache.forEach(art => {
+        if (usuarioLogadoId && art.id === usuarioLogadoId) return; // O usuário logado já tem seu item próprio acima
 
-    // 3. Renderiza os stories dos outros artistas (independentemente da conta logada)
-    idsArtistasComStories.forEach(artId => {
-        if (usuarioLogadoId && artId === usuarioLogadoId) return; // Evita duplicar o usuário logado se ele já apareceu acima
-
-        const art = artistasCache.find(a => a.id === artId);
-        if (!art) return; // Se o perfil ainda não estiver sincronizado na tabela artistas, ignora por segurança
-
+        const temStories = storiesCache.some(s => s.artist_id === art.id);
         const temNovos = temStoriesNaoVistos(art.id);
-        const classeRing = temNovos ? 'unseen' : 'seen';
+        const classeRing = temNovos ? 'unseen' : (temStories ? 'seen' : 'seen');
 
         html += `
             <div class="story-item-wrapper" onclick="assistirStoriesArtista('${art.id}')">
@@ -708,10 +698,8 @@ function renderizarStoriesBar() {
         `;
     });
 
-    if (!sessaoAtual && idsArtistasComStories.length === 0) {
-        container.innerHTML = `<span style="color:#777; font-size:13px; padding:10px 0;">Faça login como artista para postar stories.</span>`;
-    } else if (idsArtistasComStories.length === 0 && !sessaoAtual) {
-        container.innerHTML = `<span style="color:#777; font-size:13px; padding:10px 0;">Nenhum story no momento.</span>`;
+    if (!sessaoAtual && artistasCache.length === 0) {
+        container.innerHTML = `<span style="color:#777; font-size:13px; padding:10px 0;">Nenhum artista cadastrado.</span>`;
     } else {
         container.innerHTML = html;
     }
@@ -902,11 +890,56 @@ async function registrarVisualizacaoStory(storyId) {
 
 function assistirStoriesArtista(artistaId) {
     currentStoriesList = storiesCache.filter(s => s.artist_id === artistaId);
-    if (currentStoriesList.length === 0) return;
-    currentStoryIndex = 0;
     
+    // Se o artista não tiver stories publicados, abra o player mp4 direto com a foto de perfil/avatar dele para cumprir a regra 2
+    if (currentStoriesList.length === 0) {
+        const artista = artistasCache.find(a => a.id === artistaId);
+        if (artista) {
+            abrirPlayerMp4ComArtista(artista);
+        }
+        return;
+    }
+
+    currentStoryIndex = 0;
     document.getElementById("storyViewerModal").style.display = "flex";
     renderizarStoryAtual();
+}
+
+function abrirPlayerPerfilStory() {
+    const story = currentStoriesList[currentStoryIndex];
+    if (!story) return;
+    const artista = artistasCache.find(a => a.id === story.artist_id);
+    if (artista) {
+        fecharStoryViewer();
+        abrirPlayerMp4ComArtista(artista);
+    }
+}
+
+function abrirPlayerMp4ComArtista(artista) {
+    const modal = document.getElementById("playerMp4Modal");
+    const videoEl = document.getElementById("mp4PlayerVideo");
+    const infoEl = document.getElementById("mp4PlayerInfo");
+
+    // Procura por um story em vídeo do artista para usar no player mp4, ou usa a foto como fallback de mídia
+    const storyVideo = storiesCache.find(s => s.artist_id === artista.id && s.media_type === 'video');
+    
+    if (storyVideo) {
+        videoEl.src = storyVideo.media_url;
+    } else {
+        // Se não houver vídeo de story, criamos um elemento de imagem ou usamos o avatar (caso queira reproduzir arquivo de áudio ou vídeo do artista)
+        videoEl.src = artista.foto_url || 'https://via.placeholder.com/500';
+    }
+
+    infoEl.innerHTML = `<strong>${artista.nome}</strong>`;
+    modal.style.display = "flex";
+}
+
+function fecharPlayerMp4Modal() {
+    const modal = document.getElementById("playerMp4Modal");
+    const videoEl = document.getElementById("mp4PlayerVideo");
+    videoEl.pause();
+    videoEl.src = "";
+    modal.style.display = "none";
 }
 
 function renderizarStoryAtual() {
@@ -1220,7 +1253,6 @@ async function abrirPainelUpload() {
                 <button class="header-btn" id="abaProjetoBtn" onclick="mudarAbaPainel('projeto')" style="background:#252525; color:#fff;">Novo Projeto</button>
             </div>
 
-            <!-- FORMULÁRIO GUIA -->
             <div id="formGuiaContainer">
                 <input type="text" id="upNomeGuia" class="input-padrao" placeholder="Nome da Guia (Ex: Trap Star)">
                 
@@ -1243,7 +1275,6 @@ async function abrirPainelUpload() {
                 <button class="form-btn" id="btnPublicarGuia" onclick="salvarNovaGuia()">Publicar Guia</button>
             </div>
 
-            <!-- FORMULÁRIO PROJETO -->
             <div id="formProjetoContainer" style="display:none;">
                 <input type="text" id="upNomeProjeto" class="input-padrao" placeholder="Nome do Projeto / Álbum / Mixtape">
                 
