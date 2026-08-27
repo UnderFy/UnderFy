@@ -2220,7 +2220,11 @@ async function iniciarStreamCamera() {
                     : "environment"  
             },  
   
-            audio:true  
+            audio:{
+                echoCancellation:true,
+                noiseSuppression:true,
+                autoGainControl:true
+            }  
   
         };  
   
