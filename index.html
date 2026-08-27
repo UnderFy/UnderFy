@@ -302,6 +302,8 @@
             <input type="email" id="authEmail" class="form-input" placeholder="Seu e-mail">
             <input type="password" id="authPassword" class="form-input" placeholder="Sua senha">
             <input type="text" id="authNomeArtista" class="form-input" placeholder="Nome Artístico (Apenas Cadastro)" style="display:none;">
+            <label id="lblAuthAvatar" style="font-size:12px; color:#aaa; display:none;">Foto de Perfil do Artista:</label>
+            <input type="file" id="authAvatarFile" accept="image/*" class="form-input" style="display:none;">
             <button class="btn-primary" id="btnSubmitAuth" onclick="executarAuth()">Logar</button>
             <button class="btn-secondary" onclick="alternarModoAuth()" id="btnToggleAuth">Não tem conta? Cadastre-se</button>
             <button class="btn-secondary" style="border:none;" onclick="fecharModal('authModal')">Cancelar</button>
@@ -314,7 +316,7 @@
             <h2>Publicar Nova Guia</h2>
             <input type="text" id="guiaTitulo" class="form-input" placeholder="Título da Guia">
             <label style="font-size:12px; color:#aaa;">Arquivo de Áudio (.mp3, .wav):</label>
-            <input type="file" id="guiaAudioFile" accept="audio/mp3, audio/wav" class="form-input">
+            <input type="file" id="guiaAudioFile" accept="audio/*,.mp3,.wav" class="form-input">
             <label style="font-size:12px; color:#aaa;">Imagem de Capa:</label>
             <input type="file" id="guiaCapaFile" accept="image/*" class="form-input">
             <button class="btn-primary" onclick="salvarGuiaSupabase()">Enviar Guia</button>
@@ -396,6 +398,8 @@
             modoCadastro = !modoCadastro;
             document.getElementById('authTitle').innerText = modoCadastro ? 'Cadastrar Novo Artista' : 'Entrar como Artista';
             document.getElementById('authNomeArtista').style.display = modoCadastro ? 'block' : 'none';
+            document.getElementById('lblAuthAvatar').style.display = modoCadastro ? 'block' : 'none';
+            document.getElementById('authAvatarFile').style.display = modoCadastro ? 'block' : 'none';
             document.getElementById('btnSubmitAuth').innerText = modoCadastro ? 'Cadastrar' : 'Logar';
             document.getElementById('btnToggleAuth').innerText = modoCadastro ? 'Já possui conta? Faça Login' : 'Não tem conta? Cadastre-se';
         }
@@ -406,9 +410,32 @@
 
             if (modoCadastro) {
                 const nome = document.getElementById('authNomeArtista').value;
+                const avatarFile = document.getElementById('authAvatarFile').files[0];
+                let avatarPublicUrl = '';
+
+                if (!nome) {
+                    alert('Por favor, informe o nome artístico.');
+                    return;
+                }
+
+                if (avatarFile) {
+                    const avatarPath = `avatars/avatar_${Date.now()}_${avatarFile.name}`;
+                    await _supabase.storage.from('media').upload(avatarPath, avatarFile);
+                    const { data } = _supabase.storage.from('media').getPublicUrl(avatarPath);
+                    avatarPublicUrl = data.publicUrl;
+                }
+
                 const { data, error } = await _supabase.auth.signUp({ email, password });
+                if (error) {
+                    alert('Erro ao cadastrar: ' + error.message);
+                    return;
+                }
                 if (data.user) {
-                    await _supabase.from('artistas').insert([{ user_id: data.user.id, nome }]);
+                    await _supabase.from('artistas').insert([{ 
+                        user_id: data.user.id, 
+                        nome: nome,
+                        avatar_url: avatarPublicUrl || null
+                    }]);
                     alert('Cadastro realizado! Faça login.');
                     alternarModoAuth();
                 }
@@ -417,7 +444,9 @@
                 if (error) alert('Erro ao autenticar: ' + error.message);
                 else {
                     fecharModal('authModal');
-                    verificarSessao();
+                    await verificarSessao();
+                    carregarStoriesArtistas();
+                    carregarGuias();
                 }
             }
         }
@@ -439,7 +468,7 @@
                             <div class="card-title">${g.titulo}</div>
                             <div class="card-subtitle">${g.artistas?.nome || 'Artista'}</div>
                             <audio controls style="width: 100%; margin-top: 8px; height: 30px;">
-                                <source src="${g.audio_url}" type="audio/mpeg">
+                                <source src="${g.audio_url}">
                             </audio>
                             ${eProprietario ? `
                                 <div class="card-actions">
@@ -474,29 +503,43 @@
                 return;
             }
 
-            // Upload do Áudio
-            const audioPath = `guias/audio_${Date.now()}_${audioFile.name}`;
-            await _supabase.storage.from('media').upload(audioPath, audioFile);
-            const { data: audioUrl } = _supabase.storage.from('media').getPublicUrl(audioPath);
+            try {
+                // Upload do Áudio
+                const audioExt = audioFile.name.split('.').pop();
+                const audioPath = `guias/audio_${Date.now()}.${audioExt}`;
+                const { error: audioErr } = await _supabase.storage.from('media').upload(audioPath, audioFile, {
+                    contentType: audioFile.type || 'audio/mpeg'
+                });
+                if (audioErr) throw audioErr;
 
-            // Upload da Capa (opcional)
-            let capaPublicUrl = '';
-            if (capaFile) {
-                const capaPath = `guias/capas_${Date.now()}_${capaFile.name}`;
-                await _supabase.storage.from('media').upload(capaPath, capaFile);
-                capaPublicUrl = _supabase.storage.from('media').getPublicUrl(capaPath).data.publicUrl;
+                const { data: audioData } = _supabase.storage.from('media').getPublicUrl(audioPath);
+
+                // Upload da Capa (opcional)
+                let capaPublicUrl = '';
+                if (capaFile) {
+                    const capaExt = capaFile.name.split('.').pop();
+                    const capaPath = `guias/capas_${Date.now()}.${capaExt}`;
+                    await _supabase.storage.from('media').upload(capaPath, capaFile);
+                    const { data: capaData } = _supabase.storage.from('media').getPublicUrl(capaPath);
+                    capaPublicUrl = capaData.publicUrl;
+                }
+
+                const { error: dbErr } = await _supabase.from('guias').insert([{
+                    titulo: titulo,
+                    audio_url: audioData.publicUrl,
+                    capa_url: capaPublicUrl,
+                    artista_id: usuarioLogado.id,
+                    user_id: usuarioLogado.user_id
+                }]);
+
+                if (dbErr) throw dbErr;
+
+                alert('Guia enviada com sucesso!');
+                fecharModal('publicarGuiaModal');
+                carregarGuias();
+            } catch (err) {
+                alert('Erro ao publicar guia: ' + err.message);
             }
-
-            await _supabase.from('guias').insert([{
-                titulo: titulo,
-                audio_url: audioUrl.publicUrl,
-                capa_url: capaPublicUrl,
-                artista_id: usuarioLogado.id,
-                user_id: usuarioLogado.user_id
-            }]);
-
-            fecharModal('publicarGuiaModal');
-            carregarGuias();
         }
 
         async function editarGuia(id, tituloAtual) {
@@ -621,9 +664,35 @@
 
         // OUTRAS ABAS
         async function carregarProjetos() {
-            document.getElementById('sectionTitle').innerText = 'Projetos de Artistas';
+            document.getElementById('sectionTitle').innerText = 'Projetos e Lançamentos';
             const cardList = document.getElementById('cardList');
-            cardList.innerHTML = `<p style="color: #888;">Listagem de álbuns e projetos integrada.</p>`;
+            cardList.innerHTML = '';
+
+            const { data: projetos } = await _supabase.from('guias').select('*, artistas(nome)');
+
+            if (projetos && projetos.length > 0) {
+                projetos.forEach(p => {
+                    const eProprietario = usuarioLogado && (usuarioLogado.id === p.artista_id || usuarioLogado.user_id === p.user_id);
+                    cardList.innerHTML += `
+                        <div class="card">
+                            <img src="${p.capa_url || 'https://picsum.photos/200'}" alt="Capa">
+                            <div class="card-title">${p.titulo}</div>
+                            <div class="card-subtitle">${p.artistas?.nome || 'Artista'}</div>
+                            <audio controls style="width: 100%; margin-top: 8px; height: 30px;">
+                                <source src="${p.audio_url}">
+                            </audio>
+                            ${eProprietario ? `
+                                <div class="card-actions">
+                                    <button class="btn-action-small" onclick="editarGuia('${p.id}', '${p.titulo}')">Editar</button>
+                                    <button class="btn-action-small danger" onclick="excluirGuia('${p.id}')">Excluir</button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+            } else {
+                cardList.innerHTML = `<p style="color: #888;">Nenhum projeto encontrado.</p>`;
+            }
         }
 
         async function carregarArtistas() {
@@ -632,15 +701,17 @@
             cardList.innerHTML = '';
             const { data: artistas } = await _supabase.from('artistas').select('*');
             
-            if (artistas) {
+            if (artistas && artistas.length > 0) {
                 artistas.forEach(a => {
                     cardList.innerHTML += `
                         <div class="card">
-                            <img src="${a.avatar_url || 'https://picsum.photos/200'}" style="border-radius:50%;" alt="${a.nome}">
-                            <div class="card-title" style="text-align:center;">${a.nome}</div>
+                            <img src="${a.avatar_url || 'https://picsum.photos/200'}" style="border-radius:50%; width:100%; aspect-ratio:1; object-fit:cover;" alt="${a.nome}">
+                            <div class="card-title" style="text-align:center; margin-top: 6px;">${a.nome}</div>
                         </div>
                     `;
                 });
+            } else {
+                cardList.innerHTML = `<p style="color: #888;">Nenhum artista cadastrado.</p>`;
             }
         }
 
