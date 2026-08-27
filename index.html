@@ -373,7 +373,18 @@
         async function verificarSessao() {
             const { data: { session } } = await _supabase.auth.getSession();
             if (session) {
-                const { data: artista } = await _supabase.from('artistas').select('*').eq('user_id', session.user.id).single();
+                let { data: artista } = await _supabase.from('artistas').select('*').eq('user_id', session.user.id).single();
+                
+                // Se o usuário logou mas não tem registro na tabela artistas, criamos um automático para vincular
+                if (!artista) {
+                    const nomeFallback = session.user.email.split('@')[0];
+                    const { data: novoArtista } = await _supabase.from('artistas').insert([{
+                        user_id: session.user.id,
+                        nome: nomeFallback
+                    }]).select().single();
+                    artista = novoArtista;
+                }
+
                 usuarioLogado = artista || { id: session.user.id, user_id: session.user.id, nome: session.user.email };
                 document.getElementById('authBtn').innerText = 'Sair (' + (usuarioLogado.nome || 'Artista') + ')';
             } else {
@@ -435,7 +446,12 @@
 
                 const { data, error } = await _supabase.auth.signUp({ email, password });
                 if (error) {
-                    alert('Erro ao cadastrar: ' + error.message);
+                    if (error.message.includes('already registered')) {
+                        alert('Este e-mail já está cadastrado. Alterne para a tela de Login para entrar.');
+                        alternarModoAuth();
+                    } else {
+                        alert('Erro ao cadastrar: ' + error.message);
+                    }
                     return;
                 }
                 if (data.user) {
@@ -466,7 +482,7 @@
             const cardList = document.getElementById('cardList');
             cardList.innerHTML = '';
 
-            const { data: guias, error } = await _supabase.from('guias').select('*, artistas(nome)');
+            const { data: guias } = await _supabase.from('guias').select('*, artistas(nome)');
 
             if (guias && guias.length > 0) {
                 guias.forEach(g => {
@@ -517,7 +533,6 @@
             btn.innerText = 'Enviando...';
 
             try {
-                // Upload do Áudio
                 const audioExt = audioFile.name.split('.').pop();
                 const audioPath = `guias/audio_${Date.now()}.${audioExt}`;
                 const { error: audioErr } = await _supabase.storage.from('media').upload(audioPath, audioFile, {
@@ -527,7 +542,6 @@
 
                 const { data: audioData } = _supabase.storage.from('media').getPublicUrl(audioPath);
 
-                // Upload da Capa (opcional)
                 let capaPublicUrl = '';
                 if (capaFile) {
                     const capaExt = capaFile.name.split('.').pop();
@@ -578,7 +592,7 @@
 
         // STORIES EM TEMPO REAL & NAVEGAÇÃO DE TODOS OS ARTISTAS
         async function carregarStoriesArtistas() {
-            const { data: stories, error } = await _supabase.from('stories').select('*, artistas(nome, avatar_url)').order('created_at', { ascending: false });
+            const { data: stories } = await _supabase.from('stories').select('*, artistas(id, nome, avatar_url)').order('created_at', { ascending: false });
             storiesCadastrados = stories || [];
             renderTrilhoStories();
         }
