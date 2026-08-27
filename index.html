@@ -713,7 +713,7 @@ nav{
     border-top:1px solid #252525;
     z-index:40;
     display:flex;
-    justify-content:space-around;
+    justify-style:space-around;
     align-items:center;
     padding:0 10px;
 }
@@ -1292,6 +1292,9 @@ let currentStoryIndex = 0;
 let storyTimer = null;
 let storyProgressTimer = null;
 
+let selectedArtistasGuia = [];
+let selectedProjetosGuia = [];
+
 let storiesVistos = JSON.parse(
     localStorage.getItem('underfy_stories_vistos') || '{}'
 );
@@ -1456,9 +1459,6 @@ async function carregarDadosGlobais() {
 
         /*
          * CARREGAMENTO DOS STORIES
-         *
-         * Somente Stories criados nas últimas 24 horas
-         * continuam disponíveis.
          */
         const limiteStory =
             new Date(Date.now() - STORY_VALIDADE).toISOString();
@@ -1728,10 +1728,6 @@ async function irInicio() {
    STORIES
 ========================================================= */
 
-
-/*
- * Verifica se o Story ainda está dentro das 24 horas.
- */
 function storyAindaAtivo(story) {
 
     if (!story || !story.created_at) {
@@ -1749,9 +1745,6 @@ function storyAindaAtivo(story) {
 }
 
 
-/*
- * Retorna somente Stories ativos daquele artista.
- */
 function obterStoriesAtivosDoArtista(artistaId) {
 
     return storiesCache.filter(
@@ -1763,9 +1756,6 @@ function obterStoriesAtivosDoArtista(artistaId) {
 }
 
 
-/*
- * Verifica se há Stories não vistos.
- */
 function temStoriesNaoVistos(artistaId) {
 
     const storiesDoArtista =
@@ -1782,15 +1772,6 @@ function temStoriesNaoVistos(artistaId) {
 }
 
 
-/*
- * Renderização da barra de Stories.
- *
- * IMPORTANTE:
- * Se o próprio artista não tiver nenhum Story ativo,
- * não criamos um Story vazio clicável.
- *
- * O botão "+" continua disponível para publicar.
- */
 function renderizarStoriesBar() {
 
     const container =
@@ -1814,9 +1795,6 @@ function renderizarStoriesBar() {
         );
 
 
-    /*
-     * STORY DO PRÓPRIO ARTISTA
-     */
     if (sessaoAtual && artistaLogado) {
 
         const meusStories =
@@ -1825,10 +1803,6 @@ function renderizarStoriesBar() {
             );
 
 
-        /*
-         * Somente cria o círculo clicável
-         * se realmente existir Story.
-         */
         if (meusStories.length > 0) {
 
             const temNovosEu =
@@ -1872,10 +1846,6 @@ function renderizarStoriesBar() {
 
         } else {
 
-            /*
-             * Sem Story publicado:
-             * apenas botão de adicionar.
-             */
             html += `
 
                 <div
@@ -1908,9 +1878,6 @@ function renderizarStoriesBar() {
     }
 
 
-    /*
-     * STORIES DOS OUTROS ARTISTAS
-     */
     const artistasComStories =
         artistasCache.filter(a => {
 
@@ -1974,9 +1941,6 @@ function renderizarStoriesBar() {
     });
 
 
-    /*
-     * Nenhum Story disponível.
-     */
     if (!sessaoAtual && artistasComStories.length === 0) {
 
         container.innerHTML = `
@@ -2485,9 +2449,6 @@ async function publicarMidiaPreview() {
 
     try {
 
-        /*
-         * Upload da mídia
-         */
         const {
             error: uploadError
         } =
@@ -2516,12 +2477,6 @@ async function publicarMidiaPreview() {
                 );
 
 
-        /*
-         * Publicação do Story.
-         *
-         * created_at é gerado pelo banco,
-         * permitindo controlar as 24 horas.
-         */
         const {
             error: storyError
         } =
@@ -2564,9 +2519,6 @@ async function publicarMidiaPreview() {
             null;
 
 
-        /*
-         * Recarrega imediatamente.
-         */
         await carregarDadosGlobais();
 
         renderizarStoriesBar();
@@ -2658,9 +2610,6 @@ async function registrarVisualizacaoStory(storyId) {
 
     } catch(e) {
 
-        /*
-         * A tabela é tratada como opcional.
-         */
     }
 
 }
@@ -2672,19 +2621,12 @@ async function registrarVisualizacaoStory(storyId) {
 
 function assistirStoriesArtista(artistaId) {
 
-    /*
-     * Sempre pega somente Stories ativos.
-     */
     currentStoriesList =
         obterStoriesAtivosDoArtista(
             artistaId
         );
 
 
-    /*
-     * Se não existir nenhum Story,
-     * simplesmente não acontece nada.
-     */
     if (
         !currentStoriesList ||
         currentStoriesList.length === 0
@@ -2738,11 +2680,6 @@ function renderizarStoryAtual() {
         ];
 
 
-    /*
-     * Segurança:
-     * se o Story tiver expirado enquanto estava aberto,
-     * passa para o próximo.
-     */
     if (
         !story ||
         !storyAindaAtivo(story)
@@ -2781,9 +2718,6 @@ function renderizarStoryAtual() {
     }
 
 
-    /*
-     * Registra como visto.
-     */
     if (story && story.id) {
 
         storiesVistos[story.id] =
@@ -2803,9 +2737,6 @@ function renderizarStoryAtual() {
     }
 
 
-    /*
-     * Dados do artista.
-     */
     const artista =
         artistasCache.find(
             a => a.id === story.artist_id
@@ -2828,9 +2759,6 @@ function renderizarStoryAtual() {
         'https://via.placeholder.com/500';
 
 
-    /*
-     * Controles do proprietário.
-     */
     const usuarioLogadoId =
         sessaoAtual
             ? sessaoAtual.user.id
@@ -2939,9 +2867,6 @@ function renderizarStoryAtual() {
     }
 
 
-    /*
-     * BARRINHAS SEGMENTADAS
-     */
     const barsContainer =
         document.getElementById(
             "storyProgressBars"
@@ -2972,20 +2897,12 @@ function renderizarStoryAtual() {
             .join('');
 
 
-    /*
-     * PLAYER AUDIOVISUAL
-     */
     const mediaContainer =
         document.getElementById(
             "storyMediaContainer"
         );
 
 
-    /*
-     * VIDEO
-     *
-     * Nunca passa de 30 segundos.
-     */
     if (story.media_type === 'video') {
 
         mediaContainer.innerHTML = `
@@ -3016,10 +2933,6 @@ function renderizarStoryAtual() {
             'loadedmetadata',
             () => {
 
-                /*
-                 * Garante que vídeos maiores
-                 * nunca ultrapassem 30 segundos.
-                 */
                 const duracaoReal =
                     isFinite(video.duration)
                         ? video.duration
@@ -3053,9 +2966,6 @@ function renderizarStoryAtual() {
         );
 
 
-        /*
-         * Fallback caso metadata não carregue.
-         */
         setTimeout(() => {
 
             if (!iniciou && video.duration) {
@@ -3073,9 +2983,6 @@ function renderizarStoryAtual() {
         }, 500);
 
 
-        /*
-         * Interrompe o vídeo exatamente aos 30s.
-         */
         video.addEventListener(
             'timeupdate',
             () => {
@@ -3100,11 +3007,6 @@ function renderizarStoryAtual() {
 
     } else {
 
-        /*
-         * IMAGEM
-         *
-         * Duração máxima: 30 segundos.
-         */
         mediaContainer.innerHTML = `
 
             <img
@@ -3153,10 +3055,6 @@ function iniciarProgressoStory(duracaoSegundos) {
         "0%";
 
 
-    /*
-     * Pequeno atraso para permitir
-     * que a animação seja aplicada.
-     */
     setTimeout(() => {
 
         if (!fillElement) {
@@ -3174,9 +3072,6 @@ function iniciarProgressoStory(duracaoSegundos) {
     }, 30);
 
 
-    /*
-     * Avança automaticamente ao fim.
-     */
     storyTimer =
         setTimeout(() => {
 
@@ -3373,10 +3268,6 @@ function proximoStory() {
 
     currentStoryIndex++;
 
-    /*
-     * Se acabou a sequência,
-     * fecha o visualizador.
-     */
     if (
         currentStoryIndex >=
         currentStoriesList.length
@@ -4332,66 +4223,32 @@ async function abrirPainelUpload() {
 
 function mudarAbaPainel(tipo) {
 
-    const btnGuia =
-        document.getElementById(
-            "abaGuiaBtn"
-        );
-
-    const btnProj =
-        document.getElementById(
-            "abaProjetoBtn"
-        );
-
-    const formGuia =
-        document.getElementById(
-            "formGuiaContainer"
-        );
-
-    const formProj =
-        document.getElementById(
-            "formProjetoContainer"
-        );
-
+    const btnGuia = document.getElementById("abaGuiaBtn");
+    const btnProj = document.getElementById("abaProjetoBtn");
+    const formGuia = document.getElementById("formGuiaContainer");
+    const formProj = document.getElementById("formProjetoContainer");
 
     if (tipo === 'guia') {
 
-        btnGuia.style.background =
-            "#1ed760";
+        btnGuia.style.background = "#1ed760";
+        btnGuia.style.color = "#000";
 
-        btnGuia.style.color =
-            "#000";
+        btnProj.style.background = "#252525";
+        btnProj.style.color = "#fff";
 
-        btnProj.style.background =
-            "#252525";
-
-        btnProj.style.color =
-            "#fff";
-
-        formGuia.style.display =
-            "block";
-
-        formProj.style.display =
-            "none";
+        formGuia.style.display = "block";
+        formProj.style.display = "none";
 
     } else {
 
-        btnProj.style.background =
-            "#1ed760";
+        btnProj.style.background = "#1ed760";
+        btnProj.style.color = "#000";
 
-        btnProj.style.color =
-            "#000";
+        btnGuia.style.background = "#252525";
+        btnGuia.style.color = "#fff";
 
-        btnGuia.style.background =
-            "#252525";
-
-        btnGuia.style.color =
-            "#fff";
-
-        formProj.style.display =
-            "block";
-
-        formGuia.style.display =
-            "none";
+        formGuia.style.display = "none";
+        formProj.style.display = "block";
 
     }
 
@@ -4400,508 +4257,291 @@ function mudarAbaPainel(tipo) {
 
 function carregarCheckboxesPainel() {
 
-    const contArtistas =
-        document.getElementById(
-            "checkboxArtistasContainer"
-        );
+    const containerArtistas = document.getElementById("checkboxArtistasContainer");
+    const containerProjetos = document.getElementById("checkboxProjetosContainer");
 
-    const contProjetos =
-        document.getElementById(
-            "checkboxProjetosContainer"
-        );
+    selectedArtistasGuia = [];
+    selectedProjetosGuia = [];
 
-    const usuarioLogadoId =
-        sessaoAtual
-            ? sessaoAtual.user.id
-            : null;
+    const usuarioLogadoId = sessaoAtual ? sessaoAtual.user.id : null;
 
-
-    if (contArtistas) {
-
-        contArtistas.innerHTML =
-            artistasCache
-                .map(a => `
-
-                    <div
-                        class="chip-item ${a.id === usuarioLogadoId ? 'selected' : ''}"
-                        data-type="artista"
-                        data-id="${a.id}"
-                        onclick="toggleChip(this)">
-
-                        ${a.nome}
-
-                    </div>
-
-                `)
-                .join('') ||
-                '<span style="color:#777;">Nenhum artista cadastrado</span>';
-
+    if (usuarioLogadoId) {
+        selectedArtistasGuia.push(usuarioLogadoId);
     }
 
+    if (artistasCache.length === 0) {
+        containerArtistas.innerHTML = `<span style="color:#666; font-size:12px;">Nenhum artista cadastrado.</span>`;
+    } else {
+        containerArtistas.innerHTML = artistasCache.map(a => {
+            const isMe = a.id === usuarioLogadoId;
+            return `
+                <div 
+                    class="chip-item ${isMe ? 'selected' : ''}" 
+                    onclick="toggleChipArtista(this, '${a.id}')">
+                    ${a.nome} ${isMe ? '(Você)' : ''}
+                </div>
+            `;
+        }).join('');
+    }
 
-    if (contProjetos) {
+    if (projetosCache.length === 0) {
+        containerProjetos.innerHTML = `<span style="color:#666; font-size:12px;">Nenhum projeto cadastrado.</span>`;
+    } else {
+        containerProjetos.innerHTML = projetosCache.map(p => {
+            return `
+                <div 
+                    class="chip-item" 
+                    onclick="toggleChipProjeto(this, '${p.id}')">
+                    ${p.nome}
+                </div>
+            `;
+        }).join('');
+    }
 
-        contProjetos.innerHTML =
-            projetosCache
-                .map(p => `
+}
 
-                    <div
-                        class="chip-item"
-                        data-type="projeto"
-                        data-id="${p.id}"
-                        onclick="toggleChip(this)">
 
-                        ${p.nome}
+function toggleChipArtista(el, id) {
 
-                    </div>
+    const index = selectedArtistasGuia.indexOf(id);
 
-                `)
-                .join('') ||
-                '<span style="color:#777;">Nenhum projeto cadastrado</span>';
+    if (index > -1) {
+
+        selectedArtistasGuia.splice(index, 1);
+        el.classList.remove('selected');
+
+    } else {
+
+        selectedArtistasGuia.push(id);
+        el.classList.add('selected');
 
     }
 
 }
 
 
-function toggleChip(element) {
+function toggleChipProjeto(el, id) {
 
-    element.classList.toggle(
-        'selected'
-    );
+    const index = selectedProjetosGuia.indexOf(id);
+
+    if (index > -1) {
+
+        selectedProjetosGuia.splice(index, 1);
+        el.classList.remove('selected');
+
+    } else {
+
+        selectedProjetosGuia.push(id);
+        el.classList.add('selected');
+
+    }
 
 }
 
-
-/* =========================================================
-   SALVAR GUIA
-========================================================= */
 
 async function salvarNovaGuia() {
 
-    const nome =
-        document.getElementById(
-            "upNomeGuia"
-        ).value.trim();
+    const nome = document.getElementById("upNomeGuia").value.trim();
+    const capaFile = document.getElementById("upCapaArquivo").files[0];
+    const audioFile = document.getElementById("upAudioArquivo").files[0];
+    const btn = document.getElementById("btnPublicarGuia");
 
-
-    const fileCapa =
-        document.getElementById(
-            "upCapaArquivo"
-        ).files[0];
-
-
-    const fileAudio =
-        document.getElementById(
-            "upAudioArquivo"
-        ).files[0];
-
-
-    const btnPublicar =
-        document.getElementById(
-            "btnPublicarGuia"
-        );
-
-
-    const artistasSelecionados =
-        Array.from(
-            document.querySelectorAll(
-                '.chip-item[data-type="artista"].selected'
-            )
-        )
-        .map(
-            el =>
-                el.getAttribute(
-                    'data-id'
-                )
-        );
-
-
-    const projetosSelecionados =
-        Array.from(
-            document.querySelectorAll(
-                '.chip-item[data-type="projeto"].selected'
-            )
-        )
-        .map(
-            el =>
-                el.getAttribute(
-                    'data-id'
-                )
-        );
-
-
-    if (
-        !nome ||
-        !fileCapa ||
-        !fileAudio ||
-        artistasSelecionados.length === 0
-    ) {
-
-        console.warn(
-            "Preencha o nome, selecione pelo menos um artista, uma capa e um arquivo de áudio."
-        );
-
+    if (!nome) {
+        alert("Por favor, insira o nome da guia.");
         return;
-
     }
 
+    if (!audioFile) {
+        alert("Por favor, selecione um arquivo de áudio.");
+        return;
+    }
 
-    btnPublicar.disabled =
-        true;
+    if (selectedArtistasGuia.length === 0) {
+        alert("Selecione ao menos um artista.");
+        return;
+    }
 
-    btnPublicar.textContent =
-        "Enviando arquivos...";
-
+    btn.disabled = true;
+    btn.textContent = "Enviando arquivos...";
 
     try {
 
-        const nomeCapaFile =
-            `capa_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        let capaUrl = 'https://via.placeholder.com/500';
 
+        if (capaFile) {
 
-        await supabaseClient
-            .storage
-            .from('capas-musicas')
-            .upload(
-                nomeCapaFile,
-                fileCapa
-            );
+            const extCapa = capaFile.name.split('.').pop();
+            const nomeCapa = `capa_${Date.now()}_${Math.random().toString(36).substring(7)}.${extCapa}`;
 
+            const { error: errCapa } = await supabaseClient.storage.from('capas-musicas').upload(nomeCapa, capaFile);
 
-        const {
-            data: pubCapa
-        } =
-            supabaseClient
-                .storage
-                .from('capas-musicas')
-                .getPublicUrl(
-                    nomeCapaFile
-                );
+            if (errCapa) throw errCapa;
 
-
-        const nomeAudioFile =
-            `audio_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-
-        await supabaseClient
-            .storage
-            .from('capas-musicas')
-            .upload(
-                nomeAudioFile,
-                fileAudio
-            );
-
-
-        const {
-            data: pubAudio
-        } =
-            supabaseClient
-                .storage
-                .from('capas-musicas')
-                .getPublicUrl(
-                    nomeAudioFile
-                );
-
-
-        const {
-            data: resMusica,
-            error: errMusica
-        } =
-            await supabaseClient
-                .from('musicas')
-                .insert([{
-
-                    nome:
-                        nome,
-
-                    capa_url:
-                        pubCapa.publicUrl,
-
-                    audio_url:
-                        pubAudio.publicUrl,
-
-                    plays:
-                        0
-
-                }])
-                .select()
-                .single();
-
-
-        if (errMusica) {
-
-            console.error(
-                "Erro ao salvar música: " +
-                errMusica.message
-            );
-
-            btnPublicar.disabled =
-                false;
-
-            btnPublicar.textContent =
-                "Publicar Guia";
-
-            return;
+            const { data: urlCapaData } = supabaseClient.storage.from('capas-musicas').getPublicUrl(nomeCapa);
+            capaUrl = urlCapaData.publicUrl;
 
         }
 
+        const extAudio = audioFile.name.split('.').pop();
+        const nomeAudio = `audio_${Date.now()}_${Math.random().toString(36).substring(7)}.${extAudio}`;
 
-        const musicaId =
-            resMusica.id;
+        const { error: errAudio } = await supabaseClient.storage.from('capas-musicas').upload(nomeAudio, audioFile);
 
+        if (errAudio) throw errAudio;
 
-        const relArtistasData =
-            artistasSelecionados.map(
-                artId => ({
+        const { data: urlAudioData } = supabaseClient.storage.from('capas-musicas').getPublicUrl(nomeAudio);
+        const audioUrl = urlAudioData.publicUrl;
 
-                    musica_id:
-                        musicaId,
+        btn.textContent = "Cadastrando música...";
 
-                    artista_id:
-                        artId
+        const { data: musicaInserida, error: errMusica } = await supabaseClient
+            .from('musicas')
+            .insert([{
+                nome: nome,
+                capa_url: capaUrl,
+                audio_url: audioUrl,
+                plays: 0
+            }])
+            .select();
 
-                })
-            );
+        if (errMusica) throw errMusica;
 
+        const novaMusicaId = musicaInserida[0].id;
 
-        await supabaseClient
+        const relsArtistas = selectedArtistasGuia.map(artId => ({
+            musica_id: novaMusicaId,
+            artista_id: artId
+        }));
+
+        const { error: errRelArt } = await supabaseClient
             .from('musica_artistas')
-            .insert(
-                relArtistasData
-            );
+            .insert(relsArtistas);
 
+        if (errRelArt) throw errRelArt;
 
-        if (
-            projetosSelecionados.length > 0
-        ) {
+        if (selectedProjetosGuia.length > 0) {
 
-            const relProjetosData =
-                projetosSelecionados.map(
-                    projId => ({
-
-                        projeto_id:
-                            projId,
-
-                        musica_id:
-                            musicaId
-
-                    })
-                );
-
+            const relsProjetos = selectedProjetosGuia.map(projId => ({
+                musica_id: novaMusicaId,
+                projeto_id: projId
+            }));
 
             await supabaseClient
                 .from('projeto_musicas')
-                .insert(
-                    relProjetosData
-                );
+                .insert(relsProjetos);
 
         }
 
+        alert("Guia publicada com sucesso!");
 
         await carregarDadosGlobais();
 
         irInicio();
 
+    } catch (err) {
 
-    } catch(err) {
+        console.error("Erro ao salvar guia:", err);
+        alert("Falha ao salvar guia. Verifique os dados e tente novamente.");
 
-        console.error(
-            "Erro no processo: " +
-            err.message
-        );
-
-        btnPublicar.disabled =
-            false;
-
-        btnPublicar.textContent =
-            "Publicar Guia";
+        btn.disabled = false;
+        btn.textContent = "Publicar Guia";
 
     }
 
 }
 
-
-/* =========================================================
-   NOVO PROJETO
-========================================================= */
 
 async function salvarNovoProjeto() {
 
-    const nome =
-        document.getElementById(
-            "upNomeProjeto"
-        ).value.trim();
+    const nome = document.getElementById("upNomeProjeto").value.trim();
+    const capaFile = document.getElementById("upCapaProjArquivo").files[0];
+    const btn = document.getElementById("btnCriarProjeto");
 
-
-    const fileCapa =
-        document.getElementById(
-            "upCapaProjArquivo"
-        ).files[0];
-
-
-    const btnCriarProj =
-        document.getElementById(
-            "btnCriarProjeto"
-        );
-
-
-    if (!nome || !fileCapa) {
-
-        console.warn(
-            "Preencha o nome do projeto e selecione uma capa."
-        );
-
+    if (!nome) {
+        alert("Insira o nome do projeto.");
         return;
-
     }
 
-
-    btnCriarProj.disabled =
-        true;
-
-    btnCriarProj.textContent =
-        "Criando projeto...";
-
+    btn.disabled = true;
+    btn.textContent = "Criando projeto...";
 
     try {
 
-        const nomeCapaFile =
-            `proj_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        let capaUrl = 'https://via.placeholder.com/500';
 
+        if (capaFile) {
 
-        await supabaseClient
-            .storage
-            .from('capas-musicas')
-            .upload(
-                nomeCapaFile,
-                fileCapa
-            );
+            const extCapa = capaFile.name.split('.').pop();
+            const nomeCapa = `proj_${Date.now()}_${Math.random().toString(36).substring(7)}.${extCapa}`;
 
+            const { error: errCapa } = await supabaseClient.storage.from('capas-musicas').upload(nomeCapa, capaFile);
 
-        const {
-            data: pubCapa
-        } =
-            supabaseClient
-                .storage
-                .from('capas-musicas')
-                .getPublicUrl(
-                    nomeCapaFile
-                );
+            if (errCapa) throw errCapa;
 
-
-        const {
-            error
-        } =
-            await supabaseClient
-                .from('projetos')
-                .insert([{
-
-                    nome:
-                        nome,
-
-                    capa_url:
-                        pubCapa.publicUrl
-
-                }]);
-
-
-        if (error) {
-
-            console.error(
-                "Erro ao criar projeto: " +
-                error.message
-            );
-
-            btnCriarProj.disabled =
-                false;
-
-            btnCriarProj.textContent =
-                "Criar Projeto";
-
-            return;
+            const { data: urlCapaData } = supabaseClient.storage.from('capas-musicas').getPublicUrl(nomeCapa);
+            capaUrl = urlCapaData.publicUrl;
 
         }
 
+        const { error: errProj } = await supabaseClient
+            .from('projetos')
+            .insert([{
+                nome: nome,
+                capa_url: capaUrl
+            }]);
+
+        if (errProj) throw errProj;
+
+        alert("Projeto criado com sucesso!");
 
         await carregarDadosGlobais();
 
-        irInicio();
+        abrirPainelUpload();
 
+    } catch (err) {
 
-    } catch(err) {
+        console.error("Erro ao salvar projeto:", err);
+        alert("Falha ao criar projeto.");
 
-        console.error(
-            "Erro: " +
-            err.message
-        );
-
-        btnCriarProj.disabled =
-            false;
-
-        btnCriarProj.textContent =
-            "Criar Projeto";
+        btn.disabled = false;
+        btn.textContent = "Criar Projeto";
 
     }
 
 }
 
 
-/* =========================================================
-   REMOVER MÚSICA
-========================================================= */
+async function removerMusica(musicaId) {
 
-async function removerMusica(idMusica) {
-
-    if (
-        !confirm(
-            "Tem certeza que deseja apagar esta guia?"
-        )
-    ) {
+    if (!confirm("Tem certeza que deseja apagar esta guia?")) {
         return;
     }
-
 
     try {
 
         await supabaseClient
             .from('musica_artistas')
             .delete()
-            .eq(
-                'musica_id',
-                idMusica
-            );
-
+            .eq('musica_id', musicaId);
 
         await supabaseClient
             .from('projeto_musicas')
             .delete()
-            .eq(
-                'musica_id',
-                idMusica
-            );
-
+            .eq('musica_id', musicaId);
 
         await supabaseClient
             .from('musicas')
             .delete()
-            .eq(
-                'id',
-                idMusica
-            );
-
+            .eq('id', musicaId);
 
         await carregarDadosGlobais();
 
-        irInicio();
+        renderizarListasHome();
 
+    } catch (err) {
 
-    } catch(err) {
-
-        console.error(
-            "Erro:",
-            err
-        );
+        console.error("Erro ao apagar guia:", err);
+        alert("Não foi possível apagar a guia.");
 
     }
 
@@ -4909,419 +4549,326 @@ async function removerMusica(idMusica) {
 
 
 /* =========================================================
-   PLAYER DE MÚSICA
+   PESQUISA
 ========================================================= */
 
-async function tocarMusicaPorIndex(index) {
+function pesquisar() {
 
-    if (
-        index < 0 ||
-        index >= musicas.length
-    ) {
+    const termo = document.getElementById("pesquisa").value.toLowerCase().trim();
+
+    if (!termo) {
+        renderizarListasHome();
         return;
     }
 
+    const containerMusicas = document.getElementById("listaMusicas");
 
-    musicaAtualIndex =
-        index;
-
-
-    const m =
-        musicas[index];
-
-
-    playContabilizadoNessaMusica =
-        false;
-
-
-    document.getElementById(
-        "miniPlayer"
-    ).style.display =
-        "flex";
-
-
-    document.getElementById(
-        "miniMusica"
-    ).textContent =
-        m.nome;
-
-
-    document.getElementById(
-        "miniArtista"
-    ).textContent =
-        m.artistaFormatado;
-
-
-    document.getElementById(
-        "miniCapa"
-    ).src =
-        m.capa;
-
-
-    document.getElementById(
-        "modalMusica"
-    ).textContent =
-        m.nome;
-
-
-    document.getElementById(
-        "modalArtista"
-    ).textContent =
-        m.artistaFormatado;
-
-
-    document.getElementById(
-        "modalCapa"
-    ).src =
-        m.capa;
-
-
-    const audio =
-        document.getElementById(
-            "audio"
-        );
-
-
-    if (!m.audio) {
-
-        console.warn(
-            "Áudio indisponível."
-        );
-
-        return;
-
-    }
-
-
-    audio.src =
-        m.audio;
-
-
-    audio.play();
-
-
-    atualizarIconePlayPause(
-        false
+    const filtradas = musicas.filter(m => 
+        m.nome.toLowerCase().includes(termo) || 
+        m.artistaFormatado.toLowerCase().includes(termo)
     );
+
+    if (filtradas.length === 0) {
+
+        containerMusicas.innerHTML = `<div class="empty">Nenhum resultado encontrado.</div>`;
+
+    } else {
+
+        containerMusicas.innerHTML = filtradas.map(m => {
+
+            const indexGlobal = musicas.findIndex(x => x.id === m.id);
+
+            return `
+                <div class="card">
+                    <img class="cover" src="${m.capa}" onerror="this.src='https://via.placeholder.com/500'">
+                    <h3>${m.nome}</h3>
+                    <p>${m.artistaFormatado}</p>
+                    <div class="card-plays">${m.plays} reproduções</div>
+                    <button class="play" onclick="tocarMusicaPorIndex(${indexGlobal})">
+                        &#9654; OUVIR GUIA
+                    </button>
+                </div>
+            `;
+
+        }).join('');
+
+    }
 
 }
 
 
-async function verificarTempoPlay() {
+/* =========================================================
+   MODAL AUTENTICAÇÃO E PERFIL
+========================================================= */
 
-    const audio =
-        document.getElementById(
-            "audio"
-        );
+function abrirModalArtista() {
+    modoCadastro = false;
+    atualizarCamposAuth();
+    document.getElementById("modalAuth").style.display = "flex";
+}
 
 
-    if (isNaN(audio.duration)) {
+function fecharModal(modalId) {
+    document.getElementById(modalId).style.display = "none";
+}
+
+
+function alternarModoAuth() {
+    modoCadastro = !modoCadastro;
+    atualizarCamposAuth();
+}
+
+
+function atualizarCamposAuth() {
+
+    const titulo = document.getElementById("tituloAuth");
+    const botao = document.getElementById("botaoAcaoAuth");
+    const textoAlternar = document.getElementById("textoAlternar");
+
+    if (modoCadastro) {
+
+        titulo.textContent = "Cadastrar Artista";
+        botao.textContent = "Cadastrar e Continuar";
+        textoAlternar.innerHTML = "Já tem conta? <span>Entre aqui</span>";
+
+    } else {
+
+        titulo.textContent = "Entrar como Artista";
+        botao.textContent = "Entrar";
+        textoAlternar.innerHTML = "Não tem uma conta? <span>Cadastre-se grátis</span>";
+
+    }
+
+}
+
+
+async function autenticarArtista() {
+
+    const email = document.getElementById("emailArtista").value.trim();
+    const senha = document.getElementById("senhaArtista").value.trim();
+
+    if (!email || !senha) {
+        alert("Preencha e-mail e senha.");
         return;
     }
 
+    if (modoCadastro) {
 
-    atualizarBarraProgresso();
+        const { data, error } = await supabaseClient.auth.signUp({ email, senha });
 
+        if (error) {
+            alert("Erro no cadastro: " + error.message);
+            return;
+        }
 
-    if (
-        audio.currentTime >= 30 &&
-        !playContabilizadoNessaMusica &&
-        musicaAtualIndex !== -1
-    ) {
+        if (data.user) {
 
-        playContabilizadoNessaMusica =
-            true;
-
-
-        const m =
-            musicas[
-                musicaAtualIndex
-            ];
-
-
-        m.plays += 1;
-
-
-        if (
-            document.getElementById(
-                "listaMusicas"
-            )
-        ) {
-
-            renderizarListasHome();
+            usuarioPendenteId = data.user.id;
+            fecharModal("modalAuth");
+            document.getElementById("modalPerfil").style.display = "flex";
 
         }
 
+    } else {
 
-        try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, senha });
 
-            await supabaseClient
-                .from('musicas')
-                .update({
-                    plays:
-                        m.plays
-                })
-                .eq(
-                    'id',
-                    m.id
-                );
+        if (error) {
+            alert("Erro no login: " + error.message);
+            return;
+        }
 
-        } catch(e) {}
-
-    }
-
-}
-
-
-function abrirInterfacePlayer() {
-
-    if (
-        musicaAtualIndex !== -1
-    ) {
-
-        document.getElementById(
-            "playerModal"
-        ).style.display =
-            "flex";
+        sessaoAtual = data.session;
+        fecharModal("modalAuth");
+        atualizarBotaoHeader();
+        await carregarDadosGlobais();
+        abrirPainelUpload();
 
     }
 
 }
 
 
-function fecharInterfacePlayer() {
+function atualizarNomeArquivo(input) {
 
-    document.getElementById(
-        "playerModal"
-    ).style.display =
-        "none";
+    const label = document.getElementById("textoLabelFoto");
+
+    if (input.files && input.files[0]) {
+
+        label.textContent = input.files[0].name;
+
+    } else {
+
+        label.textContent = "Escolher foto de perfil (Arquivo)";
+
+    }
+
+}
+
+
+async function salvarPerfilArtista() {
+
+    const vulgo = document.getElementById("inputVulgo").value.trim();
+    const fotoFile = document.getElementById("inputFotoArquivo").files[0];
+
+    if (!vulgo) {
+        alert("Por favor, insira o seu vulgo ou nome artístico.");
+        return;
+    }
+
+    if (!usuarioPendenteId) {
+        alert("Sessão inválida. Tente cadastrar novamente.");
+        return;
+    }
+
+    try {
+
+        let fotoUrl = 'https://via.placeholder.com/500';
+
+        if (fotoFile) {
+
+            const ext = fotoFile.name.split('.').pop();
+            const nomeFoto = `avatar_${usuarioPendenteId}_${Date.now()}.${ext}`;
+
+            const { error: uploadErr } = await supabaseClient.storage.from('capas-musicas').upload(nomeFoto, fotoFile);
+
+            if (uploadErr) throw uploadErr;
+
+            const { data: urlData } = supabaseClient.storage.from('capas-musicas').getPublicUrl(nomeFoto);
+            fotoUrl = urlData.publicUrl;
+
+        }
+
+        const { error: insertErr } = await supabaseClient
+            .from('artistas')
+            .insert([{
+                id: usuarioPendenteId,
+                nome: vulgo,
+                foto_url: fotoUrl
+            }]);
+
+        if (insertErr) throw insertErr;
+
+        alert("Perfil criado com sucesso!");
+
+        fecharModal("modalPerfil");
+
+        await verificarSessaoAtiva();
+        await carregarDadosGlobais();
+        abrirPainelUpload();
+
+    } catch (err) {
+
+        console.error("Erro ao salvar perfil:", err);
+        alert("Erro ao criar perfil de artista.");
+
+    }
+
+}
+
+
+/* =========================================================
+   REPRODUTOR DE ÁUDIO & CONTROLES DO PLAYER
+========================================================= */
+
+function tocarMusicaPorIndex(index) {
+
+    if (index < 0 || index >= musicas.length) return;
+
+    musicaAtualIndex = index;
+    const musica = musicas[musicaAtualIndex];
+    const audio = document.getElementById("audio");
+
+    audio.src = musica.audio;
+    audio.play();
+
+    playContabilizadoNessaMusica = false;
+
+    atualizarInterfacePlayer();
+
+    document.getElementById("miniPlayer").style.display = "flex";
+
+}
+
+
+function atualizarInterfacePlayer() {
+
+    if (musicaAtualIndex === -1) return;
+
+    const m = musicas[musicaAtualIndex];
+
+    document.getElementById("miniCapa").src = m.capa;
+    document.getElementById("miniMusica").textContent = m.nome;
+    document.getElementById("miniArtista").textContent = m.artistaFormatado;
+    document.getElementById("miniPlayBtn").innerHTML = "&#10074;&#10074;";
+
+    document.getElementById("modalCapa").src = m.capa;
+    document.getElementById("modalMusica").textContent = m.nome;
+    document.getElementById("modalArtista").textContent = m.artistaFormatado;
+    document.getElementById("btnPlayPauseModal").innerHTML = "&#10074;&#10074;";
 
 }
 
 
 function pausarRetomar() {
 
-    const audio =
-        document.getElementById(
-            "audio"
-        );
-
+    const audio = document.getElementById("audio");
+    const miniBtn = document.getElementById("miniPlayBtn");
+    const modalBtn = document.getElementById("btnPlayPauseModal");
 
     if (audio.paused) {
 
         audio.play();
-
-        atualizarIconePlayPause(
-            false
-        );
+        miniBtn.innerHTML = "&#10074;&#10074;";
+        modalBtn.innerHTML = "&#10074;&#10074;";
 
     } else {
 
         audio.pause();
-
-        atualizarIconePlayPause(
-            true
-        );
+        miniBtn.innerHTML = "&#9654;";
+        modalBtn.innerHTML = "&#9654;";
 
     }
-
-}
-
-
-function atualizarIconePlayPause(
-    pausado
-) {
-
-    const modalBtn =
-        document.getElementById(
-            "btnPlayPauseModal"
-        );
-
-
-    const miniBtn =
-        document.getElementById(
-            "miniPlayBtn"
-        );
-
-
-    if (pausado) {
-
-        if (modalBtn)
-            modalBtn.innerHTML =
-                "&#9654;";
-
-
-        if (miniBtn)
-            miniBtn.innerHTML =
-                "&#9654;";
-
-    } else {
-
-        if (modalBtn)
-            modalBtn.innerHTML =
-                "&#10074;&#10074;";
-
-
-        if (miniBtn)
-            miniBtn.innerHTML =
-                "&#10074;&#10074;";
-
-    }
-
-}
-
-
-function atualizarBarraProgresso() {
-
-    const audio =
-        document.getElementById(
-            "audio"
-        );
-
-
-    if (isNaN(audio.duration)) {
-        return;
-    }
-
-
-    const fill =
-        document.getElementById(
-            "progressBarFill"
-        );
-
-
-    const cur =
-        document.getElementById(
-            "currentTime"
-        );
-
-
-    const dur =
-        document.getElementById(
-            "durationTime"
-        );
-
-
-    if (fill)
-        fill.style.width =
-            (audio.currentTime /
-            audio.duration) *
-            100 +
-            "%";
-
-
-    if (cur)
-        cur.textContent =
-            formatarTempo(
-                audio.currentTime
-            );
-
-
-    if (dur)
-        dur.textContent =
-            formatarTempo(
-                audio.duration
-            );
-
-}
-
-
-function mudarProgresso(event) {
-
-    const audio =
-        document.getElementById(
-            "audio"
-        );
-
-
-    const bg =
-        document.getElementById(
-            "progressBarBg"
-        );
-
-
-    if (!audio.duration) {
-        return;
-    }
-
-
-    audio.currentTime =
-        (
-            event.offsetX /
-            bg.clientWidth
-        ) *
-        audio.duration;
-
-}
-
-
-function formatarTempo(sec) {
-
-    const min =
-        Math.floor(
-            sec / 60
-        );
-
-
-    const s =
-        Math.floor(
-            sec % 60
-        );
-
-
-    return `${min}:${s < 10 ? '0' : ''}${s}`;
 
 }
 
 
 function tocarProxima() {
 
-    if (
-        musicas.length === 0
-    ) {
-        return;
+    if (musicas.length === 0) return;
+
+    if (modoShuffle) {
+
+        let indexSorteado = Math.floor(Math.random() * musicas.length);
+
+        if (indexSorteado === musicaAtualIndex && musicas.length > 1) {
+            indexSorteado = (indexSorteado + 1) % musicas.length;
+        }
+
+        tocarMusicaPorIndex(indexSorteado);
+
+    } else {
+
+        let proximo = musicaAtualIndex + 1;
+
+        if (proximo >= musicas.length) proximo = 0;
+
+        tocarMusicaPorIndex(proximo);
+
     }
-
-
-    let next =
-        modoShuffle
-            ? Math.floor(
-                Math.random() *
-                musicas.length
-            )
-            : (
-                musicaAtualIndex + 1
-            ) %
-            musicas.length;
-
-
-    tocarMusicaPorIndex(
-        next
-    );
 
 }
 
 
 function tocarAnterior() {
 
-    if (
-        musicas.length === 0
-    ) {
-        return;
-    }
+    if (musicas.length === 0) return;
 
+    let anterior = musicaAtualIndex - 1;
 
-    let prev =
-        (
-            musicaAtualIndex - 1 +
-            musicas.length
-        ) %
-        musicas.length;
+    if (anterior < 0) anterior = musicas.length - 1;
 
-
-    tocarMusicaPorIndex(
-        prev
-    );
+    tocarMusicaPorIndex(anterior);
 
 }
 
@@ -5330,13 +4877,9 @@ function lidarFimDaMusica() {
 
     if (modoRepeat) {
 
-        document.getElementById(
-            "audio"
-        ).currentTime = 0;
-
-        document.getElementById(
-            "audio"
-        ).play();
+        const audio = document.getElementById("audio");
+        audio.currentTime = 0;
+        audio.play();
 
     } else {
 
@@ -5349,451 +4892,123 @@ function lidarFimDaMusica() {
 
 function toggleShuffle() {
 
-    modoShuffle =
-        !modoShuffle;
+    modoShuffle = !modoShuffle;
+    const btn = document.getElementById("btnShuffle");
 
-
-    const btn =
-        document.getElementById(
-            "btnShuffle"
-        );
-
-
-    if (btn)
-        btn.classList.toggle(
-            "active",
-            modoShuffle
-        );
+    if (modoShuffle) {
+        btn.classList.add("active");
+    } else {
+        btn.classList.remove("active");
+    }
 
 }
 
 
 function toggleRepeat() {
 
-    modoRepeat =
-        !modoRepeat;
+    modoRepeat = !modoRepeat;
+    const btn = document.getElementById("btnRepeat");
 
-
-    const btn =
-        document.getElementById(
-            "btnRepeat"
-        );
-
-
-    if (btn)
-        btn.classList.toggle(
-            "active",
-            modoRepeat
-        );
-
-}
-
-
-/* =========================================================
-   PESQUISA
-========================================================= */
-
-function pesquisar() {
-
-    const inputPesquisa =
-        document.getElementById(
-            "pesquisa"
-        );
-
-
-    if (!inputPesquisa) {
-        return;
-    }
-
-
-    const termo =
-        inputPesquisa.value.toLowerCase();
-
-
-    const filtrado =
-        musicas.filter(
-            m =>
-                m.nome
-                    .toLowerCase()
-                    .includes(termo) ||
-
-                m.artistaFormatado
-                    .toLowerCase()
-                    .includes(termo)
-        );
-
-
-    const usuarioLogadoId =
-        sessaoAtual
-            ? sessaoAtual.user.id
-            : null;
-
-
-    const container =
-        document.getElementById(
-            "listaMusicas"
-        );
-
-
-    if (!container) {
-        return;
-    }
-
-
-    if (
-        filtrado.length === 0
-    ) {
-
-        container.innerHTML = `
-            <div class="empty">
-                Nenhuma música encontrada.
-            </div>
-        `;
-
+    if (modoRepeat) {
+        btn.classList.add("active");
     } else {
+        btn.classList.remove("active");
+    }
 
-        container.innerHTML =
-            filtrado
-                .map(m => {
-
-                    const fazParte =
-                        usuarioLogadoId &&
-                        dadosRelacaoCache.some(
-                            r =>
-                                r.musica_id ===
-                                    m.id &&
-                                r.artista_id ===
-                                    usuarioLogadoId
-                        );
+}
 
 
-                    return `
+function verificarTempoPlay() {
 
-                        <div class="card">
+    const audio = document.getElementById("audio");
 
-                            <img
-                                class="cover"
-                                src="${m.capa}">
+    if (!audio.duration) return;
 
-                            <h3>
-                                ${m.nome}
-                            </h3>
+    const progressoPercent = (audio.currentTime / audio.duration) * 100;
+    const fill = document.getElementById("progressBarFill");
 
-                            <p>
-                                ${m.artistaFormatado}
-                            </p>
+    if (fill) fill.style.width = progressoPercent + "%";
 
-                            <div class="card-plays">
-                                ${m.plays} reproduções
-                            </div>
+    const curTimeEl = document.getElementById("currentTime");
+    const durTimeEl = document.getElementById("durationTime");
 
-                            <button
-                                class="play"
-                                onclick="tocarMusicaPorIndex(${musicas.findIndex(x => x.id === m.id)})">
+    if (curTimeEl) curTimeEl.textContent = formatarTempo(audio.currentTime);
+    if (durTimeEl) durTimeEl.textContent = formatarTempo(audio.duration);
 
-                                &#9654;
-                                OUVIR GUIA
+    /* Contabiliza visualização ao tocar pelo menos 10 segundos */
+    if (audio.currentTime >= 10 && !playContabilizadoNessaMusica && musicaAtualIndex !== -1) {
 
-                            </button>
-
-                            ${
-                                fazParte
-                                ? `
-                                    <button
-                                        class="btn-delete"
-                                        onclick="removerMusica('${m.id}')">
-
-                                        APAGAR GUIA
-
-                                    </button>
-                                `
-                                : ''
-                            }
-
-                        </div>
-
-                    `;
-
-                })
-                .join('');
+        playContabilizadoNessaMusica = true;
+        contabilizarPlay(musicas[musicaAtualIndex].id);
 
     }
 
 }
 
 
-/* =========================================================
-   AUTENTICAÇÃO
-========================================================= */
+async function contabilizarPlay(musicaId) {
 
-function abrirModalArtista() {
+    try {
 
-    document.getElementById(
-        "modalAuth"
-    ).style.display =
-        "flex";
+        const m = musicas.find(x => x.id === musicaId);
 
-}
+        if (!m) return;
 
-
-function fecharModal(id) {
-
-    document.getElementById(
-        id
-    ).style.display =
-        "none";
-
-}
-
-
-function alternarModoAuth() {
-
-    modoCadastro =
-        !modoCadastro;
-
-
-    document.getElementById(
-        "tituloAuth"
-    ).textContent =
-        modoCadastro
-            ? "Criar Conta de Artista"
-            : "Entrar como Artista";
-
-
-    document.getElementById(
-        "botaoAcaoAuth"
-    ).textContent =
-        modoCadastro
-            ? "Cadastrar"
-            : "Entrar";
-
-
-    document.getElementById(
-        "textoAlternar"
-    ).textContent =
-        modoCadastro
-            ? "Já tem uma conta? Entre aqui"
-            : "Cadastre-se grátis";
-
-}
-
-
-function atualizarNomeArquivo(input) {
-
-    if (
-        input.files &&
-        input.files[0]
-    ) {
-
-        document.getElementById(
-            "textoLabelFoto"
-        ).textContent =
-            input.files[0].name;
-
-    }
-
-}
-
-
-/* =========================================================
-   LOGIN
-========================================================= */
-
-async function autenticarArtista() {
-
-    const email =
-        document.getElementById(
-            "emailArtista"
-        ).value.trim();
-
-
-    const senha =
-        document.getElementById(
-            "senhaArtista"
-        ).value.trim();
-
-
-    if (!email || !senha) {
-        return;
-    }
-
-
-    if (modoCadastro) {
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient.auth.signUp({
-                email,
-                password:senha
-            });
-
-
-        if (error) {
-
-            console.error(
-                "Erro ao cadastrar: " +
-                error.message
-            );
-
-            return;
-
-        }
-
-
-        if (data.user) {
-
-            usuarioPendenteId =
-                data.user.id;
-
-
-            fecharModal(
-                'modalAuth'
-            );
-
-
-            document.getElementById(
-                "modalPerfil"
-            ).style.display =
-                "flex";
-
-        }
-
-    } else {
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-                .auth
-                .signInWithPassword({
-                    email,
-                    password:senha
-                });
-
-
-        if (error) {
-
-            console.warn(
-                "E-mail ou senha incorretos."
-            );
-
-            return;
-
-        }
-
-
-        await verificarSessaoAtiva();
-
-        fecharModal(
-            'modalAuth'
-        );
-
-        abrirPainelUpload();
-
-    }
-
-}
-
-
-/* =========================================================
-   PERFIL
-========================================================= */
-
-async function salvarPerfilArtista() {
-
-    const vulgo =
-        document.getElementById(
-            "inputVulgo"
-        ).value.trim();
-
-
-    const fileInput =
-        document.getElementById(
-            "inputFotoArquivo"
-        );
-
-
-    if (!vulgo) {
-        return;
-    }
-
-
-    let fotoUrl =
-        'https://via.placeholder.com/500';
-
-
-    if (
-        fileInput.files &&
-        fileInput.files[0]
-    ) {
-
-        const arquivo =
-            fileInput.files[0];
-
-
-        const nomeArquivo =
-            `perfil_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
+        const novosPlays = (m.plays || 0) + 1;
+        m.plays = novosPlays;
 
         await supabaseClient
-            .storage
-            .from('capas-musicas')
-            .upload(
-                nomeArquivo,
-                arquivo
-            );
+            .from('musicas')
+            .update({ plays: novosPlays })
+            .eq('id', musicaId);
 
+    } catch (err) {
 
-        const {
-            data: publicUrlData
-        } =
-            supabaseClient
-                .storage
-                .from('capas-musicas')
-                .getPublicUrl(
-                    nomeArquivo
-                );
-
-
-        fotoUrl =
-            publicUrlData.publicUrl;
+        console.error("Erro ao contabilizar reprodução:", err);
 
     }
 
-
-    await supabaseClient
-        .from('artistas')
-        .insert([{
-
-            id:
-                usuarioPendenteId,
-
-            nome:
-                vulgo,
-
-            foto_url:
-                fotoUrl
-
-        }]);
+}
 
 
-    fecharModal(
-        'modalPerfil'
-    );
+function mudarProgresso(e) {
+
+    const audio = document.getElementById("audio");
+
+    if (!audio.duration) return;
+
+    const bar = document.getElementById("progressBarBg");
+    const rect = bar.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const width = rect.width;
+
+    const percent = clickX / width;
+    audio.currentTime = percent * audio.duration;
+
+}
 
 
-    await verificarSessaoAtiva();
+function formatarTempo(segundos) {
 
-    await carregarDadosGlobais();
+    if (isNaN(segundos)) return "0:00";
 
-    abrirPainelUpload();
+    const mins = Math.floor(segundos / 60);
+    const segs = Math.floor(segundos % 60);
 
+    return `${mins}:${segs < 10 ? '0' : ''}${segs}`;
+
+}
+
+
+function abrirInterfacePlayer() {
+    document.getElementById("playerModal").style.display = "flex";
+}
+
+
+function fecharInterfacePlayer() {
+    document.getElementById("playerModal").style.display = "none";
 }
 
 </script>
-
 </body>
 </html>
