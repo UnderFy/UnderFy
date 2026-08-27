@@ -301,7 +301,7 @@
             <h2 id="authTitle">Entrar como Artista</h2>
             <input type="email" id="authEmail" class="form-input" placeholder="Seu e-mail">
             <input type="password" id="authPassword" class="form-input" placeholder="Sua senha">
-            <input type="text" id="authNomeArtista" class="form-input" placeholder="Nome Artístico (Apenas Cadastro)" style="display:none;">
+            <input type="text" id="authNomeArtista" class="form-input" placeholder="Vulgo do Artista (Apenas Cadastro)" style="display:none;">
             <label id="lblAuthAvatar" style="font-size:12px; color:#aaa; display:none;">Foto de Perfil do Artista:</label>
             <input type="file" id="authAvatarFile" accept="image/*" class="form-input" style="display:none;">
             <button class="btn-primary" id="btnSubmitAuth" onclick="executarAuth()">Logar</button>
@@ -319,7 +319,7 @@
             <input type="file" id="guiaAudioFile" accept="audio/*,.mp3,.wav" class="form-input">
             <label style="font-size:12px; color:#aaa;">Imagem de Capa:</label>
             <input type="file" id="guiaCapaFile" accept="image/*" class="form-input">
-            <button class="btn-primary" onclick="salvarGuiaSupabase()">Enviar Guia</button>
+            <button class="btn-primary" id="btnSalvarGuia" onclick="salvarGuiaSupabase()">Enviar Guia</button>
             <button class="btn-secondary" onclick="fecharModal('publicarGuiaModal')">Cancelar</button>
         </div>
     </div>
@@ -356,7 +356,7 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_b9yvSbmWOLVJvq4AB4CLmQ_VRuzpG5T';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let usuarioLogado = null; // Guarda informações do artista ativo
+        let usuarioLogado = null; 
         let modoCadastro = false;
         let mediaStream = null;
         let fotoCapturadaBlob = null;
@@ -364,9 +364,9 @@
         let activeStoryIndex = 0;
 
         window.addEventListener('DOMContentLoaded', async () => {
-            verificarSessao();
-            carregarStoriesArtistas();
-            carregarGuias();
+            await verificarSessao();
+            await carregarStoriesArtistas();
+            await carregarGuias();
         });
 
         // AUTENTICAÇÃO E SESSÃO
@@ -374,7 +374,7 @@
             const { data: { session } } = await _supabase.auth.getSession();
             if (session) {
                 const { data: artista } = await _supabase.from('artistas').select('*').eq('user_id', session.user.id).single();
-                usuarioLogado = artista || { id: session.user.id, nome: session.user.email };
+                usuarioLogado = artista || { id: session.user.id, user_id: session.user.id, nome: session.user.email };
                 document.getElementById('authBtn').innerText = 'Sair (' + (usuarioLogado.nome || 'Artista') + ')';
             } else {
                 usuarioLogado = null;
@@ -388,6 +388,7 @@
                 usuarioLogado = null;
                 document.getElementById('authBtn').innerText = 'Entrar';
                 alert('Você saiu da conta.');
+                carregarStoriesArtistas();
                 carregarGuias();
             } else {
                 abrirModal('authModal');
@@ -408,21 +409,28 @@
             const email = document.getElementById('authEmail').value;
             const password = document.getElementById('authPassword').value;
 
+            if (!email || !password) {
+                alert('Preencha e-mail e senha.');
+                return;
+            }
+
             if (modoCadastro) {
                 const nome = document.getElementById('authNomeArtista').value;
                 const avatarFile = document.getElementById('authAvatarFile').files[0];
                 let avatarPublicUrl = '';
 
                 if (!nome) {
-                    alert('Por favor, informe o nome artístico.');
+                    alert('Por favor, informe seu vulgo / nome artístico.');
                     return;
                 }
 
                 if (avatarFile) {
                     const avatarPath = `avatars/avatar_${Date.now()}_${avatarFile.name}`;
-                    await _supabase.storage.from('media').upload(avatarPath, avatarFile);
-                    const { data } = _supabase.storage.from('media').getPublicUrl(avatarPath);
-                    avatarPublicUrl = data.publicUrl;
+                    const { error: uploadError } = await _supabase.storage.from('media').upload(avatarPath, avatarFile);
+                    if (!uploadError) {
+                        const { data } = _supabase.storage.from('media').getPublicUrl(avatarPath);
+                        avatarPublicUrl = data.publicUrl;
+                    }
                 }
 
                 const { data, error } = await _supabase.auth.signUp({ email, password });
@@ -436,17 +444,18 @@
                         nome: nome,
                         avatar_url: avatarPublicUrl || null
                     }]);
-                    alert('Cadastro realizado! Faça login.');
+                    alert('Cadastro realizado com sucesso! Faça login para continuar.');
                     alternarModoAuth();
                 }
             } else {
                 const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-                if (error) alert('Erro ao autenticar: ' + error.message);
-                else {
+                if (error) {
+                    alert('Erro ao autenticar: ' + error.message);
+                } else {
                     fecharModal('authModal');
                     await verificarSessao();
-                    carregarStoriesArtistas();
-                    carregarGuias();
+                    await carregarStoriesArtistas();
+                    await carregarGuias();
                 }
             }
         }
@@ -457,7 +466,7 @@
             const cardList = document.getElementById('cardList');
             cardList.innerHTML = '';
 
-            const { data: guias } = await _supabase.from('guias').select('*, artistas(nome)');
+            const { data: guias, error } = await _supabase.from('guias').select('*, artistas(nome)');
 
             if (guias && guias.length > 0) {
                 guias.forEach(g => {
@@ -494,6 +503,7 @@
         }
 
         async function salvarGuiaSupabase() {
+            const btn = document.getElementById('btnSalvarGuia');
             const titulo = document.getElementById('guiaTitulo').value;
             const audioFile = document.getElementById('guiaAudioFile').files[0];
             const capaFile = document.getElementById('guiaCapaFile').files[0];
@@ -502,6 +512,9 @@
                 alert('Preencha o título e selecione o arquivo de áudio.');
                 return;
             }
+
+            btn.disabled = true;
+            btn.innerText = 'Enviando...';
 
             try {
                 // Upload do Áudio
@@ -535,10 +548,16 @@
                 if (dbErr) throw dbErr;
 
                 alert('Guia enviada com sucesso!');
+                document.getElementById('guiaTitulo').value = '';
+                document.getElementById('guiaAudioFile').value = '';
+                document.getElementById('guiaCapaFile').value = '';
                 fecharModal('publicarGuiaModal');
-                carregarGuias();
+                await carregarGuias();
             } catch (err) {
                 alert('Erro ao publicar guia: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Enviar Guia';
             }
         }
 
@@ -557,9 +576,9 @@
             }
         }
 
-        // STORIES EM TEMPO REAL & NAVEGAÇÃO DE OUTROS ARTISTAS
+        // STORIES EM TEMPO REAL & NAVEGAÇÃO DE TODOS OS ARTISTAS
         async function carregarStoriesArtistas() {
-            const { data: stories } = await _supabase.from('stories').select('*, artistas(nome, avatar_url)');
+            const { data: stories, error } = await _supabase.from('stories').select('*, artistas(nome, avatar_url)').order('created_at', { ascending: false });
             storiesCadastrados = stories || [];
             renderTrilhoStories();
         }
@@ -620,17 +639,33 @@
 
         async function publicarStoryCamera() {
             if (!fotoCapturadaBlob) return;
-            const path = `stories/realtime_${Date.now()}.jpg`;
-            await _supabase.storage.from('media').upload(path, fotoCapturadaBlob);
-            const { data } = _supabase.storage.from('media').getPublicUrl(path);
+            const btn = document.getElementById('btnEnviarCameraStory');
+            btn.disabled = true;
+            btn.innerText = 'Publicando...';
 
-            await _supabase.from('stories').insert([{
-                media_url: data.publicUrl,
-                artista_id: usuarioLogado.id
-            }]);
+            try {
+                const path = `stories/realtime_${Date.now()}.jpg`;
+                const { error: uploadErr } = await _supabase.storage.from('media').upload(path, fotoCapturadaBlob);
+                if (uploadErr) throw uploadErr;
 
-            fecharCameraStoryModal();
-            carregarStoriesArtistas();
+                const { data } = _supabase.storage.from('media').getPublicUrl(path);
+
+                const { error: dbErr } = await _supabase.from('stories').insert([{
+                    media_url: data.publicUrl,
+                    artista_id: usuarioLogado.id
+                }]);
+
+                if (dbErr) throw dbErr;
+
+                alert('Story publicado com sucesso!');
+                fecharCameraStoryModal();
+                await carregarStoriesArtistas();
+            } catch (err) {
+                alert('Erro ao publicar story: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Publicar Story';
+            }
         }
 
         function fecharCameraStoryModal() {
