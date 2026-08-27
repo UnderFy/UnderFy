@@ -2245,6 +2245,11 @@ async function iniciarStreamCamera() {
         videoElement.srcObject =  
             mediaStream;  
   
+        /* Espelha somente a câmera frontal no preview ao vivo. */  
+        videoElement.style.transform =  
+            usarCameraFrontal  
+            ? "scaleX(-1)"  
+            : "scaleX(1)";  
   
     } catch(err) {  
   
@@ -2625,7 +2630,8 @@ function abrirPreviewMidiaModal() {
                 src="${urlMidia}"  
                 autoplay  
                 playsinline  
-                controls>  
+                controls  
+                style="transform: ${usarCameraFrontal ? 'scaleX(-1)' : 'scaleX(1)'};">  
             </video>  
   
         `;  
