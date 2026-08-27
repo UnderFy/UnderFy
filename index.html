@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UnderFy - Plataforma & Player</title>
-    <!-- Supabase JS Client library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
@@ -37,6 +36,18 @@
             letter-spacing: -0.5px;
         }
 
+        .user-auth-btn {
+            background: #222;
+            color: #1ed760;
+            border: 1px solid #333;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* STORIES BANNER */
         .stories-container {
             display: flex;
             gap: 12px;
@@ -45,9 +56,7 @@
             scrollbar-width: none;
         }
 
-        .stories-container::-webkit-scrollbar {
-            display: none;
-        }
+        .stories-container::-webkit-scrollbar { display: none; }
 
         .story-ring {
             display: flex;
@@ -67,16 +76,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.2s ease;
+            position: relative;
         }
 
         .story-ring.unseen .story-avatar-wrapper {
             background: linear-gradient(45deg, #1ed760, #00b0ff);
-        }
-
-        .story-ring.add-story .story-avatar-wrapper {
-            background: #222;
-            border: 1px solid #333;
         }
 
         .story-avatar {
@@ -98,14 +102,9 @@
             text-align: center;
         }
 
-        .content-section {
-            padding: 16px;
-        }
-
-        .content-section h2 {
-            font-size: 18px;
-            margin-bottom: 12px;
-        }
+        /* CONTEÚDO PRINCIPAL */
+        .content-section { padding: 16px; }
+        .content-section h2 { font-size: 18px; margin-bottom: 12px; }
 
         .card-list {
             display: grid;
@@ -117,12 +116,7 @@
             background: #121212;
             padding: 12px;
             border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .card:hover {
-            background: #282828;
+            position: relative;
         }
 
         .card img {
@@ -133,45 +127,107 @@
             margin-bottom: 8px;
         }
 
-        .card-title {
-            font-size: 14px;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        .card-title { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .card-subtitle { font-size: 12px; color: #aaa; margin-top: 2px; }
+        
+        .card-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
         }
 
-        .card-subtitle {
-            font-size: 12px;
-            color: #aaa;
-            margin-top: 2px;
+        .btn-action-small {
+            background: #222;
+            color: #fff;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            cursor: pointer;
         }
+        .btn-action-small.danger { color: #ff4d4d; }
 
-        /* MODAIS E NAVEGAÇÃO */
-        .story-modal {
+        /* MODAIS GENERALIZADOS */
+        .modal {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: #000;
+            background: rgba(0,0,0,0.9);
             z-index: 100;
             display: none;
             flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
 
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: #181818;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .form-input {
+            background: #282828;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: #1ed760;
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 24px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 10px;
+            border-radius: 24px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        /* MODAL CÂMERA TEMPO REAL */
+        .camera-container {
+            width: 100%;
+            height: 300px;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .camera-container video, .camera-container canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* PLAYER DE STORY */
+        .story-modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #000; z-index: 100;
+            display: none; flex-direction: column;
+        }
         .story-modal.active { display: flex; }
-
-        .story-progress-bar {
-            position: absolute;
-            top: 12px; left: 10px; right: 10px;
-            display: flex; gap: 4px; z-index: 102;
-        }
-
-        .progress-segment {
-            flex: 1; height: 2.5px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 2px; overflow: hidden;
-        }
-
-        .progress-fill { height: 100%; width: 0%; background: #fff; }
 
         .story-header-info {
             position: absolute;
@@ -180,60 +236,12 @@
             z-index: 102;
         }
 
-        .story-user-details { display: flex; align-items: center; gap: 8px; }
-        .story-user-details img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
-        .story-user-details span { font-size: 13px; font-weight: 600; }
-
         .close-story-btn {
             background: none; border: none; color: #fff;
-            font-size: 24px; cursor: pointer; padding: 4px 8px;
+            font-size: 24px; cursor: pointer;
         }
 
-        .story-content-view {
-            width: 100%; height: 100%;
-            display: flex; align-items: center; justify-content: center;
-            background: #000; position: relative;
-        }
-
-        .story-content-view img, .story-content-view video {
-            max-width: 100%; max-height: 100%; object-fit: contain;
-        }
-
-        .story-touch-left, .story-touch-right {
-            position: absolute; top: 0; bottom: 0; width: 35%; z-index: 101;
-        }
-        .story-touch-left { left: 0; }
-        .story-touch-right { right: 0; }
-
-        .create-story-modal {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: #121212; z-index: 110;
-            display: none; flex-direction: column;
-            justify-content: center; align-items: center;
-            padding: 20px; gap: 20px;
-        }
-
-        .create-story-modal.active { display: flex; }
-
-        .upload-box {
-            border: 2px dashed #333; border-radius: 12px;
-            width: 100%; max-width: 320px; height: 300px;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            gap: 12px; cursor: pointer; color: #aaa;
-        }
-
-        .btn-primary {
-            background: #1ed760; color: #000; border: none;
-            padding: 12px 24px; border-radius: 24px; font-weight: 700; cursor: pointer;
-        }
-
-        .btn-secondary {
-            background: transparent; color: #fff; border: 1px solid #444;
-            padding: 10px 20px; border-radius: 24px; cursor: pointer;
-        }
-
+        /* NAVEGAÇÃO INFERIOR */
         nav {
             position: fixed; bottom: 0; left: 0; right: 0; height: 65px;
             background: rgba(16, 16, 16, 0.95); backdrop-filter: blur(15px);
@@ -255,247 +263,394 @@
 
     <header>
         <h1>UnderFy</h1>
+        <button class="user-auth-btn" id="authBtn" onclick="tratarAuthBtn()">Entrar</button>
     </header>
 
+    <!-- TRILHO DE STORIES -->
     <div class="stories-container" id="storiesContainer"></div>
 
+    <!-- CONTEÚDO PRINCIPAL -->
     <main class="content-section" id="mainContent">
-        <h2 id="sectionTitle">Carregando...</h2>
+        <h2 id="sectionTitle">Guias em Destaque</h2>
         <div class="card-list" id="cardList"></div>
     </main>
 
+    <!-- BARRA DE NAVEGAÇÃO INFERIOR -->
     <nav id="appNav">
-        <button class="active" onclick="navegarAba(this, carregarProjetos)">
+        <button class="active" onclick="navegarAba(this, carregarGuias)">
+            <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            <span>Guias</span>
+        </button>
+        <button onclick="navegarAba(this, carregarProjetos)">
             <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
             <span>Projetos</span>
-        </button>
-        <button onclick="navegarAba(this, carregarMusicas)">
-            <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-            <span>Músicas</span>
         </button>
         <button onclick="navegarAba(this, carregarArtistas)">
             <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
             <span>Artistas</span>
         </button>
-        <button onclick="navegarAba(this, abrirModalCriarStory)">
+        <button onclick="navegarAba(this, abrirModalPublicarGuia)">
             <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
             <span>Publicar</span>
         </button>
     </nav>
 
-    <!-- MODAL PLAYER STORY -->
+    <!-- MODAL AUTH (LOGIN / CADASTRO) -->
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <h2 id="authTitle">Entrar como Artista</h2>
+            <input type="email" id="authEmail" class="form-input" placeholder="Seu e-mail">
+            <input type="password" id="authPassword" class="form-input" placeholder="Sua senha">
+            <input type="text" id="authNomeArtista" class="form-input" placeholder="Nome Artístico (Apenas Cadastro)" style="display:none;">
+            <button class="btn-primary" id="btnSubmitAuth" onclick="executarAuth()">Logar</button>
+            <button class="btn-secondary" onclick="alternarModoAuth()" id="btnToggleAuth">Não tem conta? Cadastre-se</button>
+            <button class="btn-secondary" style="border:none;" onclick="fecharModal('authModal')">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- MODAL PUBLICAR GUIA (MP3 / WAV + CAPA) -->
+    <div class="modal" id="publicarGuiaModal">
+        <div class="modal-content">
+            <h2>Publicar Nova Guia</h2>
+            <input type="text" id="guiaTitulo" class="form-input" placeholder="Título da Guia">
+            <label style="font-size:12px; color:#aaa;">Arquivo de Áudio (.mp3, .wav):</label>
+            <input type="file" id="guiaAudioFile" accept="audio/mp3, audio/wav" class="form-input">
+            <label style="font-size:12px; color:#aaa;">Imagem de Capa:</label>
+            <input type="file" id="guiaCapaFile" accept="image/*" class="form-input">
+            <button class="btn-primary" onclick="salvarGuiaSupabase()">Enviar Guia</button>
+            <button class="btn-secondary" onclick="fecharModal('publicarGuiaModal')">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- MODAL GERENCIAR STORY TEMPO REAL -->
+    <div class="modal" id="cameraStoryModal">
+        <div class="modal-content">
+            <h2>Novo Story em Tempo Real</h2>
+            <div class="camera-container">
+                <video id="webcamVideo" autoplay playsinline></video>
+                <canvas id="photoCanvas" style="display:none;"></canvas>
+            </div>
+            <button class="btn-primary" id="btnCapturarFoto" onclick="capturarFotoCamera()">📸 Tirar Foto</button>
+            <button class="btn-primary" id="btnEnviarCameraStory" onclick="publicarStoryCamera()" style="display:none;">Publicar Story</button>
+            <button class="btn-secondary" onclick="fecharCameraStoryModal()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- MODAL PLAYER DE STORY -->
     <div class="story-modal" id="storyPlayerModal">
-        <div class="story-progress-bar" id="storyProgressBar"></div>
         <div class="story-header-info">
-            <div class="story-user-details">
-                <img id="storyUserAvatar" src="" alt="Avatar">
-                <span id="storyUsername"></span>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <img id="storyUserAvatar" src="" style="width:32px; height:32px; border-radius:50%;" alt="Avatar">
+                <span id="storyUsername" style="font-weight:600; font-size:14px;"></span>
             </div>
             <button class="close-story-btn" onclick="fecharStoryPlayer()">&times;</button>
         </div>
-        <div class="story-content-view" id="storyContentView">
-            <div class="story-touch-left" onclick="storyAnterior()"></div>
-            <div class="story-touch-right" onclick="proximoStory()"></div>
-        </div>
-    </div>
-
-    <!-- MODAL CRIAR STORY -->
-    <div class="create-story-modal" id="createStoryModal">
-        <h2>Criar novo Story</h2>
-        <div class="upload-box" onclick="document.getElementById('storyFileInput').click()">
-            <div id="uploadPlaceholder">
-                <p style="font-size: 28px; text-align: center;">📷</p>
-                <p style="font-size: 14px; margin-top: 8px;">Selecionar mídia</p>
-            </div>
-            <div id="uploadPreviewContainer" style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center;"></div>
-        </div>
-        <input type="file" id="storyFileInput" accept="image/*,video/*" style="display: none;" onchange="handleFileSelect(event)">
-        <div style="display: flex; gap: 10px;">
-            <button class="btn-secondary" onclick="fecharCriarStory()">Cancelar</button>
-            <button class="btn-primary" id="btnPublicarStory" onclick="publicarStorySupabase()" disabled style="opacity: 0.5;">Publicar</button>
-        </div>
+        <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;" id="storyContentView"></div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO SUPABASE (Insira suas chaves aqui)
-        const SUPABASE_URL = 'https://gnibzbnypirjrcaoibkx.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_b9yvSbmWOLVJvq4AB4CLmQ_VRuzpG5T';
+        // CONFIGURAÇÕES SUPABASE
+        const SUPABASE_URL = 'HTTPS://SEU-PROJETO.SUPABASE.CO';
+        const SUPABASE_ANON_KEY = 'SUA-CHAVE-ANON-AQUI';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let storiesData = [];
-        let activeUserIndex = 0;
-        let activeItemIndex = 0;
-        let storyAnimationFrame = null;
-        let selectedFileForStory = null;
+        let usuarioLogado = null; // Guarda informações do artista ativo
+        let modoCadastro = false;
+        let mediaStream = null;
+        let fotoCapturadaBlob = null;
+        let storiesCadastrados = [];
+        let activeStoryIndex = 0;
 
-        window.addEventListener('DOMContentLoaded', () => {
-            carregarStoriesSupabase();
-            carregarProjetos();
+        window.addEventListener('DOMContentLoaded', async () => {
+            verificarSessao();
+            carregarStoriesArtistas();
+            carregarGuias();
         });
 
-        // BUSCAR DADOS DO BANCO
-        async function carregarStoriesSupabase() {
-            try {
-                // Exemplo de query na sua tabela 'stories' / 'artistas'
-                const { data, error } = await _supabase
-                    .from('stories')
-                    .select('*, artistas(nome, avatar_url)');
+        // AUTENTICAÇÃO E SESSÃO
+        async function verificarSessao() {
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (session) {
+                const { data: artista } = await _supabase.from('artistas').select('*').eq('user_id', session.user.id).single();
+                usuarioLogado = artista || { id: session.user.id, nome: session.user.email };
+                document.getElementById('authBtn').innerText = 'Sair (' + (usuarioLogado.nome || 'Artista') + ')';
+            } else {
+                usuarioLogado = null;
+                document.getElementById('authBtn').innerText = 'Entrar';
+            }
+        }
 
-                if (data && data.length > 0) {
-                    storiesData = data;
+        function tratarAuthBtn() {
+            if (usuarioLogado) {
+                _supabase.auth.signOut();
+                usuarioLogado = null;
+                document.getElementById('authBtn').innerText = 'Entrar';
+                alert('Você saiu da conta.');
+                carregarGuias();
+            } else {
+                abrirModal('authModal');
+            }
+        }
+
+        function alternarModoAuth() {
+            modoCadastro = !modoCadastro;
+            document.getElementById('authTitle').innerText = modoCadastro ? 'Cadastrar Novo Artista' : 'Entrar como Artista';
+            document.getElementById('authNomeArtista').style.display = modoCadastro ? 'block' : 'none';
+            document.getElementById('btnSubmitAuth').innerText = modoCadastro ? 'Cadastrar' : 'Logar';
+            document.getElementById('btnToggleAuth').innerText = modoCadastro ? 'Já possui conta? Faça Login' : 'Não tem conta? Cadastre-se';
+        }
+
+        async function executarAuth() {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+
+            if (modoCadastro) {
+                const nome = document.getElementById('authNomeArtista').value;
+                const { data, error } = await _supabase.auth.signUp({ email, password });
+                if (data.user) {
+                    await _supabase.from('artistas').insert([{ user_id: data.user.id, nome }]);
+                    alert('Cadastro realizado! Faça login.');
+                    alternarModoAuth();
                 }
-            } catch (err) {
-                console.log('Aguardando conexão ativa do Supabase...');
+            } else {
+                const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+                if (error) alert('Erro ao autenticar: ' + error.message);
+                else {
+                    fecharModal('authModal');
+                    verificarSessao();
+                }
             }
-            renderStories();
         }
 
-        async function carregarProjetos() {
-            document.getElementById('sectionTitle').innerText = 'Projetos e Álbuns';
+        // GUIAS / MÚSICAS (UPLOAD MP3/WAV E GERENCIAMENTO)
+        async function carregarGuias() {
+            document.getElementById('sectionTitle').innerText = 'Guias Recentes';
             const cardList = document.getElementById('cardList');
             cardList.innerHTML = '';
 
-            const { data: projetos } = await _supabase.from('projetos').select('*');
+            const { data: guias } = await _supabase.from('guias').select('*, artistas(nome)');
 
-            if (projetos && projetos.length > 0) {
-                projetos.forEach(p => {
+            if (guias && guias.length > 0) {
+                guias.forEach(g => {
+                    const eProprietario = usuarioLogado && (usuarioLogado.id === g.artista_id || usuarioLogado.user_id === g.user_id);
                     cardList.innerHTML += `
                         <div class="card">
-                            <img src="${p.capa_url || 'https://picsum.photos/200'}" alt="${p.titulo}">
-                            <div class="card-title">${p.titulo}</div>
-                            <div class="card-subtitle">${p.artista_nome || 'WallStream'}</div>
+                            <img src="${g.capa_url || 'https://picsum.photos/200'}" alt="Capa">
+                            <div class="card-title">${g.titulo}</div>
+                            <div class="card-subtitle">${g.artistas?.nome || 'Artista'}</div>
+                            <audio controls style="width: 100%; margin-top: 8px; height: 30px;">
+                                <source src="${g.audio_url}" type="audio/mpeg">
+                            </audio>
+                            ${eProprietario ? `
+                                <div class="card-actions">
+                                    <button class="btn-action-small" onclick="editarGuia('${g.id}', '${g.titulo}')">Editar</button>
+                                    <button class="btn-action-small danger" onclick="excluirGuia('${g.id}')">Excluir</button>
+                                </div>
+                            ` : ''}
                         </div>
                     `;
                 });
             } else {
-                cardList.innerHTML = `<p style="color: #888;">Nenhum projeto encontrado no banco de dados.</p>`;
+                cardList.innerHTML = `<p style="color: #888;">Nenhuma guia publicada ainda.</p>`;
             }
         }
 
-        async function carregarMusicas() {
-            document.getElementById('sectionTitle').innerText = 'Guias & Faixas';
-            const cardList = document.getElementById('cardList');
-            cardList.innerHTML = '';
+        function abrirModalPublicarGuia() {
+            if (!usuarioLogado) {
+                alert('Você precisa estar logado como artista para publicar guias.');
+                abrirModal('authModal');
+                return;
+            }
+            abrirModal('publicarGuiaModal');
+        }
 
-            const { data: musicas } = await _supabase.from('musicas').select('*');
+        async function salvarGuiaSupabase() {
+            const titulo = document.getElementById('guiaTitulo').value;
+            const audioFile = document.getElementById('guiaAudioFile').files[0];
+            const capaFile = document.getElementById('guiaCapaFile').files[0];
 
-            if (musicas && musicas.length > 0) {
-                musicas.forEach(m => {
-                    cardList.innerHTML += `
-                        <div class="card">
-                            <img src="${m.capa_url || 'https://picsum.photos/200'}" alt="${m.titulo}">
-                            <div class="card-title">${m.titulo}</div>
-                            <div class="card-subtitle">Single</div>
-                        </div>
-                    `;
-                });
-            } else {
-                cardList.innerHTML = `<p style="color: #888;">Nenhuma música cadastrada.</p>`;
+            if (!titulo || !audioFile) {
+                alert('Preencha o título e selecione o arquivo de áudio.');
+                return;
+            }
+
+            // Upload do Áudio
+            const audioPath = `guias/audio_${Date.now()}_${audioFile.name}`;
+            await _supabase.storage.from('media').upload(audioPath, audioFile);
+            const { data: audioUrl } = _supabase.storage.from('media').getPublicUrl(audioPath);
+
+            // Upload da Capa (opcional)
+            let capaPublicUrl = '';
+            if (capaFile) {
+                const capaPath = `guias/capas_${Date.now()}_${capaFile.name}`;
+                await _supabase.storage.from('media').upload(capaPath, capaFile);
+                capaPublicUrl = _supabase.storage.from('media').getPublicUrl(capaPath).data.publicUrl;
+            }
+
+            await _supabase.from('guias').insert([{
+                titulo: titulo,
+                audio_url: audioUrl.publicUrl,
+                capa_url: capaPublicUrl,
+                artista_id: usuarioLogado.id,
+                user_id: usuarioLogado.user_id
+            }]);
+
+            fecharModal('publicarGuiaModal');
+            carregarGuias();
+        }
+
+        async function editarGuia(id, tituloAtual) {
+            const novoTitulo = prompt('Digite o novo título da guia:', tituloAtual);
+            if (novoTitulo && novoTitulo !== tituloAtual) {
+                await _supabase.from('guias').update({ titulo: novoTitulo }).eq('id', id);
+                carregarGuias();
             }
         }
 
-        async function carregarArtistas() {
-            document.getElementById('sectionTitle').innerText = 'Artistas Integrados';
-            const cardList = document.getElementById('cardList');
-            cardList.innerHTML = '';
-
-            const { data: artistas } = await _supabase.from('artistas').select('*');
-
-            if (artistas && artistas.length > 0) {
-                artistas.forEach(a => {
-                    cardList.innerHTML += `
-                        <div class="card">
-                            <img src="${a.avatar_url || 'https://picsum.photos/200'}" style="border-radius: 50%" alt="${a.nome}">
-                            <div class="card-title">${a.nome}</div>
-                            <div class="card-subtitle">Artista</div>
-                        </div>
-                    `;
-                });
-            } else {
-                cardList.innerHTML = `<p style="color: #888;">Nenhum artista vinculado no banco.</p>`;
+        async function excluirGuia(id) {
+            if (confirm('Tem certeza que deseja excluir esta guia?')) {
+                await _supabase.from('guias').delete().eq('id', id);
+                carregarGuias();
             }
         }
 
-        // RENDERIZAÇÃO E INTERAÇÃO
-        function renderStories() {
+        // STORIES EM TEMPO REAL & NAVEGAÇÃO DE OUTROS ARTISTAS
+        async function carregarStoriesArtistas() {
+            const { data: stories } = await _supabase.from('stories').select('*, artistas(nome, avatar_url)');
+            storiesCadastrados = stories || [];
+            renderTrilhoStories();
+        }
+
+        function renderTrilhoStories() {
             const container = document.getElementById('storiesContainer');
             container.innerHTML = `
-                <div class="story-ring add-story" onclick="abrirModalCriarStory()">
+                <div class="story-ring" onclick="abrirCameraStoryModal()">
                     <div class="story-avatar-wrapper">
-                        <img class="story-avatar" src="https://picsum.photos/100" alt="Novo Story">
+                        <img class="story-avatar" src="${usuarioLogado?.avatar_url || 'https://picsum.photos/100'}" alt="Meu Story">
                     </div>
                     <span class="story-username">+ Story</span>
                 </div>
             `;
 
-            storiesData.forEach((u, index) => {
-                const ring = document.createElement('div');
-                ring.className = 'story-ring unseen';
-                ring.onclick = () => abrirStoryPlayer(index);
-                ring.innerHTML = `
-                    <div class="story-avatar-wrapper">
-                        <img class="story-avatar" src="${u.artistas?.avatar_url || 'https://picsum.photos/100'}" alt="Avatar">
+            storiesCadastrados.forEach((st, idx) => {
+                container.innerHTML += `
+                    <div class="story-ring unseen" onclick="abrirPlayerStory(${idx})">
+                        <div class="story-avatar-wrapper">
+                            <img class="story-avatar" src="${st.artistas?.avatar_url || 'https://picsum.photos/100'}" alt="Story">
+                        </div>
+                        <span class="story-username">${st.artistas?.nome || 'Artista'}</span>
                     </div>
-                    <span class="story-username">${u.artistas?.nome || 'Artista'}</span>
                 `;
-                container.appendChild(ring);
             });
         }
 
-        async function publicarStorySupabase() {
-            if (!selectedFileForStory) return;
-
-            const file = selectedFileForStory;
-            const fileName = `stories/${Date.now()}_${file.name}`;
-
-            // 1. Upload da mídia no Supabase Storage
-            const { data: storageData, error: storageErr } = await _supabase.storage
-                .from('media')
-                .upload(fileName, file);
-
-            if (storageData) {
-                const { data: urlData } = _supabase.storage.from('media').getPublicUrl(fileName);
-                
-                // 2. Registro na tabela 'stories'
-                await _supabase.from('stories').insert([
-                    { media_url: urlData.publicUrl, tipo: file.type.startsWith('video/') ? 'video' : 'image' }
-                ]);
-
-                fecharCriarStory();
-                carregarStoriesSupabase();
+        async function abrirCameraStoryModal() {
+            if (!usuarioLogado) {
+                alert('Faça login para gravar ou publicar um Story.');
+                abrirModal('authModal');
+                return;
+            }
+            abrirModal('cameraStoryModal');
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                document.getElementById('webcamVideo').srcObject = mediaStream;
+            } catch (err) {
+                alert('Não foi possível acessar a câmera em tempo real.');
             }
         }
 
-        function abrirModalCriarStory() {
-            document.getElementById('createStoryModal').classList.add('active');
+        function capturarFotoCamera() {
+            const video = document.getElementById('webcamVideo');
+            const canvas = document.getElementById('photoCanvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+
+            canvas.toBlob(blob => {
+                fotoCapturadaBlob = blob;
+                video.style.display = 'none';
+                canvas.style.display = 'block';
+                document.getElementById('btnCapturarFoto').style.display = 'none';
+                document.getElementById('btnEnviarCameraStory').style.display = 'block';
+            }, 'image/jpeg');
         }
 
-        function fecharCriarStory() {
-            document.getElementById('createStoryModal').classList.remove('active');
+        async function publicarStoryCamera() {
+            if (!fotoCapturadaBlob) return;
+            const path = `stories/realtime_${Date.now()}.jpg`;
+            await _supabase.storage.from('media').upload(path, fotoCapturadaBlob);
+            const { data } = _supabase.storage.from('media').getPublicUrl(path);
+
+            await _supabase.from('stories').insert([{
+                media_url: data.publicUrl,
+                artista_id: usuarioLogado.id
+            }]);
+
+            fecharCameraStoryModal();
+            carregarStoriesArtistas();
         }
 
-        function handleFileSelect(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            selectedFileForStory = file;
-            const btn = document.getElementById('btnPublicarStory');
-            btn.disabled = false;
-            btn.style.opacity = '1';
+        function fecharCameraStoryModal() {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+            }
+            document.getElementById('webcamVideo').style.display = 'block';
+            document.getElementById('photoCanvas').style.display = 'none';
+            document.getElementById('btnCapturarFoto').style.display = 'block';
+            document.getElementById('btnEnviarCameraStory').style.display = 'none';
+            fecharModal('cameraStoryModal');
         }
 
-        function navegarAba(btnElement, acao) {
-            document.querySelectorAll("#appNav button").forEach(b => b.classList.remove("active"));
-            if (btnElement) btnElement.classList.add("active");
-            if (typeof acao === 'function') acao();
-        }
+        function abrirPlayerStory(index) {
+            activeStoryIndex = index;
+            const st = storiesCadastrados[index];
+            if (!st) return;
 
-        function abrirStoryPlayer(idx) {
-            activeUserIndex = idx;
-            document.getElementById('storyPlayerModal').classList.add('active');
+            document.getElementById('storyUsername').innerText = st.artistas?.nome || 'Artista';
+            document.getElementById('storyUserAvatar').src = st.artistas?.avatar_url || 'https://picsum.photos/100';
+            
+            const view = document.getElementById('storyContentView');
+            view.innerHTML = `<img src="${st.media_url}" style="max-width:100%; max-height:100%; object-fit:contain;">`;
+            
+            abrirModal('storyPlayerModal');
         }
 
         function fecharStoryPlayer() {
-            document.getElementById('storyPlayerModal').classList.remove('active');
+            fecharModal('storyPlayerModal');
+        }
+
+        // OUTRAS ABAS
+        async function carregarProjetos() {
+            document.getElementById('sectionTitle').innerText = 'Projetos de Artistas';
+            const cardList = document.getElementById('cardList');
+            cardList.innerHTML = `<p style="color: #888;">Listagem de álbuns e projetos integrada.</p>`;
+        }
+
+        async function carregarArtistas() {
+            document.getElementById('sectionTitle').innerText = 'Artistas Cadastrados';
+            const cardList = document.getElementById('cardList');
+            cardList.innerHTML = '';
+            const { data: artistas } = await _supabase.from('artistas').select('*');
+            
+            if (artistas) {
+                artistas.forEach(a => {
+                    cardList.innerHTML += `
+                        <div class="card">
+                            <img src="${a.avatar_url || 'https://picsum.photos/200'}" style="border-radius:50%;" alt="${a.nome}">
+                            <div class="card-title" style="text-align:center;">${a.nome}</div>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        // UTILITÁRIOS
+        function abrirModal(id) { document.getElementById(id).classList.add('active'); }
+        function fecharModal(id) { document.getElementById(id).classList.remove('active'); }
+        function navegarAba(btn, acao) {
+            document.querySelectorAll("#appNav button").forEach(b => b.classList.remove("active"));
+            if (btn) btn.classList.add("active");
+            if (typeof acao === 'function') acao();
         }
     </script>
 </body>
