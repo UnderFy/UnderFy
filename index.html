@@ -279,7 +279,7 @@ input:focus{border-color:#1ed760;}
 nav{
     position:fixed;bottom:0;left:0;right:0;height:65px;
     background:#101010;border-top:1px solid #252525;z-index:40;
-    display:flex;justify-content:space-around;align-items:center;padding:0 10px;
+    display:flex;justify-around:space-around;align-items:center;padding:0 10px;
 }
 nav button{border:0;background:none;color:#aaa;font-size:11px;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:bold;}
 nav button:hover, nav button:active{color:#1ed760;}
@@ -377,7 +377,7 @@ nav button:hover, nav button:active{color:#1ed760;}
         <div class="story-progress-bars" id="storyProgressBars"></div>
         <div class="story-header-info">
             <div class="story-user-meta">
-                <img id="storyUserAvatar" src="">
+                <img id="storyUserAvatar" src="https://via.placeholder.com/500">
                 <span id="storyUserName">Artista</span>
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
@@ -385,8 +385,10 @@ nav button:hover, nav button:active{color:#1ed760;}
                 <button class="story-close-btn" onclick="fecharStoryViewer()">&times;</button>
             </div>
         </div>
-        <div style="flex:1; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;" id="storyMediaContainer">
-            <!-- Inserido dinamicamente (img ou video) -->
+        
+        <!-- ÁREA CENTRAL DE MÍDIA DO STORY -->
+        <div id="storyMediaContainer" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;">
+            <!-- Vídeo ou Imagem renderizados dinamicamente -->
         </div>
 
         <!-- BARRA INFERIOR DE VISUALIZADORES -->
@@ -973,6 +975,7 @@ function renderizarStoryAtual() {
         footerActions.style.display = "none";
     }
 
+    // Renderiza barras de progresso
     const barsContainer = document.getElementById("storyProgressBars");
     barsContainer.innerHTML = currentStoriesList.map((_, i) => `
         <div class="story-prog-track"><div class="story-prog-fill" id="progFill_${i}" style="width: ${i < currentStoryIndex ? '100%' : '0%'}"></div></div>
@@ -1000,7 +1003,10 @@ function renderizarStoryAtual() {
         };
 
         mediaContainer.appendChild(vid);
-        vid.play().catch(e => console.warn("Autoplay impedido pelo navegador:", e));
+        vid.play().catch(() => {
+            vid.muted = true;
+            vid.play();
+        });
     } else {
         const img = document.createElement("img");
         img.className = "story-media-content";
