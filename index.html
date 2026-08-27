@@ -154,7 +154,7 @@ input:focus{border-color:#1ed760;}
 .story-media-content { width: 100%; height: 100%; object-fit: cover; background: #000; }
 .story-close-btn { background: none; border: 0; color: #fff; font-size: 26px; font-weight: bold; cursor: pointer; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
 
-/* BOTÃO DE EXCLUIR MAIS DISCRETO (ESTILO LIXEIRA NO TOPO OU FLUTUANTE) */
+/* BOTÃO DE EXCLUIR MAIS DISCRETO */
 .story-delete-btn {
     position: absolute; top: 28px; right: 55px; z-index: 20;
     background: rgba(0,0,0,0.4); color: #ff4444; border: 1px solid rgba(255,68,68,0.4); 
@@ -164,7 +164,7 @@ input:focus{border-color:#1ed760;}
 }
 .story-delete-btn:hover { background: rgba(255,68,68,0.2); }
 
-/* BARRA INFERIOR DE VISUALIZADORES (ESTILO INSTAGRAM) */
+/* BARRA INFERIOR DE VISUALIZADORES */
 .story-footer-actions {
     position: absolute; bottom: 0; left: 0; right: 0; z-index: 20;
     padding: 15px 20px; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
@@ -575,7 +575,6 @@ async function carregarDadosGlobais() {
         const resStories = await supabaseClient.from('stories').select('*').order('created_at', { ascending: true });
         storiesCache = resStories.data || [];
 
-        // Tabela de visualizações (caso exista no banco, tratamos com fallback para array vazio)
         try {
             const resViews = await supabaseClient.from('story_views').select('*');
             visualizacoesCache = resViews.data || [];
@@ -670,6 +669,7 @@ function renderizarStoriesBar() {
     const usuarioLogadoId = sessaoAtual ? sessaoAtual.user.id : null;
     const artistaLogado = artistasCache.find(a => a.id === usuarioLogadoId);
 
+    // 1. Sempre exibe o item "Seu Story" se houver sessão ativa
     if (sessaoAtual && artistaLogado) {
         const temNovosEu = temStoriesNaoVistos(artistaLogado.id);
         const classeRingEu = temNovosEu ? 'unseen' : 'seen';
@@ -685,13 +685,16 @@ function renderizarStoriesBar() {
         `;
     }
 
-    const artistasComStories = artistasCache.filter(a => {
-        const tem = storiesCache.some(s => s.artist_id === a.id);
-        if (usuarioLogadoId && a.id === usuarioLogadoId) return false;
-        return tem;
-    });
+    // 2. Coleta TODOS os IDs de artistas que possuem stories publicados
+    const idsArtistasComStories = [...new Set(storiesCache.map(s => s.artist_id))];
 
-    artistasComStories.forEach(art => {
+    // 3. Renderiza os stories dos outros artistas (independentemente da conta logada)
+    idsArtistasComStories.forEach(artId => {
+        if (usuarioLogadoId && artId === usuarioLogadoId) return; // Evita duplicar o usuário logado se ele já apareceu acima
+
+        const art = artistasCache.find(a => a.id === artId);
+        if (!art) return; // Se o perfil ainda não estiver sincronizado na tabela artistas, ignora por segurança
+
         const temNovos = temStoriesNaoVistos(art.id);
         const classeRing = temNovos ? 'unseen' : 'seen';
 
@@ -705,8 +708,10 @@ function renderizarStoriesBar() {
         `;
     });
 
-    if (!sessaoAtual && artistasComStories.length === 0) {
+    if (!sessaoAtual && idsArtistasComStories.length === 0) {
         container.innerHTML = `<span style="color:#777; font-size:13px; padding:10px 0;">Faça login como artista para postar stories.</span>`;
+    } else if (idsArtistasComStories.length === 0 && !sessaoAtual) {
+        container.innerHTML = `<span style="color:#777; font-size:13px; padding:10px 0;">Nenhum story no momento.</span>`;
     } else {
         container.innerHTML = html;
     }
@@ -884,25 +889,20 @@ async function registrarVisualizacaoStory(storyId) {
     if (!sessaoAtual) return;
     const viewerId = sessaoAtual.user.id;
     const story = storiesCache.find(s => s.id === storyId);
-    if (!story || story.artist_id === viewerId) return; // Não registra se for o próprio autor
+    if (!story || story.artist_id === viewerId) return;
 
     try {
-        // Verifica se já viu para não duplicar requisição
         const jaViu = visualizacoesCache.some(v => v.story_id === storyId && v.viewer_id === viewerId);
         if (!jaViu) {
             await supabaseClient.from('story_views').insert([{ story_id: storyId, viewer_id: viewerId }]);
             visualizacoesCache.push({ story_id: storyId, viewer_id: viewerId });
         }
-    } catch(e) {
-        // Tabela opcional no banco, silencia caso não exista
-    }
+    } catch(e) {}
 }
 
 function assistirStoriesArtista(artistaId) {
     currentStoriesList = storiesCache.filter(s => s.artist_id === artistaId);
-    if (currentStoriesList.length === 0) {
-        return;
-    }
+    if (currentStoriesList.length === 0) return;
     currentStoryIndex = 0;
     
     document.getElementById("storyViewerModal").style.display = "flex";
@@ -936,7 +936,6 @@ function renderizarStoryAtual() {
         btnDelete.style.display = "flex";
         footerActions.style.display = "flex";
         
-        // Atualizar pill de visualizações estilo Instagram
         const viewsDoStory = visualizacoesCache.filter(v => v.story_id === story.id);
         const qtdViews = viewsDoStory.length;
         document.getElementById("viewerCountText").textContent = `${qtdViews} ${qtdViews === 1 ? 'visualização' : 'visualizações'}`;
