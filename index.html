@@ -698,7 +698,7 @@ function renderizarStoriesBar() {
                 <div class="story-ring ${classeRingEu}" onclick="assistirStoriesArtista('${artistaLogado.id}')">
                     <img class="story-avatar" src="${artistaLogado.foto_url || 'https://via.placeholder.com/500'}">
                 </div>
-                <div class="story-add-badge" onclick="abrirCameraModal()">+</div>
+                <div class="story-add-badge" onclick="abrirCameraModal()" title="Publicar Story">+</div>
                 <span>Seu Story</span>
             </div>
         `;
@@ -906,15 +906,12 @@ async function registrarVisualizacaoStory(storyId) {
     if (!story || story.artist_id === viewerId) return; // Não registra se for o próprio autor
 
     try {
-        // Verifica se já viu para não duplicar requisição
         const jaViu = visualizacoesCache.some(v => v.story_id === storyId && v.viewer_id === viewerId);
         if (!jaViu) {
             await supabaseClient.from('story_views').insert([{ story_id: storyId, viewer_id: viewerId }]);
             visualizacoesCache.push({ story_id: storyId, viewer_id: viewerId });
         }
-    } catch(e) {
-        // Tabela opcional no banco, silencia caso não exista
-    }
+    } catch(e) {}
 }
 
 function assistirStoriesArtista(artistaId) {
@@ -963,7 +960,6 @@ function renderizarStoryAtual() {
         btnDelete.style.display = "flex";
         footerActions.style.display = "flex";
         
-        // Atualizar pill de visualizações estilo Instagram
         const viewsDoStory = visualizacoesCache.filter(v => v.story_id === story.id);
         const qtdViews = viewsDoStory.length;
         document.getElementById("viewerCountText").textContent = `${qtdViews} ${qtdViews === 1 ? 'visualização' : 'visualizações'}`;
