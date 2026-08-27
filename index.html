@@ -891,16 +891,35 @@ function abrirPlayerMp4ComArtista(artista) {
     const videoEl = document.getElementById("mp4PlayerVideo");
     const infoEl = document.getElementById("mp4PlayerInfo");
 
-    const storyVideo = storiesCache.find(s => s.artist_id === artista.id && s.media_type === 'video');
-    if (storyVideo) {
-        videoEl.src = storyVideo.media_url;
+    // Procura por qualquer mídia recente do artista (vídeo ou imagem)
+    const storyMidia = storiesCache.find(s => s.artist_id === artista.id && s.media_url);
+    
+    if (storyMidia && storyMidia.media_type === 'video') {
+        videoEl.style.display = "block";
+        videoEl.src = storyMidia.media_url;
     } else {
-        videoEl.src = artista.foto_url || 'https://via.placeholder.com/500';
+        // Se for imagem ou não tiver vídeo, exibe a imagem de perfil ou do story
+        videoEl.style.display = "block";
+        videoEl.src = storyMidia ? storyMidia.media_url : (artista.foto_url || 'https://via.placeholder.com/500');
     }
 
     infoEl.innerHTML = `<strong>${artista.nome}</strong>`;
     modal.style.display = "flex";
+    
+    // Toca automaticamente se for elemento de vídeo válido
+    if(videoEl.tagName === 'VIDEO') {
+        videoEl.play().catch(err => console.log("Autoplay bloqueado pelo navegador:", err));
+    }
 }
+
+function fecharPlayerMp4Modal() {
+    const modal = document.getElementById("playerMp4Modal");
+    const videoEl = document.getElementById("mp4PlayerVideo");
+    videoEl.pause();
+    videoEl.src = "";
+    modal.style.display = "none";
+}
+    
 
 function fecharPlayerMp4Modal() {
     const modal = document.getElementById("playerMp4Modal");
