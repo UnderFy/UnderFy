@@ -374,8 +374,8 @@ nav button:hover, nav button:active{color:#1ed760;}
 </div>
 
 <!-- MODAL VISUALIZADOR DE STORIES (ESTILO INSTAGRAM) -->
-<div class="story-viewer-modal" id="storyViewerModal">
-    <div class="story-card-box">
+<div class="story-viewer-modal" id="storyViewerModal" onclick="underfyHandleViewerClick(event)">
+    <div class="story-card-box" id="storyCardBox" onclick="event.stopPropagation()">
         <div class="story-progress-bars" id="storyProgressBars"></div>
         <div class="story-header-info">
             <div class="story-user-meta">
@@ -387,7 +387,7 @@ nav button:hover, nav button:active{color:#1ed760;}
                 <button class="story-close-btn" onclick="fecharStoryViewer()">&times;</button>
             </div>
         </div>
-        <div style="flex:1; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;" id="storyMediaContainer">
+        <div style="flex:1; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;" id="storyMediaContainer" onmousedown="underfyPauseStory()" onmouseup="underfyResumeStory()" onttouchstart="underfyPauseStory()" ontouchend="underfyResumeStory()">
             <!-- Inserido dinamicamente (img ou video) -->
         </div>
 
@@ -513,6 +513,8 @@ let currentStoriesList = [];
 let currentStoryIndex = 0;
 let storyTimer = null;
 let storiesVistos = JSON.parse(localStorage.getItem('underfy_stories_vistos') || '{}');
+let underfyIsPaused = false;
+let underfyVideoElement = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
     await verificarSessaoAtiva();
@@ -522,6 +524,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     const audio = document.getElementById("audio");
     audio.addEventListener('ended', lidarFimDaMusica);
     audio.addEventListener('timeupdate', verificarTempoPlay);
+
+    document.addEventListener('keydown', (e) => {
+        const modal = document.getElementById("storyViewerModal");
+        if (modal && modal.style.display === "flex") {
+            if (e.key === "ArrowRight") {
+                underfyNextStory();
+            } else if (e.key === "ArrowLeft") {
+                underfyPrevStory();
+            } else if (e.key === "Escape") {
+                fecharStoryViewer();
+            }
+        }
+    });
 });
 
 async function verificarSessaoAtiva() {
@@ -572,8 +587,16 @@ async function carregarDadosGlobais() {
         const resRel = await supabaseClient.from('musica_artistas').select('*');
         dadosRelacaoCache = resRel.data || [];
 
+        const agoraMs = Date.now();
         const resStories = await supabaseClient.from('stories').select('*').order('created_at', { ascending: true });
-        storiesCache = resStories.data || [];
+        const rawStories = resStories.data || [];
+        
+        storiesCache = rawStories.filter(s => {
+            if (!s.created_at) return true;
+            const criacaoMs = new Date(s.created_at).getTime();
+            const horasPassadas = (agoraMs - criacaoMs) / (1000 * 60 * 60);
+            return horasPassadas <= 24;
+        });
 
         // Tabela de visualizações (caso exista no banco, tratamos com fallback para array vazio)
         try {
@@ -900,12 +923,20 @@ function assistirStoriesArtista(artistaId) {
         return;
     }
     currentStoryIndex = 0;
+    underfyIsPaused = false;
     
     document.getElementById("storyViewerModal").style.display = "flex";
     renderizarStoryAtual();
 }
 
 function renderizarStoryAtual() {
+    clearTimeout(storyTriggerTimeout);
+    clearTimeout(storyTimer);
+    if (underfyVideoElement) {
+        underfyVideoElement.pause();
+        underfyVideoElement = null;
+    }
+
     if (currentStoryIndex >= currentStoriesList.length || currentStoryIndex < 0) {
         fecharStoryViewer();
         return;
@@ -960,11 +991,31 @@ function renderizarStoryAtual() {
 
     const mediaContainer = document.getElementById("storyMediaContainer");
     if (story.media_type === 'video') {
-        mediaContainer.innerHTML = `<video class="story-media-content" src="${story.media_url}" autoplay playsinline onended="proximoStory()"></video>`;
+        mediaContainer.innerHTML = `<video class="story-media-content" id="activeStoryVideo" src="${story.media_url}" autoplay playsinline muted></video>`;
+        const vid = document.getElementById("activeStoryVideo");
+        underfyVideoElement = vid;
+
+        vid.addEventListener('loadedmetadata', () => {
+            if (underfyIsPaused) return;
+            const duration = vid.duration * 1000;
+            const fillElement = document.getElementById(`progFill_${currentStoryIndex}`);
+            if (fillElement) {
+                fillElement.style.transition = `width ${vid.duration}s linear`;
+                setTimeout(() => fillElement.style.width = "100%", 50);
+            }
+            storyTimer = setTimeout(() => {
+                currentStoryIndex++;
+                renderizarStoryAtual();
+            }, duration || 5000);
+        });
+
+        vid.addEventListener('error', () => {
+            currentStoryIndex++;
+            renderizarStoryAtual();
+        });
     } else {
-        mediaContainer.innerHTML = `<img class="story-media-content" src="${story.media_url}">`;
+        mediaContainer.innerHTML = `<img class="story-media-content" src="${story.media_url}" onerror="underfyHandleMediaError()">`;
         
-        clearTimeout(storyTimer);
         const fillElement = document.getElementById(`progFill_${currentStoryIndex}`);
         if(fillElement) {
             fillElement.style.transition = "width 5s linear";
@@ -974,6 +1025,85 @@ function renderizarStoryAtual() {
             currentStoryIndex++;
             renderizarStoryAtual();
         }, 5000);
+    }
+}
+
+let storyTriggerTimeout = null;
+
+function underfyHandleMediaError() {
+    currentStoryIndex++;
+    renderizarStoryAtual();
+}
+
+function underfyHandleViewerClick(e) {
+    if (e.target.id === 'storyViewerModal') {
+        fecharStoryViewer();
+        return;
+    }
+    const box = document.getElementById('storyCardBox');
+    const rect = box.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    if (clickX < rect.width / 2) {
+        underfyPrevStory();
+    } else {
+        underfyNextStory();
+    }
+}
+
+function underfyPrevStory() {
+    if (currentStoryIndex > 0) {
+        currentStoryIndex--;
+        renderizarStoryAtual();
+    }
+}
+
+function underfyNextStory() {
+    currentStoryIndex++;
+    renderizarStoryAtual();
+}
+
+function underfyPauseStory() {
+    underfyIsPaused = true;
+    clearTimeout(storyTimer);
+    if (underfyVideoElement) {
+        underfyVideoElement.pause();
+    }
+    const fillElement = document.getElementById(`progFill_${currentStoryIndex}`);
+    if (fillElement) {
+        const computedWidth = window.getComputedStyle(fillElement).width;
+        fillElement.style.transition = 'none';
+        fillElement.style.width = computedWidth;
+    }
+}
+
+function underfyResumeStory() {
+    if (!underfyIsPaused) return;
+    underfyIsPaused = false;
+    if (underfyVideoElement) {
+        underfyVideoElement.play();
+        const remainingTime = (underfyVideoElement.duration - underfyVideoElement.currentTime) * 1000;
+        const fillElement = document.getElementById(`progFill_${currentStoryIndex}`);
+        if (fillElement) {
+            fillElement.style.transition = `width ${(underfyVideoElement.duration - underfyVideoElement.currentTime)}s linear`;
+            fillElement.style.width = "100%";
+        }
+        storyTimer = setTimeout(() => {
+            currentStoryIndex++;
+            renderizarStoryAtual();
+        }, remainingTime || 5000);
+    } else {
+        const fillElement = document.getElementById(`progFill_${currentStoryIndex}`);
+        if (fillElement) {
+            const currentW = parseFloat(fillElement.style.width) || 0;
+            const remainingRatio = (100 - currentW) / 100;
+            const remainingDuration = 5000 * remainingRatio;
+            fillElement.style.transition = `width ${remainingDuration / 1000}s linear`;
+            fillElement.style.width = "100%";
+            storyTimer = setTimeout(() => {
+                currentStoryIndex++;
+                renderizarStoryAtual();
+            }, remainingDuration);
+        }
     }
 }
 
@@ -1034,7 +1164,12 @@ function proximoStory() {
 }
 
 function fecharStoryViewer() {
+    clearTimeout(storyTriggerTimeout);
     clearTimeout(storyTimer);
+    if (underfyVideoElement) {
+        underfyVideoElement.pause();
+        underfyVideoElement = null;
+    }
     document.getElementById("storyViewerModal").style.display = "none";
     document.getElementById("viewersModal").style.display = "none";
     renderizarStoriesBar();
