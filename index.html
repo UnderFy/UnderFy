@@ -1014,6 +1014,37 @@ nav button:active{
 .project-panel-item span{display:block;color:#777;font-size:12px;margin-top:3px;}
 @media(max-width:600px){.guide-management-item{align-items:flex-start;flex-direction:column;}.guide-management-actions{width:100%;justify-content:flex-start;}.guide-management-actions button{flex:1;}}
 
+
+/* NOVO PAINEL DO ARTISTA */
+.artist-studio{max-width:980px;margin:30px auto 70px;}
+.artist-studio-top{display:flex;align-items:center;gap:16px;margin-bottom:25px;}
+.artist-studio-top h1{font-size:36px;letter-spacing:-1px;margin:3px 0;}
+.artist-studio-top p{color:#777;font-size:13px;}
+.studio-eyebrow{color:#1ed760;font-size:10px;font-weight:900;letter-spacing:1.8px;}
+.studio-back{width:42px;height:42px;border:1px solid #2b2b2b;background:#171717;color:#fff;border-radius:50%;font-size:20px;}
+.studio-tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px;}
+.studio-tab{display:flex;align-items:center;gap:13px;text-align:left;padding:15px 17px;background:#151515;border:1px solid #282828;color:#fff;border-radius:16px;cursor:pointer;transition:.2s;}
+.studio-tab:hover{border-color:#444;}
+.studio-tab.active{background:#1b241f;border-color:#1ed760;box-shadow:0 0 0 1px rgba(30,215,96,.12);}
+.studio-tab-icon{width:38px;height:38px;border-radius:11px;background:#252525;display:flex;align-items:center;justify-content:center;font-size:20px;color:#1ed760;}
+.studio-tab strong,.studio-tab small{display:block;}.studio-tab small{color:#777;font-size:11px;margin-top:3px;}
+.studio-content{background:#111;border:1px solid #292929;border-radius:22px;padding:24px;animation:studioFade .18s ease;}
+@keyframes studioFade{from{opacity:.3;transform:translateY(3px)}to{opacity:1;transform:none}}
+.studio-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;}
+.studio-heading>div,.studio-card-title>div,.studio-track-header>div{display:flex;align-items:center;gap:10px;}
+.studio-heading h2{font-size:21px;}.studio-number{font-size:10px;color:#1ed760;font-weight:900;letter-spacing:1px;}.studio-status{font-size:9px;color:#777;border:1px solid #2d2d2d;border-radius:20px;padding:6px 9px;}
+.studio-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:15px;}
+.studio-main-card,.studio-feat-card{background:#181818;border:1px solid #272727;border-radius:17px;padding:19px;}
+.studio-label{display:block;font-size:11px;color:#999;font-weight:bold;margin-bottom:8px;}
+.studio-input{width:100%;background:#101010;border:1px solid #303030;color:#fff;border-radius:11px;padding:14px;outline:none;margin:0;}.studio-input:focus{border-color:#1ed760;}
+.studio-upload-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:13px;}
+.studio-file-card{display:flex;align-items:center;gap:10px;background:#101010;border:1px dashed #3a3a3a;border-radius:12px;padding:13px;cursor:pointer;min-width:0;}.studio-file-card:hover{border-color:#1ed760;}.studio-file-icon{width:34px;height:34px;border-radius:9px;background:#202020;color:#1ed760;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}.studio-file-card strong,.studio-file-card small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.studio-file-card strong{font-size:12px;}.studio-file-card small{color:#666;font-size:10px;margin-top:2px;}.studio-plus{margin-left:auto;color:#1ed760;font-size:20px;}
+.studio-card-title{display:flex;justify-content:space-between;align-items:center;}.studio-card-title span{font-size:10px;color:#1ed760;font-weight:bold;}.studio-card-title h3{font-size:15px;}.studio-card-title>small{color:#666;font-size:10px;}.studio-feat-card>p{color:#666;font-size:11px;margin:8px 0 12px;}
+.studio-search{width:100%;background:#101010;border:1px solid #303030;color:#fff;border-radius:9px;padding:10px 11px;font-size:12px;margin:0 0 10px;}.studio-artists{display:flex;flex-direction:column;gap:6px;max-height:190px;overflow:auto;}
+.studio-artist-chip{width:100%;display:flex;align-items:center;gap:9px;border:1px solid #292929;background:#202020;color:#ddd;border-radius:10px;padding:8px;text-align:left;cursor:pointer;}.studio-artist-chip:hover{border-color:#444;}.studio-artist-chip.selected{background:#183522;border-color:#1ed760;color:#fff;}.studio-artist-chip b{margin-left:auto;opacity:0;color:#1ed760;}.studio-artist-chip.selected b{opacity:1;}.artist-dot{width:27px;height:27px;border-radius:50%;background:#303030;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:11px;font-weight:bold;}.studio-primary{width:100%;border:0;background:#1ed760;color:#000;border-radius:13px;padding:15px 17px;margin-top:16px;font-weight:900;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}.studio-primary:hover{filter:brightness(1.05);}.studio-primary b{font-size:20px;}
+.studio-project-head{display:grid;grid-template-columns:180px 1fr;gap:18px;margin-bottom:28px;}.studio-project-cover{height:180px;background:#181818;border:1px dashed #3a3a3a;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;}.studio-project-cover:hover{border-color:#1ed760;}.studio-project-cover>span{font-size:35px;color:#1ed760;margin-bottom:9px;}.studio-project-cover label{font-size:12px;font-weight:bold;cursor:pointer;}.studio-project-cover small{font-size:9px;color:#666;margin-top:5px;}.studio-project-name{padding-top:12px;}.studio-project-name p{color:#666;font-size:11px;margin-top:9px;}.studio-track-header{display:flex;align-items:center;justify-content:space-between;border-top:1px solid #242424;padding-top:18px;margin-bottom:10px;}.studio-track-header h3{font-size:15px;}.studio-track-header>span{color:#666;font-size:10px;}.studio-project-tracks{display:flex;flex-direction:column;gap:7px;max-height:310px;overflow:auto;}.studio-track-option{display:flex;align-items:center;gap:12px;background:#181818;border:1px solid #272727;border-radius:12px;padding:8px 10px;cursor:pointer;}.studio-track-option:hover{border-color:#444;}.studio-track-option:has(input:checked){border-color:#1ed760;background:#17231b;}.studio-track-option input{width:auto;accent-color:#1ed760;}.studio-track-option img{width:45px;height:45px;object-fit:cover;border-radius:8px;}.studio-track-option span{min-width:0;flex:1;}.studio-track-option strong,.studio-track-option small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.studio-track-option strong{font-size:12px;}.studio-track-option small{font-size:10px;color:#666;margin-top:3px;}.studio-track-option i{font-style:normal;color:#1ed760;opacity:0;}.studio-track-option:has(input:checked) i{opacity:1;}.studio-empty{color:#666;font-size:12px;padding:20px;text-align:center;width:100%;}
+@media(max-width:700px){.artist-studio{margin-top:20px;}.studio-grid,.studio-project-head{grid-template-columns:1fr;}.studio-project-cover{height:150px;}.studio-upload-row{grid-template-columns:1fr;}.studio-content{padding:16px;}.studio-tabs{grid-template-columns:1fr 1fr;}.studio-tab{padding:12px 10px;}.studio-tab-icon{display:none;}.studio-tab small{font-size:9px;}.studio-heading{align-items:flex-start;}.studio-status{display:none;}}
+
 .upload-section{
     background:#1a1a1a;
     border:1px solid #252525;
@@ -2517,104 +2548,168 @@ function mostrarArtistas() {
    PAINEL DO ARTISTA / UPLOAD
 ========================= */
 async function abrirPainelUpload() {
-    if (!sessaoAtual) {
-        abrirModalArtista();
-        return;
-    }
+    if (!sessaoAtual) { abrirModalArtista(); return; }
 
-    const artista = artistasCache.find(a => a.id === sessaoAtual.user.id);
+    const artista = artistasCache.find(a => String(a.id) === String(sessaoAtual.user.id));
     if (!artista) {
         alert("Seu perfil de artista ainda não foi encontrado. Crie o perfil antes de publicar.");
         return;
     }
 
-    window.scrollTo({ top:0, behavior:"smooth" });
-
+    window.scrollTo({top:0, behavior:"smooth"});
     const containerMain = document.getElementById("conteudoDinamico");
     const minhasMusicas = musicas.filter(m =>
-        dadosRelacaoCache.some(r => r.musica_id === m.id && r.artista_id === sessaoAtual.user.id)
+        dadosRelacaoCache.some(r => String(r.musica_id) === String(m.id) && String(r.artista_id) === String(sessaoAtual.user.id))
+    );
+    const artistasParaFeat = artistasCache.slice().sort((a,b) =>
+        String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR")
     );
 
-    const meusProjetos = projetosCache.filter(p => {
-        return minhasMusicas.some(m => projetosRelacionadosCachemente(p.id, m.id));
-    });
-
     containerMain.innerHTML = `
-        <div class="artist-panel">
-            <h2>Painel do Artista</h2>
-            <p class="artist-panel-subtitle">Publique suas guias, crie projetos e organize seu material.</p>
-
-            <div class="upload-section">
-                <h3>Publicar nova guia</h3>
-                <p>Envie uma capa opcional e um arquivo de áudio MP3, WAV ou outro formato aceito pelo navegador.</p>
-
-                <input type="text" id="uploadNomeMusica" class="input-padrao" placeholder="Nome da música">
-
-                <label class="file-upload-label" for="uploadCapaFile">
-                    <span id="lblCapa">Escolher capa (Imagem)</span>
-                </label>
-                <input type="file" id="uploadCapaFile" accept="image/*" style="display:none;"
-                    onchange="document.getElementById('lblCapa').textContent=this.files[0]?.name || 'Escolher capa (Imagem)'">
-
-                <label class="file-upload-label" for="uploadAudioFile">
-                    <span id="lblAudio">Escolher arquivo de áudio (MP3/WAV)</span>
-                </label>
-                <input type="file" id="uploadAudioFile" accept="audio/*" style="display:none;"
-                    onchange="document.getElementById('lblAudio').textContent=this.files[0]?.name || 'Escolher arquivo de áudio (MP3/WAV)'">
-
-                <button class="form-btn" id="btnPublicarGuia" onclick="publicarMusicaNova()">Publicar Guia</button>
+        <div class="artist-studio">
+            <div class="artist-studio-top">
+                <button class="studio-back" onclick="irInicio()">←</button>
+                <div>
+                    <span class="studio-eyebrow">ÁREA DO ARTISTA</span>
+                    <h1>Publicar</h1>
+                    <p>Adicione suas guias e monte seus projetos.</p>
+                </div>
             </div>
 
-            <div class="upload-section">
-                <h3>Criar novo projeto</h3>
-                <p>Dê um nome ao projeto, escolha uma capa opcional e selecione as suas guias que farão parte dele.</p>
+            <div class="studio-tabs">
+                <button id="tabNovaGuia" class="studio-tab active" onclick="alternarPainelArtista('guia')">
+                    <span class="studio-tab-icon">♪</span>
+                    <span><strong>Nova Guia</strong><small>Áudio, capa e feats</small></span>
+                </button>
+                <button id="tabNovoProjeto" class="studio-tab" onclick="alternarPainelArtista('projeto')">
+                    <span class="studio-tab-icon">▣</span>
+                    <span><strong>Novo Projeto</strong><small>Organize suas guias</small></span>
+                </button>
+            </div>
 
-                <input type="text" id="uploadNomeProjeto" class="input-padrao" placeholder="Nome do projeto">
-
-                <label class="file-upload-label" for="uploadCapaProjetoFile">
-                    <span id="lblCapaProjeto">Escolher capa do projeto (Imagem)</span>
-                </label>
-                <input type="file" id="uploadCapaProjetoFile" accept="image/*" style="display:none;"
-                    onchange="document.getElementById('lblCapaProjeto').textContent=this.files[0]?.name || 'Escolher capa do projeto (Imagem)'">
-
-                <div class="upload-list" id="listaGuiasProjeto">
-                    ${
-                        minhasMusicas.length
-                        ? minhasMusicas.map(m => `
-                            <label class="upload-song-option">
-                                <input type="checkbox" name="projetoMusica" value="${m.id}">
-                                <span>${m.nome}</span>
-                                <small>${m.artistaFormatado}</small>
-                            </label>
-                        `).join('')
-                        : `<div style="color:#777;font-size:13px;padding:5px;">Você ainda não publicou nenhuma guia.</div>`
-                    }
+            <section id="painelNovaGuia" class="studio-content">
+                <div class="studio-heading">
+                    <div><span class="studio-number">01</span><h2>Adicionar guia</h2></div>
+                    <span class="studio-status">NOVA PUBLICAÇÃO</span>
                 </div>
 
-                <button class="form-btn" id="btnCriarProjeto" onclick="publicarProjetoNovo()">Criar Projeto</button>
-            </div>
+                <div class="studio-grid">
+                    <div class="studio-main-card">
+                        <label class="studio-label">Nome da guia</label>
+                        <input type="text" id="uploadNomeMusica" class="studio-input" placeholder="Ex.: Noite de Sessão">
 
-            <div class="upload-section guide-management">
-                <h3>Minhas guias</h3>
-                <p>Você pode gerenciar qualquer guia da qual seja participante.</p>
-                <div id="listaMinhasGuiasGerenciamento"></div>
-            </div>
+                        <div class="studio-upload-row">
+                            <label class="studio-file-card" for="uploadAudioFile">
+                                <span class="studio-file-icon">♫</span>
+                                <span><strong id="lblAudio">Adicionar áudio</strong><small>MP3 ou WAV</small></span>
+                                <span class="studio-plus">+</span>
+                            </label>
+                            <input type="file" id="uploadAudioFile" accept=".mp3,.wav,audio/mpeg,audio/wav,audio/x-wav,audio/wave" style="display:none;"
+                                onchange="document.getElementById('lblAudio').textContent=this.files[0]?.name || 'Adicionar áudio'">
 
-            <div class="upload-section">
-                <h3>Projetos do Artista</h3>
-                <p>Projetos que possuem guias das quais você participa.</p>
-                <div id="listaMeusProjetosPainel"></div>
-            </div>
+                            <label class="studio-file-card" for="uploadCapaFile">
+                                <span class="studio-file-icon">▧</span>
+                                <span><strong id="lblCapa">Adicionar capa</strong><small>Capa do single</small></span>
+                                <span class="studio-plus">+</span>
+                            </label>
+                            <input type="file" id="uploadCapaFile" accept="image/*" style="display:none;"
+                                onchange="document.getElementById('lblCapa').textContent=this.files[0]?.name || 'Adicionar capa'">
+                        </div>
+                    </div>
 
-            <div class="upload-actions">
-                <button class="header-btn" style="margin-top:15px;flex:1;" onclick="abrirLayoutMaisStory()">+ Story</button>
-                <button class="header-btn logout" style="margin-top:15px;flex:1;" onclick="irInicio()">Voltar</button>
-            </div>
+                    <div class="studio-feat-card">
+                        <div class="studio-card-title"><div><span>02</span><h3>Artistas e feats</h3></div><small>${artistasParaFeat.length} cadastrados</small></div>
+                        <p>Selecione os artistas que participam desta guia.</p>
+                        <input class="studio-search" placeholder="Pesquisar artista..." oninput="filtrarArtistasGuia(this.value)">
+                        <div class="studio-artists" id="uploadGuiaArtistas">
+                            ${artistasParaFeat.length ? artistasParaFeat.map(a => `
+                                <button type="button" class="studio-artist-chip ${String(a.id) === String(artista.id) ? 'selected' : ''}"
+                                    data-artista-id="${a.id}" data-artista-nome="${String(a.nome || '').replace(/"/g,'&quot;')}"
+                                    onclick="toggleArtistaGuiaChip(this)">
+                                    <span class="artist-dot">${String(a.nome || '?').charAt(0).toUpperCase()}</span>
+                                    <span>${a.nome}</span>
+                                    <b>✓</b>
+                                </button>
+                            `).join('') : '<div class="studio-empty">Nenhum artista cadastrado.</div>'}
+                        </div>
+                    </div>
+                </div>
+
+                <button class="studio-primary" id="btnPublicarGuia" onclick="publicarMusicaNova()"><span>Publicar Guia</span><b>→</b></button>
+            </section>
+
+            <section id="painelNovoProjeto" class="studio-content" style="display:none;">
+                <div class="studio-heading">
+                    <div><span class="studio-number">01</span><h2>Adicionar projeto</h2></div>
+                    <span class="studio-status">NOVO PROJETO</span>
+                </div>
+
+                <div class="studio-project-head">
+                    <div class="studio-project-cover">
+                        <span>▧</span>
+                        <label for="uploadCapaProjetoFile">Adicionar capa</label>
+                        <input type="file" id="uploadCapaProjetoFile" accept="image/*" style="display:none;"
+                            onchange="document.getElementById('lblCapaProjeto').textContent=this.files[0]?.name || 'Adicionar capa'">
+                        <small id="lblCapaProjeto">JPG, PNG ou WEBP</small>
+                    </div>
+                    <div class="studio-project-name">
+                        <label class="studio-label">Nome do projeto</label>
+                        <input type="text" id="uploadNomeProjeto" class="studio-input" placeholder="Ex.: Sessão 01 — Volume 1">
+                        <p>Escolha as guias publicadas que farão parte deste projeto.</p>
+                    </div>
+                </div>
+
+                <div class="studio-track-header">
+                    <div><span class="studio-number">02</span><h3>Guias publicadas</h3></div>
+                    <span>${minhasMusicas.length} disponíveis</span>
+                </div>
+                <div class="studio-project-tracks" id="listaGuiasProjeto">
+                    ${minhasMusicas.length ? minhasMusicas.map(m => `
+                        <label class="studio-track-option">
+                            <input type="checkbox" name="projetoMusica" value="${m.id}">
+                            <img src="${m.capa || 'https://via.placeholder.com/500'}" onerror="this.src='https://via.placeholder.com/500'">
+                            <span><strong>${m.nome}</strong><small>${m.artistaFormatado}</small></span>
+                            <i>✓</i>
+                        </label>
+                    `).join('') : '<div class="studio-empty">Você ainda não publicou nenhuma guia.</div>'}
+                </div>
+
+                <button class="studio-primary" id="btnCriarProjeto" onclick="publicarProjetoNovo()"><span>Criar Projeto</span><b>→</b></button>
+            </section>
         </div>
     `;
+}
 
-    renderizarGerenciamentoGuiasPainel(minhasMusicas);
-    renderizarProjetosPainel(meusProjetos);
+function alternarPainelArtista(tipo) {
+    const guia = document.getElementById('painelNovaGuia');
+    const projeto = document.getElementById('painelNovoProjeto');
+    const tabGuia = document.getElementById('tabNovaGuia');
+    const tabProjeto = document.getElementById('tabNovoProjeto');
+    if (!guia || !projeto) return;
+    const isGuia = tipo === 'guia';
+    guia.style.display = isGuia ? 'block' : 'none';
+    projeto.style.display = isGuia ? 'none' : 'block';
+    tabGuia?.classList.toggle('active', isGuia);
+    tabProjeto?.classList.toggle('active', !isGuia);
+}
+
+function filtrarArtistasGuia(termo) {
+    const q = String(termo || '').toLowerCase().trim();
+    document.querySelectorAll('#uploadGuiaArtistas .studio-artist-chip').forEach(el => {
+        const nome = String(el.dataset.artistaNome || '').toLowerCase();
+        el.style.display = !q || nome.includes(q) ? 'flex' : 'none';
+    });
+}
+
+function toggleArtistaGuiaChip(element) {
+    if (!element) return;
+    element.classList.toggle("selected");
+}
+
+function obterArtistasSelecionadosDaNovaGuia() {
+    return Array.from(document.querySelectorAll("#uploadGuiaArtistas .chip-item.selected"))
+        .map(el => el.dataset.artistaId)
+        .filter(Boolean);
 }
 
 function projetosRelacionadosCachemente(projetoId, musicaId) {
@@ -2801,15 +2896,21 @@ async function publicarMusicaNova() {
     const nome = nomeInput?.value.trim();
     const capaFile = capaInput?.files?.[0];
     const audioFile = audioInput?.files?.[0];
+    const artistasSelecionados = obterArtistasSelecionadosDaNovaGuia();
 
     if (!nome || !audioFile) {
         alert("Preencha o nome da guia e selecione o arquivo de áudio.");
         return;
     }
 
-    if (!audioFile.type.startsWith("audio/")) {
-        alert("Selecione um arquivo de áudio válido.");
+    const extensaoAudio = (audioFile.name.split(".").pop() || "").toLowerCase();
+    if (!["mp3", "wav"].includes(extensaoAudio)) {
+        alert("Selecione um arquivo MP3 ou WAV.");
         return;
+    }
+
+    if (!artistasSelecionados.includes(String(sessaoAtual.user.id))) {
+        artistasSelecionados.unshift(String(sessaoAtual.user.id));
     }
 
     if (btn) {
@@ -2836,14 +2937,13 @@ async function publicarMusicaNova() {
             capaUrl = supabaseClient.storage.from("capas-musicas").getPublicUrl(pathCapa).data.publicUrl;
         }
 
-        const extAudio = (audioFile.name.split(".").pop() || "mp3").toLowerCase();
-        const pathAudio = `audios/${sessaoAtual.user.id}/audio_${Date.now()}_${Math.random().toString(36).substring(2,10)}.${extAudio}`;
+        const pathAudio = `audios/${sessaoAtual.user.id}/audio_${Date.now()}_${Math.random().toString(36).substring(2,10)}.${extensaoAudio}`;
 
         const upAudio = await supabaseClient.storage
             .from("capas-musicas")
             .upload(pathAudio, audioFile, {
                 upsert:false,
-                contentType:audioFile.type || "audio/mpeg"
+                contentType: audioFile.type || (extensaoAudio === "wav" ? "audio/wav" : "audio/mpeg")
             });
 
         if (upAudio.error) throw new Error("Erro ao subir o áudio: " + upAudio.error.message);
@@ -2863,14 +2963,16 @@ async function publicarMusicaNova() {
         if (musErr) throw new Error("Erro ao salvar a guia: " + musErr.message);
         if (!musData || !musData[0]) throw new Error("A guia foi enviada, mas não foi possível obter o registro criado.");
 
+        const relacoes = artistasSelecionados.map(artistaId => ({
+            musica_id:musData[0].id,
+            artista_id:artistaId
+        }));
+
         const { error: relErr } = await supabaseClient
             .from("musica_artistas")
-            .insert([{
-                musica_id:musData[0].id,
-                artista_id:sessaoAtual.user.id
-            }]);
+            .insert(relacoes);
 
-        if (relErr) throw new Error("Guia salva, mas não foi possível vinculá-la ao artista: " + relErr.message);
+        if (relErr) throw new Error("Guia salva, mas não foi possível salvar os artistas/feats: " + relErr.message);
 
         alert("Guia publicada com sucesso!");
         await carregarDadosGlobais();
@@ -2882,7 +2984,7 @@ async function publicarMusicaNova() {
     } finally {
         if (btn) {
             btn.disabled = false;
-            btn.textContent = "Publicar Guia";
+            btn.textContent = "Adicionar Guia";
         }
     }
 }
