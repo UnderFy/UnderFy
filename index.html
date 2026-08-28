@@ -994,6 +994,26 @@ nav button:active{
 }
 .artist-panel h2{font-size:26px;margin-bottom:6px;}
 .artist-panel-subtitle{color:#888;font-size:13px;margin-bottom:22px;}
+.guide-management{margin-top:18px;}
+.guide-management-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;background:#202020;border-radius:10px;margin-top:8px;}
+.guide-management-info{display:flex;align-items:center;gap:10px;min-width:0;}
+.guide-management-info img{width:45px;height:45px;object-fit:cover;border-radius:8px;flex-shrink:0;}
+.guide-management-info div{min-width:0;}
+.guide-management-info strong,.guide-management-info span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.guide-management-info span{color:#777;font-size:12px;margin-top:3px;}
+.guide-management-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end;}
+.btn-secondary{border:1px solid #333;background:#292929;color:#fff;padding:8px 12px;border-radius:18px;font-size:12px;font-weight:bold;}
+.btn-secondary:hover{border-color:#1ed760;}
+.btn-danger{border:1px solid rgba(255,68,68,.35);background:rgba(255,68,68,.12);color:#ff6666;padding:8px 12px;border-radius:18px;font-size:12px;font-weight:bold;}
+.btn-danger:hover{background:rgba(255,68,68,.25);}
+.artist-chips-box{display:flex;flex-wrap:wrap;gap:8px;max-height:150px;overflow-y:auto;padding:10px;background:#151515;border:1px solid #333;border-radius:10px;margin-bottom:13px;}
+.project-panel-item{display:flex;align-items:center;gap:12px;padding:10px;background:#202020;border-radius:10px;margin-top:8px;cursor:pointer;}
+.project-panel-item img{width:48px;height:48px;object-fit:cover;border-radius:8px;flex-shrink:0;}
+.project-panel-item div{min-width:0;}
+.project-panel-item strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.project-panel-item span{display:block;color:#777;font-size:12px;margin-top:3px;}
+@media(max-width:600px){.guide-management-item{align-items:flex-start;flex-direction:column;}.guide-management-actions{width:100%;justify-content:flex-start;}.guide-management-actions button{flex:1;}}
+
 .upload-section{
     background:#1a1a1a;
     border:1px solid #252525;
@@ -1204,6 +1224,31 @@ nav button:active{
     <button onclick="tratarAcaoArtista()">PUBLICAR</button>
 </nav>
 
+<!-- GERENCIAR GUIA -->
+<div class="modal" id="modalGerenciarGuia">
+    <div class="modal-content">
+        <button class="close" onclick="fecharModal('modalGerenciarGuia')">&#10005;</button>
+        <h2>Gerenciar Guia</h2>
+        <p id="gerenciarGuiaSubtitulo" style="color:#888;font-size:13px;margin:8px 0 15px 0;"></p>
+        <input type="hidden" id="gerenciarGuiaId">
+        <input type="text" id="gerenciarGuiaNome" class="input-padrao" placeholder="Nome da guia">
+        <label class="file-upload-label" for="gerenciarGuiaCapa">
+            <span id="lblGerenciarGuiaCapa">Trocar capa (opcional)</span>
+        </label>
+        <input type="file" id="gerenciarGuiaCapa" accept="image/*" style="display:none;"
+            onchange="document.getElementById('lblGerenciarGuiaCapa').textContent=this.files[0]?.name || 'Trocar capa (opcional)'">
+        <label class="file-upload-label" for="gerenciarGuiaAudio">
+            <span id="lblGerenciarGuiaAudio">Trocar áudio (opcional)</span>
+        </label>
+        <input type="file" id="gerenciarGuiaAudio" accept="audio/*" style="display:none;"
+            onchange="document.getElementById('lblGerenciarGuiaAudio').textContent=this.files[0]?.name || 'Trocar áudio (opcional)'">
+        <p style="color:#888;font-size:12px;margin-bottom:8px;">Artistas da guia / feats</p>
+        <div class="artist-chips-box" id="gerenciarGuiaArtistas"></div>
+        <button class="form-btn" id="btnSalvarGuiaGerenciada" onclick="salvarGuiaGerenciada()">Salvar alterações</button>
+        <button class="btn-danger" style="width:100%;margin-top:10px;" onclick="removerGuiaGerenciada()">Remover guia</button>
+    </div>
+</div>
+
 <!-- LOGIN -->
 <div class="modal" id="modalAuth">
     <div class="modal-content">
@@ -1247,6 +1292,7 @@ let storiesCache = [];
 let visualizacoesCache = [];  
 let storyViewsRealtimeChannel = null;
 let storyViewsRealtimeStoryId = null;
+let guiaGerenciadaAtualId = null;
   
 let musicaAtualIndex = -1;  
 let modoShuffle = false;  
@@ -1359,7 +1405,8 @@ async function carregarDadosGlobais() {
             .from('projetos')  
             .select('*')  
             .order('created_at', { ascending:false });  
-        projetosCache = resProjetos.data || [];  
+        projetosCache = resProjetos.data || [];
+        await carregarRelacoesProjetosCache();  
   
         const resMusicas = await supabaseClient  
             .from('musicas')  
@@ -2488,6 +2535,10 @@ async function abrirPainelUpload() {
         dadosRelacaoCache.some(r => r.musica_id === m.id && r.artista_id === sessaoAtual.user.id)
     );
 
+    const meusProjetos = projetosCache.filter(p => {
+        return minhasMusicas.some(m => projetosRelacionadosCachemente(p.id, m.id));
+    });
+
     containerMain.innerHTML = `
         <div class="artist-panel">
             <h2>Painel do Artista</h2>
@@ -2543,12 +2594,197 @@ async function abrirPainelUpload() {
                 <button class="form-btn" id="btnCriarProjeto" onclick="publicarProjetoNovo()">Criar Projeto</button>
             </div>
 
+            <div class="upload-section guide-management">
+                <h3>Minhas guias</h3>
+                <p>Você pode gerenciar qualquer guia da qual seja participante.</p>
+                <div id="listaMinhasGuiasGerenciamento"></div>
+            </div>
+
+            <div class="upload-section">
+                <h3>Projetos do Artista</h3>
+                <p>Projetos que possuem guias das quais você participa.</p>
+                <div id="listaMeusProjetosPainel"></div>
+            </div>
+
             <div class="upload-actions">
                 <button class="header-btn" style="margin-top:15px;flex:1;" onclick="abrirLayoutMaisStory()">+ Story</button>
                 <button class="header-btn logout" style="margin-top:15px;flex:1;" onclick="irInicio()">Voltar</button>
             </div>
         </div>
     `;
+
+    renderizarGerenciamentoGuiasPainel(minhasMusicas);
+    renderizarProjetosPainel(meusProjetos);
+}
+
+function projetosRelacionadosCachemente(projetoId, musicaId) {
+    return window.__underfyProjetoMusicasCache?.some(r =>
+        String(r.projeto_id) === String(projetoId) && String(r.musica_id) === String(musicaId)
+    ) || false;
+}
+
+async function carregarRelacoesProjetosCache() {
+    try {
+        const { data, error } = await supabaseClient.from("projeto_musicas").select("*");
+        if (error) throw error;
+        window.__underfyProjetoMusicasCache = data || [];
+    } catch(e) {
+        console.error("Erro ao carregar relações de projetos:", e);
+        window.__underfyProjetoMusicasCache = [];
+    }
+}
+
+function renderizarGerenciamentoGuiasPainel(minhasMusicas) {
+    const container = document.getElementById("listaMinhasGuiasGerenciamento");
+    if (!container) return;
+    if (!minhasMusicas.length) {
+        container.innerHTML = `<div class="empty">Nenhuma guia vinculada ao seu perfil.</div>`;
+        return;
+    }
+    container.innerHTML = minhasMusicas.map(m => `
+        <div class="guide-management-item">
+            <div class="guide-management-info">
+                <img src="${m.capa}" onerror="this.src='https://via.placeholder.com/500'">
+                <div><strong>${m.nome}</strong><span>${m.artistaFormatado}</span></div>
+            </div>
+            <div class="guide-management-actions">
+                <button class="btn-secondary" onclick="abrirGerenciamentoGuia('${m.id}')">Editar</button>
+                <button class="btn-danger" onclick="removerGuia('${m.id}')">Remover</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderizarProjetosPainel(meusProjetos) {
+    const container = document.getElementById("listaMeusProjetosPainel");
+    if (!container) return;
+    if (!meusProjetos.length) {
+        container.innerHTML = `<div class="empty">Nenhum projeto encontrado para suas guias.</div>`;
+        return;
+    }
+    container.innerHTML = meusProjetos.map(p => `
+        <div class="project-panel-item" onclick="abrirProjeto('${p.id}')">
+            <img src="${p.capa_url || 'https://via.placeholder.com/500'}" onerror="this.src='https://via.placeholder.com/500'">
+            <div><strong>${p.nome}</strong><span>Projeto • ${contarGuiasDoProjetoCache(p.id)} guias</span></div>
+        </div>
+    `).join('');
+}
+
+function contarGuiasDoProjetoCache(projetoId) {
+    return (window.__underfyProjetoMusicasCache || []).filter(r => String(r.projeto_id) === String(projetoId)).length;
+}
+
+async function abrirGerenciamentoGuia(musicaId) {
+    if (!sessaoAtual) { abrirModalArtista(); return; }
+    const musica = musicas.find(m => String(m.id) === String(musicaId));
+    if (!musica) return;
+    const souParticipante = dadosRelacaoCache.some(r => String(r.musica_id) === String(musicaId) && String(r.artista_id) === String(sessaoAtual.user.id));
+    if (!souParticipante) { alert("Você não participa desta guia."); return; }
+
+    guiaGerenciadaAtualId = musica.id;
+    document.getElementById("gerenciarGuiaId").value = musica.id;
+    document.getElementById("gerenciarGuiaNome").value = musica.nome || '';
+    document.getElementById("gerenciarGuiaSubtitulo").textContent = `Participantes atuais: ${musica.artistaFormatado}`;
+    document.getElementById("gerenciarGuiaCapa").value = '';
+    document.getElementById("gerenciarGuiaAudio").value = '';
+    document.getElementById("lblGerenciarGuiaCapa").textContent = 'Trocar capa (opcional)';
+    document.getElementById("lblGerenciarGuiaAudio").textContent = 'Trocar áudio (opcional)';
+
+    const box = document.getElementById("gerenciarGuiaArtistas");
+    box.innerHTML = artistasCache.map(a => {
+        const marcado = dadosRelacaoCache.some(r => String(r.musica_id) === String(musica.id) && String(r.artista_id) === String(a.id));
+        return `<label class="chip-item ${marcado ? 'selected' : ''}" onclick="toggleChipGuia(this)">
+            <input type="checkbox" name="gerenciarGuiaArtista" value="${a.id}" ${marcado ? 'checked' : ''} style="display:none;">${a.nome}
+        </label>`;
+    }).join('');
+    document.getElementById("modalGerenciarGuia").style.display = "flex";
+}
+
+function toggleChipGuia(el) {
+    const input = el.querySelector('input');
+    input.checked = !input.checked;
+    el.classList.toggle('selected', input.checked);
+}
+
+async function salvarGuiaGerenciada() {
+    if (!sessaoAtual || !guiaGerenciadaAtualId) return;
+    const musicaId = guiaGerenciadaAtualId;
+    const nome = document.getElementById("gerenciarGuiaNome").value.trim();
+    const capaFile = document.getElementById("gerenciarGuiaCapa").files?.[0];
+    const audioFile = document.getElementById("gerenciarGuiaAudio").files?.[0];
+    const btn = document.getElementById("btnSalvarGuiaGerenciada");
+    const participa = dadosRelacaoCache.some(r => String(r.musica_id) === String(musicaId) && String(r.artista_id) === String(sessaoAtual.user.id));
+    if (!participa) { alert("Você não tem permissão para gerenciar esta guia."); return; }
+    if (!nome) { alert("Digite o nome da guia."); return; }
+    const artistasSelecionados = Array.from(document.querySelectorAll('input[name="gerenciarGuiaArtista"]:checked')).map(i => i.value);
+    if (!artistasSelecionados.length) { alert("Selecione pelo menos um artista para a guia."); return; }
+    if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+
+    try {
+        const update = { nome };
+        if (capaFile) {
+            const ext = (capaFile.name.split('.').pop() || 'jpg').toLowerCase();
+            const path = `capas/${sessaoAtual.user.id}/edit_${Date.now()}_${Math.random().toString(36).substring(2,10)}.${ext}`;
+            const up = await supabaseClient.storage.from('capas-musicas').upload(path, capaFile, {upsert:false, contentType:capaFile.type || 'image/jpeg'});
+            if (up.error) throw new Error('Erro ao subir a nova capa: ' + up.error.message);
+            update.capa_url = supabaseClient.storage.from('capas-musicas').getPublicUrl(path).data.publicUrl;
+        }
+        if (audioFile) {
+            if (!audioFile.type.startsWith('audio/')) throw new Error('Selecione um arquivo de áudio válido.');
+            const ext = (audioFile.name.split('.').pop() || 'mp3').toLowerCase();
+            const path = `audios/${sessaoAtual.user.id}/edit_${Date.now()}_${Math.random().toString(36).substring(2,10)}.${ext}`;
+            const up = await supabaseClient.storage.from('capas-musicas').upload(path, audioFile, {upsert:false, contentType:audioFile.type || 'audio/mpeg'});
+            if (up.error) throw new Error('Erro ao subir o novo áudio: ' + up.error.message);
+            update.audio_url = supabaseClient.storage.from('capas-musicas').getPublicUrl(path).data.publicUrl;
+        }
+
+        const { error: musErr } = await supabaseClient.from('musicas').update(update).eq('id', musicaId);
+        if (musErr) throw new Error('Erro ao atualizar a guia: ' + musErr.message);
+
+        const { error: delErr } = await supabaseClient.from('musica_artistas').delete().eq('musica_id', musicaId);
+        if (delErr) throw new Error('Erro ao atualizar os artistas da guia: ' + delErr.message);
+        const relacoes = artistasSelecionados.map(artistaId => ({ musica_id: musicaId, artista_id: artistaId }));
+        const { error: insErr } = await supabaseClient.from('musica_artistas').insert(relacoes);
+        if (insErr) throw new Error('Erro ao salvar os participantes/feats: ' + insErr.message);
+
+        fecharModal('modalGerenciarGuia');
+        await carregarDadosGlobais();
+        await carregarRelacoesProjetosCache();
+        alert('Guia atualizada com sucesso!');
+        abrirPainelUpload();
+    } catch(err) {
+        console.error('ERRO AO EDITAR GUIA:', err);
+        alert('Não foi possível atualizar a guia:\n\n' + (err?.message || 'Erro desconhecido.'));
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Salvar alterações'; }
+    }
+}
+
+async function removerGuia(musicaId) {
+    if (!sessaoAtual) return;
+    const participante = dadosRelacaoCache.some(r => String(r.musica_id) === String(musicaId) && String(r.artista_id) === String(sessaoAtual.user.id));
+    if (!participante) { alert('Você não participa desta guia.'); return; }
+    const musica = musicas.find(m => String(m.id) === String(musicaId));
+    if (!musica) return;
+    if (!confirm(`Remover a guia "${musica.nome}"? Ela será removida para todos os participantes.`)) return;
+    try {
+        await supabaseClient.from('projeto_musicas').delete().eq('musica_id', musicaId);
+        const { error: relErr } = await supabaseClient.from('musica_artistas').delete().eq('musica_id', musicaId);
+        if (relErr) throw new Error('Erro ao remover os participantes: ' + relErr.message);
+        const { error: musErr } = await supabaseClient.from('musicas').delete().eq('id', musicaId);
+        if (musErr) throw new Error('Erro ao remover a guia: ' + musErr.message);
+        await carregarDadosGlobais();
+        await carregarRelacoesProjetosCache();
+        alert('Guia removida com sucesso.');
+        abrirPainelUpload();
+    } catch(err) {
+        console.error('ERRO AO REMOVER GUIA:', err);
+        alert('Não foi possível remover a guia:\n\n' + (err?.message || 'Erro desconhecido.'));
+    }
+}
+
+async function removerGuiaGerenciada() {
+    if (guiaGerenciadaAtualId) await removerGuia(guiaGerenciadaAtualId);
 }
 
 async function publicarMusicaNova() {
@@ -2826,22 +3062,21 @@ async function abrirArtistaPorId(artistaId) {
         .select("*")
         .eq("artista_id", artista.id);
 
-    if (relErr) {
-        console.error("Erro ao carregar guias do artista:", relErr);
-    }
+    if (relErr) console.error("Erro ao carregar guias do artista:", relErr);
 
     const idsMusicasArtista = relsArt ? relsArt.map(r => r.musica_id) : [];
-    const musicasDoArtista = musicas.filter(m =>
-        idsMusicasArtista.some(id => String(id) === String(m.id))
+    const musicasDoArtista = musicas.filter(m => idsMusicasArtista.some(id => String(id) === String(m.id)));
+    const projetosDoArtista = projetosCache.filter(p =>
+        (window.__underfyProjetoMusicasCache || []).some(r => String(r.projeto_id) === String(p.id) && idsMusicasArtista.some(id => String(id) === String(r.musica_id)))
     );
 
     const containerMain = document.getElementById("conteudoDinamico");
+    const podeGerenciar = sessaoAtual && String(sessaoAtual.user.id) === String(artista.id);
 
     containerMain.innerHTML = `
         <div class="artist-profile-hero">
             <img src="${artista.foto_url || 'https://via.placeholder.com/500'}"
-                 onerror="this.src='https://via.placeholder.com/500'"
-                 alt="${artista.nome}">
+                 onerror="this.src='https://via.placeholder.com/500'" alt="${artista.nome}">
             <div>
                 <small style="color:#1ed760;font-weight:bold;">ARTISTA</small>
                 <h1 style="font-size:36px;margin:5px 0;">${artista.nome}</h1>
@@ -2854,30 +3089,49 @@ async function abrirArtistaPorId(artistaId) {
             <div id="listaMusicasArtista" style="display:flex;flex-direction:column;gap:12px;"></div>
         </div>
 
+        <div class="section" style="margin-top:40px;">
+            <div class="section-title"><h2>Projetos</h2></div>
+            <div id="listaProjetosArtista" style="display:flex;flex-wrap:wrap;gap:12px;"></div>
+        </div>
+
         <button class="header-btn detail-back" onclick="irInicio()">&#8592; Voltar ao Início</button>
     `;
 
     const container = document.getElementById("listaMusicasArtista");
-
     if (musicasDoArtista.length === 0) {
         container.innerHTML = `<div class="empty">Nenhuma guia publicada por este artista.</div>`;
     } else {
         container.innerHTML = musicasDoArtista.map(m => {
             const indexGlobal = musicas.findIndex(x => x.id === m.id);
+            const podeGerenciarGuia = sessaoAtual && dadosRelacaoCache.some(r => String(r.musica_id) === String(m.id) && String(r.artista_id) === String(sessaoAtual.user.id));
             return `
-                <div style="background:#151515;padding:15px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:15px;">
-                    <div style="display:flex;align-items:center;gap:15px;min-width:0;">
-                        <img src="${m.capa}" onerror="this.src='https://via.placeholder.com/500'"
-                             style="width:50px;height:50px;object-fit:cover;border-radius:8px;">
+                <div style="background:#151515;padding:15px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;">
+                    <div style="display:flex;align-items:center;gap:15px;min-width:0;flex:1;">
+                        <img src="${m.capa}" onerror="this.src='https://via.placeholder.com/500'" style="width:50px;height:50px;object-fit:cover;border-radius:8px;">
                         <div style="min-width:0;">
                             <strong style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.nome}</strong>
                             <span style="color:#888;font-size:13px;display:block;">${m.artistaFormatado}</span>
                         </div>
                     </div>
-                    <button class="play" style="width:auto;padding:10px 20px;margin:0;" onclick="tocarMusica(${indexGlobal})">&#9654; Ouvir</button>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+                        <button class="play" style="width:auto;padding:10px 20px;margin:0;" onclick="tocarMusica(${indexGlobal})">&#9654; Ouvir</button>
+                        ${podeGerenciarGuia ? `<button class="btn-secondary" onclick="abrirGerenciamentoGuia('${m.id}')">Gerenciar</button>` : ''}
+                    </div>
                 </div>
             `;
         }).join("");
+    }
+
+    const projetosContainer = document.getElementById("listaProjetosArtista");
+    if (!projetosDoArtista.length) {
+        projetosContainer.innerHTML = `<div class="empty">Nenhum projeto com guias deste artista.</div>`;
+    } else {
+        projetosContainer.innerHTML = projetosDoArtista.map(p => `
+            <div class="card" onclick="abrirProjeto('${p.id}')">
+                <img class="cover" src="${p.capa_url || 'https://via.placeholder.com/500'}" onerror="this.src='https://via.placeholder.com/500'">
+                <h3>${p.nome}</h3><p>Projeto</p>
+            </div>
+        `).join('');
     }
 }
 
