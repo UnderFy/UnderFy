@@ -1280,22 +1280,6 @@ nav button:active{
     </div>
 </div>
 
-<!-- ADICIONAR GUIA AO PROJETO -->
-<div class="modal" id="modalAdicionarGuiaProjeto">
-    <div class="modal-content">
-        <button class="close" onclick="fecharModal('modalAdicionarGuiaProjeto')">&#10005;</button>
-        <h2>Adicionar no projeto</h2>
-        <p id="adicionarGuiaProjetoSubtitulo" style="color:#888;font-size:13px;margin:8px 0 15px 0;"></p>
-        <input type="hidden" id="adicionarGuiaProjetoMusicaId">
-        <label style="display:block;color:#aaa;font-size:12px;margin-bottom:7px;">Escolha o projeto</label>
-        <select id="adicionarGuiaProjetoSelect" class="input-padrao" style="width:100%;">
-            <option value="">Selecione um projeto</option>
-        </select>
-        <p id="adicionarGuiaProjetoStatus" style="color:#777;font-size:11px;margin:10px 0 0;"></p>
-        <button class="form-btn" id="btnAdicionarGuiaProjeto" onclick="adicionarGuiaAoProjeto()">Adicionar ao projeto</button>
-    </div>
-</div>
-
 <!-- LOGIN -->
 <div class="modal" id="modalAuth">
     <div class="modal-content">
@@ -2760,7 +2744,6 @@ function renderizarGerenciamentoGuiasPainel(minhasMusicas) {
             </div>
             <div class="guide-management-actions">
                 <button class="btn-secondary" onclick="abrirGerenciamentoGuia('${m.id}')">Editar</button>
-                <button class="btn-secondary" onclick="abrirAdicionarGuiaAoProjeto('${m.id}')">Adicionar no projeto</button>
                 <button class="btn-danger" onclick="removerGuia('${m.id}')">Remover</button>
             </div>
         </div>
@@ -2784,113 +2767,6 @@ function renderizarProjetosPainel(meusProjetos) {
 
 function contarGuiasDoProjetoCache(projetoId) {
     return (window.__underfyProjetoMusicasCache || []).filter(r => String(r.projeto_id) === String(projetoId)).length;
-}
-
-async function abrirAdicionarGuiaAoProjeto(musicaId) {
-    if (!sessaoAtual) { abrirModalArtista(); return; }
-
-    const musica = musicas.find(m => String(m.id) === String(musicaId));
-    if (!musica) return;
-
-    const souParticipante = dadosRelacaoCache.some(r =>
-        String(r.musica_id) === String(musicaId) &&
-        String(r.artista_id) === String(sessaoAtual.user.id)
-    );
-    if (!souParticipante) {
-        alert("Você não participa desta guia.");
-        return;
-    }
-
-    await carregarRelacoesProjetosCache();
-
-    const select = document.getElementById("adicionarGuiaProjetoSelect");
-    const status = document.getElementById("adicionarGuiaProjetoStatus");
-    const subtitulo = document.getElementById("adicionarGuiaProjetoSubtitulo");
-    const hidden = document.getElementById("adicionarGuiaProjetoMusicaId");
-    const btn = document.getElementById("btnAdicionarGuiaProjeto");
-
-    if (!select || !hidden) return;
-
-    hidden.value = musica.id;
-    if (subtitulo) subtitulo.textContent = `Guia: ${musica.nome}`;
-    if (status) status.textContent = "";
-    if (btn) { btn.disabled = false; btn.textContent = "Adicionar ao projeto"; }
-
-    const projetos = projetosCache.slice().sort((a,b) =>
-        String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR")
-    );
-
-    if (!projetos.length) {
-        select.innerHTML = '<option value="">Nenhum projeto cadastrado</option>';
-        if (status) status.textContent = "Crie um projeto primeiro na aba Novo Projeto.";
-    } else {
-        select.innerHTML = '<option value="">Selecione um projeto</option>' + projetos.map(p => {
-            const jaEsta = projetosRelacionadosCachemente(p.id, musica.id);
-            return `<option value="${p.id}">${p.nome}${jaEsta ? ' — já adicionada' : ''}</option>`;
-        }).join('');
-    }
-
-    select.onchange = () => {
-        const projetoId = select.value;
-        if (!projetoId) {
-            if (status) status.textContent = "";
-            return;
-        }
-        const jaEsta = projetosRelacionadosCachemente(projetoId, musica.id);
-        if (status) status.textContent = jaEsta
-            ? "Esta guia já está neste projeto."
-            : "A guia será adicionada ao projeto selecionado.";
-    };
-
-    document.getElementById("modalAdicionarGuiaProjeto").style.display = "flex";
-}
-
-async function adicionarGuiaAoProjeto() {
-    if (!sessaoAtual) { abrirModalArtista(); return; }
-
-    const musicaId = document.getElementById("adicionarGuiaProjetoMusicaId")?.value;
-    const projetoId = document.getElementById("adicionarGuiaProjetoSelect")?.value;
-    const btn = document.getElementById("btnAdicionarGuiaProjeto");
-    const musica = musicas.find(m => String(m.id) === String(musicaId));
-
-    if (!musicaId || !projetoId) {
-        alert("Selecione um projeto.");
-        return;
-    }
-
-    const souParticipante = dadosRelacaoCache.some(r =>
-        String(r.musica_id) === String(musicaId) &&
-        String(r.artista_id) === String(sessaoAtual.user.id)
-    );
-    if (!souParticipante) {
-        alert("Você não participa desta guia.");
-        return;
-    }
-
-    if (projetosRelacionadosCachemente(projetoId, musicaId)) {
-        alert("Esta guia já está adicionada a esse projeto.");
-        return;
-    }
-
-    if (btn) { btn.disabled = true; btn.textContent = "Adicionando..."; }
-
-    try {
-        const { error } = await supabaseClient
-            .from("projeto_musicas")
-            .insert([{ projeto_id: projetoId, musica_id: musicaId }]);
-
-        if (error) throw new Error("Erro ao adicionar a guia ao projeto: " + error.message);
-
-        await carregarRelacoesProjetosCache();
-        fecharModal("modalAdicionarGuiaProjeto");
-        alert(`A guia "${musica?.nome || ''}" foi adicionada ao projeto com sucesso!`);
-        abrirPainelUpload();
-    } catch (err) {
-        console.error("ERRO AO ADICIONAR GUIA AO PROJETO:", err);
-        alert("Não foi possível adicionar a guia ao projeto:\n\n" + (err?.message || "Erro desconhecido."));
-    } finally {
-        if (btn) { btn.disabled = false; btn.textContent = "Adicionar ao projeto"; }
-    }
 }
 
 async function abrirGerenciamentoGuia(musicaId) {
