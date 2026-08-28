@@ -1283,6 +1283,8 @@ let projetosCache = [];
 let dadosRelacaoCache = [];  
 let storiesCache = [];  
 let visualizacoesCache = [];  
+let storyViewsRealtimeChannel = null;
+let storyViewsRealtimeStoryId = null;
   
 let musicaAtualIndex = -1;  
 let modoShuffle = false;  
@@ -3679,6 +3681,159 @@ function underfyResumeStory() {
    LISTA DE VISUALIZADORES  
 ========================= */  
   
+function renderizarVisualizadoresStory(storyId) {
+
+    const container =
+        document.getElementById(
+            "listaVisualizadoresConteudo"
+        );
+
+    const viewsDoStory =
+        visualizacoesCache.filter(
+            v => v.story_id === storyId
+        );
+
+    if (!container) return;
+
+    if (viewsDoStory.length === 0) {
+
+        container.innerHTML = `
+            <div class="empty">
+                Nenhuma visualização ainda.
+            </div>
+        `;
+
+    } else {
+
+        container.innerHTML =
+            viewsDoStory
+                .map(v => {
+
+                    const art =
+                        artistasCache.find(
+                            a => a.id === v.viewer_id
+                        ) ||
+                        {
+                            nome:'Usuário',
+                            foto_url:'https://via.placeholder.com/500'
+                        };
+
+                    return `
+                        <div class="viewer-item">
+                            <img src="${art.foto_url}">
+                            <span>${art.nome}</span>
+                        </div>
+                    `;
+
+                })
+                .join('');
+    }
+
+    const viewerCountText =
+        document.getElementById("viewerCountText");
+
+    if (viewerCountText) {
+        viewerCountText.textContent =
+            `${viewsDoStory.length} ${
+                viewsDoStory.length === 1
+                ? 'visualização'
+                : 'visualizações'
+            }`;
+    }
+}
+
+function iniciarRealtimeVisualizacoesStory(storyId) {
+
+    if (!storyId) return;
+
+    if (
+        storyViewsRealtimeChannel &&
+        storyViewsRealtimeStoryId === storyId
+    ) {
+        return;
+    }
+
+    if (storyViewsRealtimeChannel) {
+        supabaseClient.removeChannel(
+            storyViewsRealtimeChannel
+        );
+        storyViewsRealtimeChannel = null;
+        storyViewsRealtimeStoryId = null;
+    }
+
+    storyViewsRealtimeStoryId = storyId;
+
+    storyViewsRealtimeChannel =
+        supabaseClient
+            .channel(`underfy-story-views-${storyId}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'story_views',
+                    filter: `story_id=eq.${storyId}`
+                },
+                payload => {
+
+                    if (payload.eventType === 'INSERT') {
+
+                        const novaView = payload.new;
+
+                        const jaExiste =
+                            visualizacoesCache.some(
+                                v =>
+                                    v.story_id === novaView.story_id &&
+                                    v.viewer_id === novaView.viewer_id
+                            );
+
+                        if (!jaExiste) {
+                            visualizacoesCache.push(novaView);
+                        }
+
+                    } else if (payload.eventType === 'DELETE') {
+
+                        const removida = payload.old;
+
+                        visualizacoesCache =
+                            visualizacoesCache.filter(
+                                v =>
+                                    !(
+                                        v.story_id === removida.story_id &&
+                                        (
+                                            !removida.viewer_id ||
+                                            v.viewer_id === removida.viewer_id
+                                        )
+                                    )
+                            );
+                    }
+
+                    const storyAtual =
+                        currentStoriesList[currentStoryIndex];
+
+                    if (
+                        storyAtual &&
+                        storyAtual.id === storyId
+                    ) {
+                        renderizarVisualizadoresStory(storyId);
+                    }
+                }
+            )
+            .subscribe();
+}
+
+function pararRealtimeVisualizacoesStory() {
+
+    if (storyViewsRealtimeChannel) {
+        supabaseClient.removeChannel(
+            storyViewsRealtimeChannel
+        );
+    }
+
+    storyViewsRealtimeChannel = null;
+    storyViewsRealtimeStoryId = null;
+}
+
 function abrirListaVisualizadores() {  
   
     const story =  
@@ -3696,16 +3851,9 @@ function abrirListaVisualizadores() {
         );  
   
   
-    const container =  
-        document.getElementById(  
-            "listaVisualizadoresConteudo"  
-        );  
-  
-  
     /*  
-       Atualiza as visualizações diretamente do Supabase ao abrir a lista.  
-       Isso evita que o cache antigo da página esconda visualizações  
-       feitas por outros artistas enquanto o Story estava aberto.  
+       Mantém a consulta inicial ao Supabase e, depois dela,
+       o Realtime mantém a lista/contador atualizados.
     */  
     supabaseClient  
         .from('story_views')  
@@ -3720,68 +3868,9 @@ function abrirListaVisualizadores() {
   
                 visualizacoesCache.push(...data);  
             }  
-  
-            const viewsDoStory =  
-                visualizacoesCache.filter(  
-                    v =>  
-                        v.story_id ===  
-                        story.id  
-                );  
-  
-  
-            if (  
-                viewsDoStory.length === 0  
-            ) {  
-  
-                container.innerHTML = `  
-                    <div class="empty">  
-                        Nenhuma visualização ainda.  
-                    </div>  
-                `;  
-  
-            } else {  
-  
-                container.innerHTML =  
-                    viewsDoStory  
-                        .map(v => {  
-  
-                            const art =  
-                                artistasCache.find(  
-                                    a =>  
-                                        a.id ===  
-                                        v.viewer_id  
-                                ) ||  
-                                {  
-                                    nome:'Usuário',  
-                                    foto_url:  
-                                        'https://via.placeholder.com/500'  
-                                };  
-  
-  
-                            return `  
-                                <div class="viewer-item">  
-                                    <img  
-                                        src="${art.foto_url}">  
-                                    <span>  
-                                        ${art.nome}  
-                                    </span>  
-                                </div>  
-                            `;  
-  
-                        })  
-                        .join('');  
-  
-            }  
-  
-  
-            document.getElementById(  
-                "viewerCountText"  
-            ).textContent =  
-                `${viewsDoStory.length} ${  
-                    viewsDoStory.length === 1  
-                    ? 'visualização'  
-                    : 'visualizações'  
-                }`;  
+
+            renderizarVisualizadoresStory(story.id);
+            iniciarRealtimeVisualizacoesStory(story.id);
   
             modalViewers.style.display =  
                 "flex";  
@@ -3886,6 +3975,8 @@ function proximoStory() {
   
 function fecharStoryViewer() {  
   
+    pararRealtimeVisualizacoesStory();
+
     clearTimeout(  
         storyTriggerTimeout  
     );  
