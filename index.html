@@ -1111,6 +1111,29 @@ nav button:active{
     .story-publish-options{grid-template-columns:1fr;}
     .story-publish-screen{padding:20px;}
 }
+
+.project-add-guides-btn{
+    margin-top:12px;border:0;background:#1ed760;color:#000;padding:10px 16px;
+    border-radius:20px;font-weight:bold;cursor:pointer;
+}
+.project-add-guides-btn:hover{filter:brightness(1.05);}
+.project-guides-list{
+    display:flex;flex-direction:column;gap:7px;max-height:310px;overflow:auto;
+    margin:15px 0;
+}
+.project-guide-option{
+    display:flex;align-items:center;gap:12px;background:#181818;border:1px solid #272727;
+    border-radius:12px;padding:8px 10px;cursor:pointer;
+}
+.project-guide-option:hover{border-color:#444;}
+.project-guide-option:has(input:checked){border-color:#1ed760;background:#17231b;}
+.project-guide-option input{width:auto;accent-color:#1ed760;}
+.project-guide-option img{width:45px;height:45px;object-fit:cover;border-radius:8px;}
+.project-guide-option span{min-width:0;flex:1;}
+.project-guide-option strong,.project-guide-option small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.project-guide-option strong{font-size:12px;}
+.project-guide-option small{font-size:10px;color:#666;margin-top:3px;}
+
 </style>
 </head>
 <body>
@@ -1277,6 +1300,18 @@ nav button:active{
         <div class="artist-chips-box" id="gerenciarGuiaArtistas"></div>
         <button class="form-btn" id="btnSalvarGuiaGerenciada" onclick="salvarGuiaGerenciada()">Salvar alterações</button>
         <button class="btn-danger" style="width:100%;margin-top:10px;" onclick="removerGuiaGerenciada()">Remover guia</button>
+    </div>
+</div>
+
+
+<!-- ADICIONAR GUIAS AO PROJETO -->
+<div class="modal" id="modalAdicionarGuiasProjeto">
+    <div class="modal-content">
+        <button class="close" onclick="fecharModal('modalAdicionarGuiasProjeto')">&#10005;</button>
+        <h2>Adicionar Guias</h2>
+        <p id="adicionarGuiasProjetoSubtitulo" style="color:#888;font-size:13px;margin:8px 0 15px 0;"></p>
+        <div class="project-guides-list" id="listaGuiasAdicionarProjeto"></div>
+        <button class="form-btn" id="btnAdicionarGuiasProjeto" onclick="adicionarGuiasAoProjeto()">Adicionar ao projeto</button>
     </div>
 </div>
 
@@ -2234,6 +2269,88 @@ async function apagarStoryAtual(e) {
     }
 }
 
+
+async function abrirAdicionarGuiasAoProjeto(projetoId) {
+    const projeto = projetosCache.find(p => String(p.id) === String(projetoId));
+    if (!projeto) return;
+
+    const { data: relsProj, error } = await supabaseClient
+        .from("projeto_musicas")
+        .select("*")
+        .eq("projeto_id", projetoId);
+
+    if (error) {
+        console.error("Erro ao carregar guias do projeto:", error);
+        alert("Não foi possível carregar as guias deste projeto.");
+        return;
+    }
+
+    const idsExistentes = new Set((relsProj || []).map(r => String(r.musica_id)));
+    const guiasDisponiveis = musicas.filter(m => !idsExistentes.has(String(m.id)));
+
+    document.getElementById("adicionarGuiasProjetoSubtitulo").textContent =
+        `Selecione uma ou mais guias para adicionar a ${projeto.nome}.`;
+
+    const container = document.getElementById("listaGuiasAdicionarProjeto");
+
+    if (!guiasDisponiveis.length) {
+        container.innerHTML = `<div class="empty">Todas as guias disponíveis já estão neste projeto.</div>`;
+    } else {
+        container.innerHTML = guiasDisponiveis.map(m => `
+            <label class="project-guide-option">
+                <input type="checkbox" name="projetoGuiaAdicionar" value="${m.id}">
+                <img src="${m.capa || 'https://via.placeholder.com/500'}" onerror="this.src='https://via.placeholder.com/500'">
+                <span><strong>${m.nome}</strong><small>${m.artistaFormatado}</small></span>
+            </label>
+        `).join('');
+    }
+
+    document.getElementById("btnAdicionarGuiasProjeto").dataset.projetoId = projetoId;
+    document.getElementById("btnAdicionarGuiasProjeto").disabled = !guiasDisponiveis.length;
+    document.getElementById("modalAdicionarGuiasProjeto").style.display = "flex";
+}
+
+async function adicionarGuiasAoProjeto() {
+    const btn = document.getElementById("btnAdicionarGuiasProjeto");
+    const projetoId = btn?.dataset.projetoId;
+    if (!projetoId) return;
+
+    const guiasSelecionadas = Array.from(
+        document.querySelectorAll('input[name="projetoGuiaAdicionar"]:checked')
+    ).map(input => input.value);
+
+    if (!guiasSelecionadas.length) {
+        alert("Selecione pelo menos uma guia.");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Adicionando...";
+
+    try {
+        const relacoes = guiasSelecionadas.map(musicaId => ({
+            projeto_id: projetoId,
+            musica_id: musicaId
+        }));
+
+        const { error } = await supabaseClient
+            .from("projeto_musicas")
+            .insert(relacoes);
+
+        if (error) throw error;
+
+        fecharModal("modalAdicionarGuiasProjeto");
+        await carregarDadosGlobais();
+        await abrirProjeto(projetoId);
+    } catch (err) {
+        console.error("ERRO AO ADICIONAR GUIAS AO PROJETO:", err);
+        alert("Não foi possível adicionar as guias ao projeto:\n\n" + (err?.message || "Erro desconhecido."));
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Adicionar ao projeto";
+    }
+}
+
 /* =========================  
    HOME & PLAYER  
 ========================= */  
@@ -3112,6 +3229,7 @@ async function abrirProjeto(projetoId) {
                 <small style="color:#1ed760;font-weight:bold;">PROJETO</small>
                 <h1 style="font-size:36px;margin:5px 0;">${projeto.nome}</h1>
                 <p style="color:#888;">${musicasDoProjeto.length} guias cadastradas</p>
+                <button class="project-add-guides-btn" onclick="abrirAdicionarGuiasAoProjeto('${projeto.id}')">+ Adicionar Guias</button>
             </div>
         </div>
 
