@@ -2893,19 +2893,8 @@ async function abrirPainelUpload() {
                 <button class="studio-primary" id="btnCriarProjeto" onclick="publicarProjetoNovo()"><span>Criar Projeto</span><b>→</b></button>
             </section>
 
-            <section class="barras-manage">
-                <div class="barras-manage-title">
-                    <h3>Gerenciar BARRAS publicadas</h3>
-                    <span class="studio-status">SUAS PUBLICAÇÕES</span>
-                </div>
-                <div id="listaMinhasBarrasGerenciamento" class="barras-manage-list">
-                    <div class="studio-empty">Carregando suas Barras...</div>
-                </div>
-            </section>
         </div>
     `;
-
-    await renderizarGerenciamentoBarrasPainel();
 }
 
 function alternarPainelArtista(tipo) {
@@ -3041,7 +3030,6 @@ async function salvarEdicaoBarra(barraId) {
             .eq('id', barraId)
             .eq('artista_id', sessaoAtual.user.id);
         if (error) throw error;
-        await renderizarGerenciamentoBarrasPainel();
         await carregarFeedBarras(window.__underfyBarrasFiltroArtistaId || null);
     } catch(err) {
         console.error('ERRO AO EDITAR BARRA:', err);
@@ -3078,7 +3066,6 @@ async function excluirBarra(barraId) {
             .eq('id', barraId)
             .eq('artista_id', sessaoAtual.user.id);
         if (error) throw error;
-        await renderizarGerenciamentoBarrasPainel();
         await carregarFeedBarras(window.__underfyBarrasFiltroArtistaId || null);
     } catch(err) {
         console.error('ERRO AO EXCLUIR BARRA:', err);
@@ -3756,6 +3743,21 @@ async function carregarFeedBarras(artistaId = null) {
                     <div class="barra-head">
                         <img src="${autor.foto_url || 'https://via.placeholder.com/500'}" onerror="this.src='https://via.placeholder.com/500'">
                         <div class="barra-author"><strong>${autor.nome} <span class="verification-badge" title="Artista verificado"></span></strong><small>${data}</small></div>
+                        ${sessaoAtual && String(sessaoAtual.user.id) === String(barra.artista_id) ? `
+                        <div class="barra-more-wrap">
+                            <button class="barra-more-btn" type="button" onclick="alternarMenuBarra('${barra.id}', event)" title="Mais opções">⋮</button>
+                            <div class="barra-more-menu" id="barra-menu-${barra.id}">
+                                <button type="button" onclick="alternarEdicaoBarra('${barra.id}', true)">Editar</button>
+                                <button type="button" class="delete" onclick="excluirBarra('${barra.id}')">Excluir</button>
+                            </div>
+                        </div>` : ''}
+                    </div>
+                    <div class="barra-edit-box" id="barra-edit-${barra.id}">
+                        <textarea id="barra-edit-text-${barra.id}" maxlength="1000" placeholder="Texto da Barra...">${barra.texto || ''}</textarea>
+                        <div class="barra-edit-actions">
+                            <button class="barra-edit-cancel" onclick="alternarEdicaoBarra('${barra.id}', false)">Cancelar</button>
+                            <button class="barra-edit-save" onclick="salvarEdicaoBarra('${barra.id}')">Salvar</button>
+                        </div>
                     </div>
                     ${barra.texto ? `<div class="barra-text">${barra.texto}</div>` : ''}
                     ${barra.audio_url ? `<audio class="barra-audio" controls preload="metadata" src="${barra.audio_url}"></audio>` : ''}
