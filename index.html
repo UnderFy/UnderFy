@@ -3741,8 +3741,17 @@ async function carregarFeedBarras(artistaId = null) {
             return `
                 <article class="barra-card" id="barra-${barra.id}">
                     <div class="barra-head">
-                        <img src="${autor.foto_url || 'https://via.placeholder.com/500'}" onerror="this.src='https://via.placeholder.com/500'">
-                        <div class="barra-author"><strong>${autor.nome} <span class="verification-badge" title="Artista verificado"></span></strong><small>${data}</small></div>
+                        <img src="${autor.foto_url || 'https://via.placeholder.com/500'}" 
+                             onclick="abrirArtistaPorId('${barra.artista_id}'); event.stopPropagation();"
+                             style="cursor:pointer;"
+                             title="Ver perfil de ${autor.nome}"
+                             onerror="this.src='https://via.placeholder.com/500'">
+                        <div class="barra-author" 
+                             onclick="abrirArtistaPorId('${barra.artista_id}'); event.stopPropagation();"
+                             style="cursor:pointer;">
+                            <strong>${autor.nome} <span class="verification-badge" title="Artista verificado"></span></strong>
+                            <small>${data}</small>
+                        </div>
                         ${sessaoAtual && String(sessaoAtual.user.id) === String(barra.artista_id) ? `
                         <div class="barra-more-wrap">
                             <button class="barra-more-btn" type="button" onclick="alternarMenuBarra('${barra.id}', event)" title="Mais opções">⋮</button>
