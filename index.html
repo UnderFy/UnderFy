@@ -1180,6 +1180,9 @@ nav button:active{
 .barras-feed{display:flex;flex-direction:column;gap:12px;}
 .barra-card{background:#141414;border:1px solid #282828;border-radius:18px;padding:16px;}
 .barra-head{display:flex;align-items:center;gap:11px;}.barra-head img{width:44px;height:44px;border-radius:50%;object-fit:cover;}.barra-author{min-width:0;flex:1;}.barra-author strong{font-size:14px;display:flex;align-items:center;gap:5px;}.barra-author small{color:#666;font-size:10px;display:block;margin-top:3px;}
+.barra-more-wrap{position:relative;flex-shrink:0;}.barra-more-btn{width:34px;height:34px;border:0;background:transparent;color:#888;border-radius:50%;font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}.barra-more-btn:hover{background:#222;color:#fff;}.barra-more-menu{position:absolute;right:0;top:38px;z-index:30;min-width:145px;background:#242424;border:1px solid #383838;border-radius:12px;padding:5px;box-shadow:0 12px 30px rgba(0,0,0,.45);display:none;}.barra-more-menu.open{display:block;}.barra-more-menu button{width:100%;border:0;background:transparent;color:#eee;text-align:left;padding:10px 11px;border-radius:8px;font-size:13px;cursor:pointer;}.barra-more-menu button:hover{background:#333;}.barra-more-menu button.delete{color:#ff6b6b;}
+.barras-manage{margin-top:24px;background:#141414;border:1px solid #282828;border-radius:18px;padding:16px;}.barras-manage-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;}.barras-manage-title h3{font-size:18px;margin:0;}.barras-manage-list{display:flex;flex-direction:column;gap:9px;}.barra-manage-item{display:flex;align-items:center;gap:10px;background:#1a1a1a;border:1px solid #262626;border-radius:12px;padding:10px;}.barra-manage-preview{min-width:0;flex:1;}.barra-manage-preview strong{font-size:12px;display:block;margin-bottom:4px;}.barra-manage-preview p{margin:0;color:#aaa;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.barra-manage-preview small{display:block;color:#666;font-size:10px;margin-top:4px;}.barra-manage-more{position:relative;}.barra-manage-more .barra-more-menu{top:34px;}
+.barra-edit-box{display:none;margin-top:8px;padding:10px;background:#101010;border:1px solid #292929;border-radius:12px;}.barra-edit-box.open{display:block;}.barra-edit-box textarea{width:100%;min-height:75px;background:#151515;border:1px solid #333;color:#fff;border-radius:10px;padding:10px;resize:vertical;font-family:inherit;outline:none;}.barra-edit-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px;}.barra-edit-actions button{border:0;border-radius:9px;padding:8px 12px;cursor:pointer;font-weight:700;}.barra-edit-cancel{background:#292929;color:#fff;}.barra-edit-save{background:#1ed760;color:#000;}
 .verification-badge{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:#1d9bf0;color:#fff;font-size:10px;font-weight:900;line-height:1;vertical-align:middle;flex-shrink:0;}
 .verification-badge::before{content:'✓';}
 .barra-text{font-size:15px;line-height:1.5;color:#eee;margin:13px 0 10px;white-space:pre-wrap;word-break:break-word;}
@@ -2889,8 +2892,20 @@ async function abrirPainelUpload() {
 
                 <button class="studio-primary" id="btnCriarProjeto" onclick="publicarProjetoNovo()"><span>Criar Projeto</span><b>→</b></button>
             </section>
+
+            <section class="barras-manage">
+                <div class="barras-manage-title">
+                    <h3>Gerenciar BARRAS publicadas</h3>
+                    <span class="studio-status">SUAS PUBLICAÇÕES</span>
+                </div>
+                <div id="listaMinhasBarrasGerenciamento" class="barras-manage-list">
+                    <div class="studio-empty">Carregando suas Barras...</div>
+                </div>
+            </section>
         </div>
     `;
+
+    await renderizarGerenciamentoBarrasPainel();
 }
 
 function alternarPainelArtista(tipo) {
@@ -2941,6 +2956,139 @@ async function carregarRelacoesProjetosCache() {
         window.__underfyProjetoMusicasCache = [];
     }
 }
+
+async function renderizarGerenciamentoBarrasPainel() {
+    const container = document.getElementById('listaMinhasBarrasGerenciamento');
+    if (!container || !sessaoAtual) return;
+
+    container.innerHTML = '<div class="studio-empty">Carregando suas Barras...</div>';
+    try {
+        const { data: barras, error } = await supabaseClient
+            .from('barras')
+            .select('*')
+            .eq('artista_id', sessaoAtual.user.id)
+            .order('created_at', {ascending:false});
+        if (error) throw error;
+
+        if (!barras?.length) {
+            container.innerHTML = '<div class="studio-empty">Você ainda não publicou nenhuma Barra.</div>';
+            return;
+        }
+
+        container.innerHTML = barras.map((barra, index) => {
+            const data = barra.created_at ? new Date(barra.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
+            const resumo = barra.texto ? barra.texto : (barra.audio_url ? '🎙️ Barra em áudio' : 'Barra');
+            return `
+                <div class="barra-manage-item" id="barra-manage-${barra.id}">
+                    <div class="barra-manage-preview">
+                        <strong>BARRA #${barras.length - index}</strong>
+                        <p>${resumo}</p>
+                        <small>${data}${barra.audio_url ? ' • áudio' : ''}</small>
+                        <div class="barra-edit-box" id="barra-edit-${barra.id}">
+                            <textarea id="barra-edit-text-${barra.id}" maxlength="1000" placeholder="Texto da Barra...">${barra.texto || ''}</textarea>
+                            <div class="barra-edit-actions">
+                                <button class="barra-edit-cancel" onclick="alternarEdicaoBarra('${barra.id}', false)">Cancelar</button>
+                                <button class="barra-edit-save" onclick="salvarEdicaoBarra('${barra.id}')">Salvar</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="barra-manage-more">
+                        <button class="barra-more-btn" type="button" onclick="alternarMenuBarra('${barra.id}', event)" title="Mais opções">⋮</button>
+                        <div class="barra-more-menu" id="barra-menu-${barra.id}">
+                            <button type="button" onclick="alternarEdicaoBarra('${barra.id}', true)">Editar</button>
+                            <button type="button" class="delete" onclick="excluirBarra('${barra.id}')">Excluir</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch(err) {
+        console.error('ERRO AO CARREGAR GERENCIAMENTO DE BARRAS:', err);
+        container.innerHTML = '<div class="studio-empty">Não foi possível carregar suas Barras. Verifique as permissões da tabela barras.</div>';
+    }
+}
+
+function alternarMenuBarra(barraId, event) {
+    if (event) event.stopPropagation();
+    document.querySelectorAll('.barra-more-menu.open').forEach(menu => {
+        if (menu.id !== 'barra-menu-' + barraId) menu.classList.remove('open');
+    });
+    document.getElementById('barra-menu-' + barraId)?.classList.toggle('open');
+}
+
+function alternarEdicaoBarra(barraId, abrir = true) {
+    document.querySelectorAll('.barra-more-menu.open').forEach(menu => menu.classList.remove('open'));
+    const box = document.getElementById('barra-edit-' + barraId);
+    if (box) box.classList.toggle('open', abrir);
+}
+
+async function salvarEdicaoBarra(barraId) {
+    if (!artistaLogadoValido()) { abrirModalArtista(); return; }
+    const textoEl = document.getElementById('barra-edit-text-' + barraId);
+    const texto = (textoEl?.value || '').trim();
+
+    const barra = await buscarMinhaBarra(barraId);
+    if (!barra) return;
+    if (!texto && !barra.audio_url) {
+        alert('A Barra precisa ter um texto ou áudio.');
+        return;
+    }
+
+    try {
+        const { error } = await supabaseClient
+            .from('barras')
+            .update({ texto: texto || null })
+            .eq('id', barraId)
+            .eq('artista_id', sessaoAtual.user.id);
+        if (error) throw error;
+        await renderizarGerenciamentoBarrasPainel();
+        await carregarFeedBarras(window.__underfyBarrasFiltroArtistaId || null);
+    } catch(err) {
+        console.error('ERRO AO EDITAR BARRA:', err);
+        alert('Não foi possível editar a Barra:\n\n' + (err?.message || 'Erro desconhecido.'));
+    }
+}
+
+async function buscarMinhaBarra(barraId) {
+    const { data, error } = await supabaseClient
+        .from('barras')
+        .select('*')
+        .eq('id', barraId)
+        .eq('artista_id', sessaoAtual.user.id)
+        .maybeSingle();
+    if (error) {
+        console.error('ERRO AO BUSCAR BARRA:', error);
+        alert('Não foi possível localizar a Barra.');
+        return null;
+    }
+    return data;
+}
+
+async function excluirBarra(barraId) {
+    if (!artistaLogadoValido()) { abrirModalArtista(); return; }
+    document.querySelectorAll('.barra-more-menu.open').forEach(menu => menu.classList.remove('open'));
+    if (!confirm('Excluir esta Barra? Esta ação não pode ser desfeita.')) return;
+
+    try {
+        const barra = await buscarMinhaBarra(barraId);
+        if (!barra) return;
+        const { error } = await supabaseClient
+            .from('barras')
+            .delete()
+            .eq('id', barraId)
+            .eq('artista_id', sessaoAtual.user.id);
+        if (error) throw error;
+        await renderizarGerenciamentoBarrasPainel();
+        await carregarFeedBarras(window.__underfyBarrasFiltroArtistaId || null);
+    } catch(err) {
+        console.error('ERRO AO EXCLUIR BARRA:', err);
+        alert('Não foi possível excluir a Barra:\n\n' + (err?.message || 'Erro desconhecido.'));
+    }
+}
+
+document.addEventListener('click', () => {
+    document.querySelectorAll('.barra-more-menu.open').forEach(menu => menu.classList.remove('open'));
+});
 
 function renderizarGerenciamentoGuiasPainel(minhasMusicas) {
     const container = document.getElementById("listaMinhasGuiasGerenciamento");
