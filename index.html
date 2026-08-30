@@ -1843,6 +1843,15 @@ MOBILE
 .logo{gap:3px;letter-spacing:-.7px}.brand-under{color:#fff}.brand-fy{color:var(--green)}.brand-dot{color:#777;margin:0 5px}.brand-uta{color:#fff;font-weight:1000;letter-spacing:-1px}.share-btn{width:38px;height:38px;border-radius:50%;background:#202020;color:#aaa;display:grid;place-items:center;cursor:pointer}.share-btn:hover{color:#fff;background:#292929}
 .stories-row{display:flex;gap:13px;overflow-x:auto;scrollbar-width:none;padding:3px 1px 6px}.stories-row::-webkit-scrollbar{display:none}.story-card{min-width:82px;width:82px;cursor:pointer;text-align:center}.story-ring{width:76px;height:76px;margin:auto;border-radius:50%;padding:3px;background:linear-gradient(135deg,var(--green),#fff,var(--cyan));}.story-ring img{width:100%;height:100%;border-radius:50%;object-fit:cover;border:3px solid #080808}.story-card b{display:block;margin-top:7px;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.story-card small{display:block;color:#666;margin-top:3px;font-size:9px}
 .social-profile{max-height:calc(100vh - 50px);overflow:auto}.profile-tabs{display:flex;gap:7px;overflow:auto;scrollbar-width:none;margin-top:18px}.profile-tabs::-webkit-scrollbar{display:none}.profile-tab{white-space:nowrap;padding:9px 13px;border-radius:18px;background:#1a1a1a;color:#888;cursor:pointer;font-size:11px}.profile-tab.active{background:var(--green);color:#050505;font-weight:900}.profile-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:15px}.profile-tile{background:#151515;border:1px solid #282828;border-radius:13px;padding:9px;cursor:pointer;min-width:0}.profile-tile img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:9px}.profile-tile b,.profile-tile span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.profile-tile b{font-size:11px;margin-top:7px}.profile-tile span{font-size:9px;color:#777;margin-top:3px}.social-stats{display:flex;gap:8px;margin-top:15px}.social-stat{flex:1;background:#151515;border:1px solid #282828;border-radius:12px;padding:10px;text-align:center}.social-stat b{display:block;font-size:16px}.social-stat span{display:block;color:#777;font-size:9px;margin-top:3px}.follow-btn{padding:10px 14px;border-radius:12px;background:var(--green);color:#050505;font-weight:900;cursor:pointer}.follow-btn.following{background:#1d1d1d;color:#fff;border:1px solid #333}.artist-mini{display:flex;align-items:center;gap:10px;padding:9px;border-radius:12px;cursor:pointer}.artist-mini:hover{background:#181818}.artist-mini img{width:45px;height:45px;border-radius:50%;object-fit:cover}.bar-social{margin-top:12px;display:flex;gap:7px}.bar-social button{background:#181818;color:#999;border:1px solid #292929;border-radius:10px;padding:8px 10px;cursor:pointer;font-size:10px}.bar-social button.liked,.bar-social button.reposted{color:var(--green)}.bar-stat-action{cursor:pointer;user-select:none;transition:.15s}.bar-stat-action:hover{opacity:.8}.bar-stat-action.active{color:var(--green);font-weight:800}.bar-stat-action svg{pointer-events:none}.bar-comments{margin-top:9px;display:none}.bar-comments.open{display:block}.bar-comments textarea{width:100%;min-height:65px;resize:vertical;background:#0d0d0d;border:1px solid #292929;color:#fff;border-radius:10px;padding:9px;outline:none}.comment-item{font-size:10px;color:#aaa;padding:7px 0;border-bottom:1px solid #222}.comment-item b{color:#fff}.share-box{width:min(500px,100%);margin:25px auto;background:#101010;border:1px solid #292929;border-radius:24px;padding:16px}.share-title span,.share-title small{display:block}.share-title span{font-weight:900;font-size:18px}.share-title small{color:#777;font-size:10px;margin-top:4px}.share-canvas{display:block;width:100%;height:auto;max-height:68vh;object-fit:contain;background:#050505;border-radius:17px;margin-top:14px;touch-action:none;-webkit-user-select:none;user-select:none}.share-actions{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:7px;margin-top:10px}.share-actions button{padding:11px 8px;border-radius:11px;background:#1c1c1c;color:#fff;border:1px solid #303030;cursor:pointer;font-size:10px}.share-actions .share-main{background:var(--green);color:#050505;border-color:var(--green);font-weight:900}.story-viewer{position:fixed;inset:0;background:#000;z-index:10000;display:none;align-items:center;justify-content:center}.story-viewer.open{display:flex}.story-content{width:min(480px,100vw);height:100%;position:relative;background:#090909;display:flex;align-items:center;justify-content:center}.story-image{width:100%;height:100%;object-fit:cover}.story-user{position:absolute;top:22px;left:18px;right:60px;z-index:4;font-size:12px;font-weight:900;text-shadow:0 2px 8px #000}.story-caption{position:absolute;left:18px;right:18px;bottom:28px;z-index:4;padding:12px;border-radius:12px;background:rgba(0,0,0,.45);font-size:13px;line-height:1.4}.story-close{position:absolute;top:16px;right:16px;z-index:6;width:42px;height:42px;border-radius:50%;background:rgba(20,20,20,.7);color:#fff;display:grid;place-items:center;cursor:pointer}.story-tap{position:absolute;top:0;bottom:0;width:35%;z-index:5}.story-left{left:0}.story-right{right:0}.story-progress{position:absolute;top:9px;left:10px;right:10px;z-index:7;display:flex;gap:4px}.story-progress span{height:3px;flex:1;background:rgba(255,255,255,.28);border-radius:5px;overflow:hidden}.story-progress span i{display:block;height:100%;width:0;background:#fff}.story-progress span.done i{width:100%}.story-hold{user-select:none}
+/* V5.16 — prioridade social da timeline e Stories */
+.timeline-following{order:0}
+.timeline-secondary{order:1;opacity:.72;filter:saturate(.82)}
+.timeline-secondary:hover{opacity:1;filter:none}
+.story-following{order:0}
+.story-secondary{order:1;opacity:.78}
+.story-secondary .story-ring{filter:saturate(.78)}
+.story-secondary:hover{opacity:1}
+
 @media(max-width:600px){.profile-grid{grid-template-columns:repeat(2,1fr)}.share-actions{grid-template-columns:1fr 1fr}.share-actions .share-main{grid-column:1/-1}.story-content{max-width:100vw}.logo{font-size:18px}.mark{width:32px;height:32px}}
 </style>
 </head>
@@ -4053,14 +4062,20 @@ function renderizarMusicas(){
     let el=document.getElementById('tracks');
     if(!el) return;
     if(!musicas.length){ el.innerHTML=`<div class="empty">${PUBLIC_STATE.musicas==='error'?'Não foi possível carregar as Guias agora. Tente atualizar novamente.':'Nenhuma música encontrada.'}</div>`; return; }
-    el.innerHTML=musicas.map((m,i)=>{
+    const seg=getSocial('follows').map(String);
+    const timeline=[
+        ...musicas.filter(m=>seg.includes(String(m.artista_id))),
+        ...musicas.filter(m=>!seg.includes(String(m.artista_id)))
+    ];
+    el.innerHTML=timeline.map((m,i)=>{
+        const seguidoAgora=seg.includes(String(m.artista_id));
         const liked=getStorage(STORAGE.curtidas).some(x=>String(x.id)===String(m.id));
         const likesCount=contadoresSociais.musicasCurtidas[String(m.id)]||0;
-        return `<div class="track" onclick="tocar(${i})">
+        return `<div class="track ${seguidoAgora?'timeline-following':'timeline-secondary'}" onclick="tocarPorId('${esc(m.id)}')">
             <img class="cover" src="${esc(m.capa_url||m.cover_url||PH)}" onerror="this.src='${PH}'">
             <div class="tinfo"><b>${esc(m.titulo||m.nome||'Guia')}</b><span>${esc(artistasDaMusica(m))}</span></div>
             <div class="pub-stats guide-samples">
-                <span class="guide-like-sample ${liked?'active':''}" onclick="event.stopPropagation();curtirMusica(musicas[${i}])" title="${liked?'Descurtir':'Curtir'}">
+                <span class="guide-like-sample ${liked?'active':''}" onclick="event.stopPropagation();curtirMusica(m)" title="${liked?'Descurtir':'Curtir'}">
                     <i data-lucide="heart"></i> ${formatarNumero(likesCount)}
                 </span>
             </div>
@@ -4111,14 +4126,19 @@ function renderizarParaVoce(){
     const el=document.getElementById('paraVoce');
     if(!el) return;
     const seg=getSocial('follows').map(String);
-    const candidatas=musicas.filter(m=>!seg.includes(String(m.artista_id)));
-    const lista=(candidatas.length?candidatas:musicas).slice(0,10);
-    el.innerHTML=lista.length?lista.map((m)=>`<div class="recommend" onclick="tocarPorId('${esc(m.id)}')">
+    // Prioridade do ouvinte: artistas seguidos primeiro; os demais continuam visíveis em segundo plano.
+    const lista=[
+        ...musicas.filter(m=>seg.includes(String(m.artista_id))),
+        ...musicas.filter(m=>!seg.includes(String(m.artista_id)))
+    ].slice(0,10);
+    el.innerHTML=lista.length?lista.map((m)=>{
+        const seguidoAgora=seg.includes(String(m.artista_id));
+        return `<div class="recommend ${seguidoAgora?'timeline-following':'timeline-secondary'}" onclick="tocarPorId('${esc(m.id)}')">
         <img src="${esc(m.capa_url||m.cover_url||PH)}" onerror="this.src='${PH}'">
         <b>${esc(m.titulo||m.nome||'Guia')}</b>
         <span>${esc(artistasDaMusica(m))}</span>
         <div class="pub-stats guide-samples"><span class="guide-like-sample ${getStorage(STORAGE.curtidas).some(x=>String(x.id)===String(m.id))?'active':''}" onclick="event.stopPropagation();curtirMusica(${JSON.stringify(m).replace(/"/g,'&quot;')})" title="Curtir"><i data-lucide="heart"></i> ${formatarNumero(contadoresSociais.musicasCurtidas[String(m.id)]||0)}</span></div>
-    </div>`).join(''):`<div class="empty">Ainda não há recomendações.</div>`;
+    </div>`}).join(''):`<div class="empty">Ainda não há recomendações.</div>`;
     icones();
 }
 
@@ -4132,19 +4152,26 @@ async function carregarStories(){
             if(!r.error) stories=r.data||[];
         }catch(e){}
     }
-    // Fallback: se a tabela Stories ainda não existir, a interface permanece pronta.
+    // Todos os Stories publicados ficam disponíveis para visualização.
+    // Artistas seguidos aparecem primeiro; os demais permanecem logo depois.
     const grupos={};
     stories.forEach(st=>{
         const aid=st.artista_id??st.usuario_artista_id;
         if(aid==null) return;
         (grupos[aid]??=[]).push(st);
     });
-    let ids=Object.keys(grupos);
     const follows=getSocial('follows').map(String);
-    if(follows.length) ids=ids.filter(id=>follows.includes(String(id)));
+    const ids=Object.keys(grupos).sort((a,b)=>{
+        const af=follows.includes(String(a)), bf=follows.includes(String(b));
+        if(af!==bf) return af?-1:1;
+        const da=grupos[a][0]?.created_at||'';
+        const dbb=grupos[b][0]?.created_at||'';
+        return String(dbb).localeCompare(String(da));
+    });
     el.innerHTML=ids.length?ids.map(aid=>{
         const a=encontrarArtistaObj(aid), foto=a?.foto_url||PH;
-        return `<div class="story-card" onclick="abrirStories('${esc(aid)}')"><div class="story-ring"><img src="${esc(foto)}" onerror="this.src='${PH}'"></div><b>${esc(a?.nome||'Artista')}</b><small>${grupos[aid].length} story${grupos[aid].length>1?'s':''}</small></div>`;
+        const seguindoAgora=follows.includes(String(aid));
+        return `<div class="story-card ${seguindoAgora?'story-following':'story-secondary'}" onclick="abrirStories('${esc(aid)}')"><div class="story-ring"><img src="${esc(foto)}" onerror="this.src='${PH}'"></div><b>${esc(a?.nome||'Artista')}</b><small>${grupos[aid].length} story${grupos[aid].length>1?'s':''}</small></div>`;
     }).join(''):`<div class="empty" style="width:100%">Os Stories dos artistas aparecerão aqui.</div>`;
     icones();
 }
@@ -4282,43 +4309,8 @@ function renderBarra(b){
     return `<article class="barra" data-barra-id="${esc(key)}"><div class="bhead" onclick="abrirPerfilArtista('${esc(aid||'')}')"><img src="${esc(a?.foto_url||PH)}" onerror="this.src='${PH}'"><div class="bauthor"><b>${esc(a?.nome||b.artista_nome||'Artista UnderFy')} <span class="badge">✓</span></b><small data-followers-artist="${esc(aid||'')}">${formatarNumero(contadoresSociais.artistas[String(aid)]||0)} seguidores</small></div></div><div class="btext">${esc(b.texto||b.conteudo||b.letra||'Barra')}</div>${(b.audio_url||b.audio||b.url_audio)?`<audio class="audio" controls src="${esc(b.audio_url||b.audio||b.url_audio)}"></audio>`:''}<div class="pub-stats"><span class="bar-stat-action ${likes?'active':''}" onclick="event.stopPropagation();toggleBarraLike('${esc(key)}')" title="${likes?'Descurtir':'Curtir'}"><i data-lucide="heart"></i> ${formatarNumero(likesCount)}</span><span class="bar-stat-action ${reps?'active':''}" onclick="event.stopPropagation();toggleBarraRepost('${esc(key)}')" title="${reps?'Remover repost':'Repostar'}"><i data-lucide="repeat-2"></i> ${formatarNumero(repsCount)}</span><span class="bar-stat-action" onclick="event.stopPropagation();toggleBarraComments('${esc(key)}')" title="Ver/comentar"><i data-lucide="message-circle"></i> ${formatarNumero(commentsCount)}</span><span class="bar-stat-action" onclick="event.stopPropagation();compartilharBarra(${JSON.stringify(b).replace(/"/g,'&quot;')})" title="Compartilhar"><i data-lucide="share-2"></i></span></div><div id="comments-${esc(key)}" class="bar-comments"><div>${comments.map(c=>`<div class="comment-item"><b>${esc(c.nome||c.ouvinte_nome||'Ouvinte')}</b> ${esc(c.texto||'')}</div>`).join('')}</div><textarea id="commentText-${esc(key)}" placeholder="Comente nesta Barra..."></textarea><button class="follow-btn" style="margin-top:7px" onclick="enviarComentarioBarra('${esc(key)}')">Comentar</button></div></article>`;
 }
 
-async function toggleBarraLike(id){
-    if(!db || !usuarioAtual){
-        alert('Entre na sua conta de ouvinte para curtir uma Barra.');
-        return;
-    }
-    const k=String(id);
-    const a=getSocial('barraLikes');
-    const i=a.findIndex(x=>String(x)===k);
-    const adicionando=i<0;
-    try{
-        if(adicionando){
-            const {data:existente,error:findError}=await db.from('barras_curtidas')
-                .select('id').eq('barra_id',id).eq('ouvinte_id',usuarioAtual.id).maybeSingle();
-            if(findError) throw findError;
-            if(!existente){
-                const {error}=await db.from('barras_curtidas').insert({barra_id:id,ouvinte_id:usuarioAtual.id});
-                if(error) throw error;
-            }
-            if(!a.some(x=>String(x)===k)) a.push(id);
-            contadoresSociais.barrasCurtidas[k]=(contadoresSociais.barrasCurtidas[k]||0)+1;
-        }else{
-            const {error}=await db.from('barras_curtidas').delete()
-                .eq('barra_id',id).eq('ouvinte_id',usuarioAtual.id);
-            if(error) throw error;
-            a.splice(i,1);
-            contadoresSociais.barrasCurtidas[k]=Math.max(0,(contadoresSociais.barrasCurtidas[k]||0)-1);
-        }
-        setSocial('barraLikes',a);
-        salvarContadoresSociais();
-        renderizarBarras();
-    }catch(e){
-        console.error('ERRO AO SALVAR CURTIDA DA BARRA:',e);
-        alert('Não foi possível salvar a curtida da Barra.
-
-'+(e?.message||'Verifique as Policies da tabela barras_curtidas.'));
-    }
-}
+function toggleBarraLike(id){let a=getSocial('barraLikes');const i=a.findIndex(x=>String(x)===String(id));if(i>=0)a.splice(i,1);else a.push(id);setSocial('barraLikes',a);const k=String(id);contadoresSociais.barrasCurtidas[k]=Math.max(0,(contadoresSociais.barrasCurtidas[k]||0)+(i<0?1:-1));
+    salvarContadoresSociais();if(db&&usuarioAtual)sincronizarSocialDb('barras_curtidas',{barra_id:id,ouvinte_id:usuarioAtual.id},i<0);renderizarBarras();}
 function toggleBarraRepost(id){let a=getSocial('barraReposts');const i=a.findIndex(x=>String(x)===String(id));if(i>=0)a.splice(i,1);else a.push(id);setSocial('barraReposts',a);const k=String(id);contadoresSociais.barrasReposts[k]=Math.max(0,(contadoresSociais.barrasReposts[k]||0)+(i<0?1:-1));
     salvarContadoresSociais();if(db&&usuarioAtual)sincronizarSocialDb('barras_reposts',{barra_id:id,ouvinte_id:usuarioAtual.id},i<0);renderizarBarras();}
 async function sincronizarSocialDb(tabela,registro,adicionar){try{if(adicionar)await db.from(tabela).upsert(registro,{onConflict:'ouvinte_id,barra_id'});else await db.from(tabela).delete().eq('ouvinte_id',registro.ouvinte_id).eq('barra_id',registro.barra_id);}catch(e){}}
