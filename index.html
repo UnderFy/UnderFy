@@ -4283,56 +4283,45 @@ function renderBarra(b){
 }
 
 async function toggleBarraLike(id){
-    if(!usuarioAtual){abrirPerfil();return;}
-    let a=getSocial('barraLikes');
-    const i=a.findIndex(x=>String(x)===String(id));
-    const adicionar=i<0;
-    if(adicionar) a.push(String(id)); else a.splice(i,1);
-    setSocial('barraLikes',a);
+    if(!db || !usuarioAtual){
+        alert('Entre na sua conta de ouvinte para curtir uma Barra.');
+        return;
+    }
     const k=String(id);
-    contadoresSociais.barrasCurtidas[k]=Math.max(0,(contadoresSociais.barrasCurtidas[k]||0)+(adicionar?1:-1));
-    salvarContadoresSociais();
-    renderizarBarras();
-
-    const resultado=await sincronizarSocialDb('barras_curtidas',{barra_id:id,ouvinte_id:usuarioAtual.id},adicionar);
-    if(!resultado.ok){
-        // Reverte a alteração local se o banco recusou a operação.
-        const atual=getSocial('barraLikes');
-        const pos=atual.findIndex(x=>String(x)===String(id));
-        if(adicionar){if(pos>=0) atual.splice(pos,1);} else if(pos<0) atual.push(String(id));
-        setSocial('barraLikes',atual);
-        contadoresSociais.barrasCurtidas[k]=Math.max(0,(contadoresSociais.barrasCurtidas[k]||0)+(adicionar?-1:1));
+    const a=getSocial('barraLikes');
+    const i=a.findIndex(x=>String(x)===k);
+    const adicionando=i<0;
+    try{
+        if(adicionando){
+            const {data:existente,error:findError}=await db.from('barras_curtidas')
+                .select('id').eq('barra_id',id).eq('ouvinte_id',usuarioAtual.id).maybeSingle();
+            if(findError) throw findError;
+            if(!existente){
+                const {error}=await db.from('barras_curtidas').insert({barra_id:id,ouvinte_id:usuarioAtual.id});
+                if(error) throw error;
+            }
+            if(!a.some(x=>String(x)===k)) a.push(id);
+            contadoresSociais.barrasCurtidas[k]=(contadoresSociais.barrasCurtidas[k]||0)+1;
+        }else{
+            const {error}=await db.from('barras_curtidas').delete()
+                .eq('barra_id',id).eq('ouvinte_id',usuarioAtual.id);
+            if(error) throw error;
+            a.splice(i,1);
+            contadoresSociais.barrasCurtidas[k]=Math.max(0,(contadoresSociais.barrasCurtidas[k]||0)-1);
+        }
+        setSocial('barraLikes',a);
         salvarContadoresSociais();
         renderizarBarras();
-        alert('Não foi possível salvar a curtida da Barra. Verifique as permissões da tabela barras_curtidas no Supabase.');
+    }catch(e){
+        console.error('ERRO AO SALVAR CURTIDA DA BARRA:',e);
+        alert('Não foi possível salvar a curtida da Barra.
+
+'+(e?.message||'Verifique as Policies da tabela barras_curtidas.'));
     }
 }
 function toggleBarraRepost(id){let a=getSocial('barraReposts');const i=a.findIndex(x=>String(x)===String(id));if(i>=0)a.splice(i,1);else a.push(id);setSocial('barraReposts',a);const k=String(id);contadoresSociais.barrasReposts[k]=Math.max(0,(contadoresSociais.barrasReposts[k]||0)+(i<0?1:-1));
     salvarContadoresSociais();if(db&&usuarioAtual)sincronizarSocialDb('barras_reposts',{barra_id:id,ouvinte_id:usuarioAtual.id},i<0);renderizarBarras();}
-async function sincronizarSocialDb(tabela,registro,adicionar){
-    if(!db||!usuarioAtual||!registro?.ouvinte_id||!registro?.barra_id) return {ok:false,error:new Error('Sessão do ouvinte não disponível')};
-    try{
-        if(adicionar){
-            // Não depende de uma constraint UNIQUE para salvar a curtida.
-            // Primeiro verifica se o ouvinte já curtiu esta Barra.
-            const {data:existente,error:findError}=await db.from(tabela)
-                .select('id').eq('ouvinte_id',registro.ouvinte_id).eq('barra_id',registro.barra_id).maybeSingle();
-            if(findError) throw findError;
-            if(!existente){
-                const {error:insertError}=await db.from(tabela).insert(registro);
-                if(insertError) throw insertError;
-            }
-        }else{
-            const {error:deleteError}=await db.from(tabela)
-                .delete().eq('ouvinte_id',registro.ouvinte_id).eq('barra_id',registro.barra_id);
-            if(deleteError) throw deleteError;
-        }
-        return {ok:true};
-    }catch(e){
-        console.error('ERRO AO SINCRONIZAR '+tabela+':',e);
-        return {ok:false,error:e};
-    }
-}
+async function sincronizarSocialDb(tabela,registro,adicionar){try{if(adicionar)await db.from(tabela).upsert(registro,{onConflict:'ouvinte_id,barra_id'});else await db.from(tabela).delete().eq('ouvinte_id',registro.ouvinte_id).eq('barra_id',registro.barra_id);}catch(e){}}
 function toggleBarraComments(id){document.getElementById('comments-'+id)?.classList.toggle('open');}
 function enviarComentarioBarra(id){const ta=document.getElementById('commentText-'+id);const texto=ta?.value.trim();if(!texto)return;const a=getSocial('barraComments');a.push({barra_id:id,texto,nome:perfilOuvinte?.nome||'Ouvinte'});setSocial('barraComments',a);const k=String(id);contadoresSociais.barrasComentarios[k]=(contadoresSociais.barrasComentarios[k]||0)+1;
     salvarContadoresSociais();if(db&&usuarioAtual){(async()=>{try{await db.from('barras_comentarios').insert({barra_id:id,ouvinte_id:usuarioAtual.id,texto});}catch(e){}})();}renderizarBarras();toggleBarraComments(id);}
